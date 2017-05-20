@@ -1,0 +1,115 @@
+﻿@model Pro.Data.Entities.BuildingInfoView
+@{
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    ViewBag.Title = "Buildings";
+    int id = Nistec.Types.ToInt(Request["id"]);
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    @*<link rel="stylesheet" href="~/Scripts/jq/mobile/jquery.mobile-1.4.5.min.css" />
+    <script src="~/Scripts/jq/mobile/jquery.mobile-1.4.5.min.js"></script>*@
+
+    <style type="text/css">
+        .row_detail {
+            margin: 10px;
+            direction: rtl;
+        }
+
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+    </style>
+
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var theme = 'Arctic';
+            var source =
+            {
+                datatype: "json",
+                datafields: [
+                    { name: 'BuildingId', type: 'number' },
+                    { name: 'PurposeId', type: 'number' },
+                    { name: 'PurposeName', type: 'string' },
+                    { name: 'AvgPriceForRent', type: 'number' },
+                    { name: 'AvgPriceForSale', type: 'number' },
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetPricesGrid", "Building")',
+            };
+            source.data = { 'BuildingId': '@id' };
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) { }
+                //loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pageable: false,
+                altrows: true,
+                columns: [
+                  { text: 'סוג נכס', dataField: 'PurposeName', width: 80, cellsalign: 'right', align: 'center' },
+                  { text: 'מחיר ממוצע שכירות למ"ר', dataField: 'AvgPriceForRent', width: 140, cellsalign: 'right', align: 'right' },
+                  { text: 'מחיר ממוצע מכירה למ"ר', dataField: 'AvgPriceForSale', width: 140, cellsalign: 'right', align: 'right' },
+                ]
+            });
+            $("#linkNewCalc").on('click', function () {
+                calcBuildingPrices();
+            });
+            function calcBuildingPrices() {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CalcBuildingPrices", "Building")',
+                    data: { 'BuildingId': '@id' },
+                    //contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#jqxgrid").jqxGrid('source').dataBind();
+                    },
+                    error: function (xhr, status, error) { alert('error ' + error) }
+                       
+                });
+            };
+        });
+
+    
+    </script>
+
+}
+
+
+@section featured {
+
+
+}
+
+
+<div class="clear"></div>
+
+<div style="margin: 5px;direction:rtl">
+    <div class="grid-wrap">
+        @*<h4>מחירים</h4>*@
+        <div id="jqxWidget">
+            <div id="jqxgrid" style="position: relative; z-index: 1;"></div>
+            <div><input id="linkNewCalc" type="button" value="חישוב" /></div>
+        </div>
+    </div>
+</div>
+

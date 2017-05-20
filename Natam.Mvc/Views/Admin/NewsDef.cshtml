@@ -1,0 +1,298 @@
+﻿@{
+    Layout = "~/Views/Shared/_ViewAdmin.cshtml";
+    Page.Title = "Building";
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+
+    @Scripts.Render("~/bundles/jqxgrid")
+}
+@section scripts {
+ <script type="text/javascript">
+     $(document).ready(function () {
+         var theme = 'Arctic';
+         JSON.useDateParser();
+            // prepare the data
+            var source =
+            {
+                updaterow: function (rowid, rowdata, commit) {
+                    //alert(rowdata.NewsName);
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'POST',
+                        url: '@Url.Action("NewsDefUpdate", "Admin")',
+                        data: { 'NewsId': rowdata.NewsId, 'NewsName': rowdata.NewsName, 'command': 1 },
+                        success: function (data, status, xhr) {
+                            if(data=='1')
+                                alert('עודכן בהצלחה');
+                            else
+                                alert('לא עודכנו נתונים');
+                            commit(true);
+                        },
+                        error: function () {
+                            alert('אירעה שגיאה, לא עודכנו נתונים');
+                            // cancel changes.
+                            commit(false);
+                        }
+                    });
+                },
+                addrow: function (rowid, rowdata, position, commit) {
+                    //alert(rowdata.NewsName);
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'POST',
+                        url: '@Url.Action("NewsDefUpdate", "Admin")',
+                        data: { 'NewsId': -1, 'NewsName': rowdata.NewsName, 'command': 0 },
+                        success: function (data, status, xhr) {
+                            if (data == '1') {
+                                //alert('עודכן בהצלחה');
+                                dataAdapter.dataBind();
+                            }
+                            else
+                                alert('לא עודכנו נתונים');
+                            commit(true);
+                        },
+                        error: function () {
+                            alert('אירעה שגיאה, לא עודכנו נתונים');
+                            commit(false);
+                        }
+                    });
+                },
+                deleterow: function (rowid, commit) {
+                    //alert(rowid);
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'POST',
+                        url: '@Url.Action("NewsDefUpdate", "Admin")',
+                        data: { 'NewsId': rowid, 'NewsName': null, 'command': 2 },
+                        success: function (data, status, xhr) {
+                            if (data == '1') {
+                                //alert('עודכן בהצלחה');
+                                dataAdapter.dataBind();
+                            }
+                            else
+                                alert('לא עודכנו נתונים');
+                            commit(true);
+                        },
+                        error: function () {
+                            alert('אירעה שגיאה, לא עודכנו נתונים');
+                            commit(false);
+                        }
+                    });
+                },
+                dataType: "json",
+                datafields:
+                [
+                    { name: 'NewsId', type: 'number' },
+                    { name: 'NewsName', type: 'string' }
+                ],
+                id: 'NewsId',
+                //data: {},
+                type: 'POST',
+                url: '@Url.Action("GetNewsView", "Common")'
+            };
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                 contentType: "application/json; charset=utf-8",
+                 loadError: function (jqXHR, status, error) {
+                     //alert("NewsAdapter failed: " + error);
+                 },
+                 loadComplete: function (data) {
+                     //alert("NewsAdapter is Loaded");
+                 }
+             });
+            
+            var editrow = -1;
+            // initialize jqxGrid
+            $("#jqxgrid").jqxGrid(
+            {
+                rtl:true,
+                width: 400,
+                autoheight: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pageable: false,
+                showtoolbar: true,
+                rendertoolbar: function (toolbar) {
+                    var me = this;
+                    var container = $("<div style='margin: 5px;text-align:right'></div>");
+                    toolbar.append(container);
+                    container.append('<input id="addrowbutton" type="button" value="הוספה" />');
+                    //container.append('<input style="margin-left: 5px;" id="addmultiplerowsbutton" type="button" value="Add Multiple New Rows" />');
+                    container.append('<input style="margin-left: 5px;" id="deleterowbutton" type="button" value="מחיקה" title="מחיקת השורה המסומנת"/>');
+                    container.append('<input id="updaterowbutton" type="button" value="עריכה" title="עריכת השורה המסומנת"/>');
+                    container.append('<input id="refreshbutton" type="button" value="רענון" />');
+                    $("#addrowbutton").jqxButton();
+                    //$("#addmultiplerowsbutton").jqxButton();
+                    $("#deleterowbutton").jqxButton();
+                    $("#updaterowbutton").jqxButton();
+                    $("#refreshbutton").jqxButton();
+                    // update row.
+                    $("#updaterowbutton").on('click', function () {
+                        
+                        var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                        var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                        if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                            //var id = $("#jqxgrid").jqxGrid('getrowid', selectedrowindex);
+                            //var commit = $("#jqxgrid").jqxGrid('updaterow', id, datarow);
+                            $("#jqxgrid").jqxGrid('ensurerowvisible', selectedrowindex);
+
+                            $("#insertFlag").val('1');
+                            $("#trcode").show();
+                            // open the popup window when the user clicks a button.
+                            editrow = selectedrowindex;
+                            var offset = $("#jqxgrid").offset();
+                            $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+                            // get the clicked row's data and initialize the input fields.
+                            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', editrow);
+                            $("#NewsId").val(dataRecord.NewsId);
+                            $("#NewsName").val(dataRecord.NewsName);
+                            // show the popup window.
+                            $("#popupWindow").jqxWindow('open');
+                        }
+
+                    });
+                    // create new row.
+                    $("#addrowbutton").on('click', function () {
+                        //var datarow = generaterow();
+                        //var commit = $("#jqxgrid").jqxGrid('addrow', null, datarow$("#popupWindow").jqxWindow();//{ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+                        // show the popup window.
+                        var offset = $("#jqxgrid").offset();
+                        $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+                        $("#popupWindow").jqxWindow('open');
+                        $("#insertFlag").val('0');
+                        $("#trcode").hide();
+                        $("#NewsName").val('');
+                    });
+                    // create new rows.
+                    //$("#addmultiplerowsbutton").on('click', function () {
+                    //    $("#jqxgrid").jqxGrid('beginupdate');
+                    //    for (var i = 0; i < 10; i++) {
+                    //        var datarow = generaterow();
+                    //        var commit = $("#jqxgrid").jqxGrid('addrow', null, datarow);
+                    //    }
+                    //    $("#jqxgrid").jqxGrid('endupdate');
+                    //});
+                    // delete row.
+                    $("#deleterowbutton").on('click', function () {
+                        var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                        var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                        if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                            var id = $("#jqxgrid").jqxGrid('getrowid', selectedrowindex);
+                            var result = confirm("האם למחוק?");
+                            if (result == true) {
+                                //Logic to delete the item
+                                var commit = $("#jqxgrid").jqxGrid('deleterow', id);
+                            }
+                        }
+                    });
+                    // refresh grid.
+                    $("#refreshbutton").on('click', function () {
+                        dataAdapter.dataBind();
+                    });
+                },
+                columns: [
+                  { text: 'קוד קבוצה', datafield: 'NewsId', width: 60, cellsalign: 'right', align: 'center' },
+                  { text: 'שם קבוצה', datafield: 'NewsName', cellsalign: 'right', align: 'center' },
+               //   {
+               //       text: 'עריכה', datafield: 'Edit', width: 90, columntype: 'button', cellsrenderer: function () {
+               //           return "Edit";
+               //       }, buttonclick: function (row) {
+               //           $("#insertFlag").val('1');
+               //           $("#trcode").show();
+               //           // open the popup window when the user clicks a button.
+               //           editrow = row;
+               //           var offset = $("#jqxgrid").offset();
+               //           $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+               //           // get the clicked row's data and initialize the input fields.
+               //           var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', editrow);
+               //           $("#NewsId").val(dataRecord.NewsId);
+               //           $("#NewsName").val(dataRecord.NewsName);
+               //           // show the popup window.
+               //           $("#popupWindow").jqxWindow('open');
+               //       }
+               //   }
+               ]
+            });
+         // initialize the input fields.
+            $("#NewsId").jqxInput({ theme: theme }).width(150);
+            $("#NewsName").jqxInput({ theme: theme }).width(150);
+         // initialize the popup window and buttons.
+            $("#popupWindow").jqxWindow({
+                width: 250, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01
+            });
+            $("#popupWindow").on('open', function () {
+                $("#NewsName").jqxInput('selectAll');
+            });
+
+            $("#Cancel").jqxButton({ theme: theme });
+            $("#Save").jqxButton({ theme: theme });
+           // update the edited row when the user clicks the 'Save' button.
+            $("#Save").click(function () {
+                if ($("#insertFlag").val() == '0') {
+                    var row = {
+                        NewsId: $("#NewsId").val(), NewsName: $("#NewsName").val()
+                    };
+                    $('#jqxgrid').jqxGrid('addrow', null, row);
+                    $("#popupWindow").jqxWindow('hide');
+                }
+                else if (editrow >= 0) {
+                    var row = {
+                        NewsId: $("#NewsId").val(), NewsName: $("#NewsName").val()
+                    };
+                    var rowID = $('#jqxgrid').jqxGrid('getrowid', editrow);
+                    $('#jqxgrid').jqxGrid('updaterow', rowID, row);
+                    $("#popupWindow").jqxWindow('hide');
+                }
+            });
+            //$("#addrowbutton").click(function () {
+            //    $("#popupWindow").jqxWindow();//{ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+            //    // show the popup window.
+            //    $("#popupWindow").jqxWindow('open');
+            //    $("#insertFlag").val('1');
+            //});
+        });
+    </script>
+}
+<hgroup class="title">
+    <h3 class="rightPan">הגדרות כלליות-<span>קבוצות דיוור</span></h3>
+    
+</hgroup>
+<div class="clear"></div>
+
+<div class="global-view">
+    
+    <div class="container-rtl">
+        <div class="grid-wrap">
+             <div id="jqxWidget">
+                 <!--<input style="margin-right: 5px;" type="button" id="addrowbutton" value="הוספה" />-->
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                 <div style="font-size: 12px; font-family: Verdana, Geneva, 'DejaVu Sans', sans-serif; margin-top: 30px;">
+            <div id="cellbegineditevent"></div>
+            <div style="margin-top: 10px;" id="cellendeditevent"></div>
+            <div id="popupWindow">
+                <input type="hidden" id="insertFlag" value="0" />
+            <div>עריכה</div>
+            <div style="overflow: hidden;direction:rtl">
+                <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
+                    <tr id="trcode">
+                        <td align="right">קוד קבוצה:</td>
+                        <td align="left"><input id="NewsId" readonly style="direction:rtl;text-align:right;" /></td>
+                    </tr>
+                    <tr>
+                        <td align="right">שם קבוצה:</td>
+                        <td align="left"><input id="NewsName" style="direction:rtl;text-align:right;" /></td>
+                    </tr>
+                    <tr>
+                        <td align="right"></td>
+                        <td style="padding-top: 10px;" align="right">
+                            <input style="margin-right: 5px;" type="button" id="Save" value="עדכון" />
+                            <input id="Cancel" type="button" value="ביטול" /></td>
+                    </tr>
+                </table>
+            </div>
+       </div>
+       </div>
+             </div>
+        </div>
+    </div>
+</div>

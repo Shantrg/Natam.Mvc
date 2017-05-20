@@ -1,0 +1,379 @@
+﻿@{
+    ViewBag.Title = "Crm";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+<script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
+<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+
+}
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var theme = 'Arctic';
+            JSON.useDateParser();
+
+            var contactsSource =
+                 {
+                     dataType: "json",
+                     async: false,
+                     dataFields: [
+                         { name: 'ContactId' },
+                         { name: 'Info' }
+                     ],
+                     data: { 'LeadId': '@id' },
+                     type: 'POST',
+                     url: '@Url.Action("GetContactsByLead", "Crm")'
+                 };
+
+            var contactsAdapter = new $.jqx.dataAdapter(contactsSource);
+            $("#ContactId").jqxComboBox(
+            {
+                rtl: true,
+                source: contactsAdapter,
+                width: 250,
+                //height: 200,
+                //checkboxes: true,
+                displayMember: 'Info',
+                valueMember: 'ContactId'
+            });
+
+            //$('#contacts').on('change', function (event) {
+            //    wizard.validate();
+            //    var contactId = getSelectedListValue("contacts", 0);
+            //    $("#ContactId").val(contactId);
+            //    wizard.validate();
+            //});
+            
+            CreateDateTimeInput("RemindDate");
+            $("#LeadId").val('@id');
+
+
+            //AgentId-ContactId-LeadId-LeadType-Memo-RecordId-RemindDate-State
+            var sendCommand = function (rowdata, command, commit) {
+                
+                
+                var url;
+                if (command == 0)
+                    url = '@Url.Action("LeadTraceAdd", "Common")'
+                else if (command == 2)
+                    url = '@Url.Action("LeadTraceDelete", "Common")'
+                else
+                    url = '@Url.Action("LeadTraceUpdate", "Common")';
+
+                $.ajax({
+                    dataType: 'json',
+                    type: 'POST',
+                    url: url,
+                    data: rowdata,
+                    success: function (data, status, xhr) {
+                        //alert(data.Message);
+                        if (data.Commit) {
+                            //alert('עודכן בהצלחה');
+                            commit(true);
+                            //dataAdapter.dataBind();
+                        }
+                        dataAdapter.dataBind();
+                    },
+                    error: function () {
+                        alert('אירעה שגיאה, לא עודכנו נתונים');
+                        commit(false);
+                    }
+                });
+            };
+            var source =
+            {
+
+                updaterow: function (rowid, rowdata, commit) {
+                    sendCommand(rowdata, 1, commit);
+                },
+                addrow: function (rowid, rowdata, position, commit) {
+                    sendCommand(rowdata, 0, commit);
+                },
+                deleterow: function (rowid, commit) {
+                    var rowdata = { 'RecordId': rowid }
+                    sendCommand(rowdata, 2, commit);
+                },
+                dataType: "json",
+
+                datafields:
+                [
+                   { name: 'RecordId', type: 'number' },
+                   { name: 'Creation', type: 'date' },
+                   { name: 'LastUpdate', type: 'date' },
+                   { name: 'RemindDate', type: 'date' },
+                   { name: 'Memo', type: 'string' },
+                   { name: 'ContactId', type: 'number' },
+                   { name: 'LeadId', type: 'number' },
+                   { name: 'AgentId', type: 'number' },
+                   { name: 'State', type: 'number' },
+                   { name: 'LeadType', type: 'number' },
+                   //{ name: 'UserName', type: 'string' },
+                   { name: 'CustomerName', type: 'string' },
+                   { name: 'ContactName', type: 'string' },
+                   { name: 'ContactTitle', type: 'string' },
+                   { name: 'ContactMobile', type: 'string' }
+
+                ],
+                data: { 'id': '@id' },
+                id: 'RecordId',
+                type: 'POST',
+                url: '@Url.Action("GetLeadsTrace", "Common")'
+            };
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                //contentType: "application/json; charset=utf-8",
+                loadError: function (jqXHR, status, error) {
+                    alert("dataAdapter failed: " + error);
+                },
+                loadComplete: function (data) {
+                    //alert("dataAdapter is Loaded");
+                }
+            });
+            dataAdapter.dataBind();
+            var editrow = -1;
+            // initialize jqxGrid
+            $("#jqxgrid").jqxGrid(
+            {
+                rtl: true,
+                width: '99%',
+                height: '300px',
+                rowsheight: 30,
+                autoheight: false,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pageable: false,
+                showtoolbar: true,
+                scrollmode: 'logical',
+                rendertoolbar: function (toolbar) {
+                    var me = this;
+                    var container = $("<div style='margin: 5px;text-align:right'></div>");
+                    toolbar.append(container);
+                    container.append('<input id="addrowbutton" type="button" value="הוספה" />');
+                    container.append('<input style="margin-left: 5px;" id="deleterowbutton" type="button" value="מחיקה" title="מחיקת השורה המסומנת"/>');
+                    container.append('<input id="updaterowbutton" type="button" value="עריכה" title="עריכת השורה המסומנת"/>');
+                    container.append('<input id="refreshbutton" type="button" value="רענון" />');
+                    $("#addrowbutton").jqxButton();
+                    $("#deleterowbutton").jqxButton();
+                    $("#updaterowbutton").jqxButton();
+                    $("#refreshbutton").jqxButton();
+                    // update row.
+                    $("#updaterowbutton").on('click', function () {
+
+                        var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                        doRowEdit(selectedrowindex);
+                    });
+
+                    // create new row.
+                    $("#addrowbutton").on('click', function () {
+                        // show the popup window.
+                        $("#RecordId").val('');
+                        $("#RemindDate").val('');
+                        $("#Memo").val('');
+                        //$("#ContactId").val('');
+                        $("#LeadId").val('@id');
+                        //$("#AgentId").val('');
+                        $("#State").val('');
+                        $("#LeadType").val('0');
+
+                        editrow = -1;
+                        openEditor(0);
+                    });
+                    // delete row.
+                    $("#deleterowbutton").on('click', function () {
+                        var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                        var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                        if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                            editrow = selectedrowindex;
+                            var id = $("#jqxgrid").jqxGrid('getrowid', selectedrowindex);
+                            var result = confirm("האם למחוק?");
+                            if (result == true) {
+                                //Logic to delete the item
+                                var commit = $("#jqxgrid").jqxGrid('deleterow', id);
+                            }
+                        }
+                    });
+                    // refresh grid.
+                    $("#refreshbutton").on('click', function () {
+                        dataAdapter.dataBind();
+                    });
+                },
+                columns: [
+                { text: 'קוד שיחה', datafield: 'RecordId', width: 90, cellsalign: 'right', align: 'center' },
+                { text: 'שם הלקוח', datafield: 'CustomerName', width: 120, cellsalign: 'right', align: 'center' },
+                { text: 'איש קשר', datafield: 'ContactName', width: 100, cellsalign: 'right', align: 'center' },
+                { text: 'תפקיד', datafield: 'ContactTitle', width: 100, cellsalign: 'right', align: 'center' },
+                { text: 'טלפון', datafield: 'ContactMobile', width: 100, cellsalign: 'right', align: 'center' },
+                { text: 'תוכן', datafield: 'Memo', cellsalign: 'right', align: 'center' },
+                { text: 'תאריך לתזכורת', datafield: 'RemindDate',type: 'date', width: 100, cellsformat: 'd', cellsalign: 'right', align: 'center' },
+                { text: 'תאריך עדכון', datafield: 'LastUpdate', type: 'date', width: 100, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+            var openEditor = function (mode) {
+                $("#Mode").val(mode);
+
+                // open the popup window when the user clicks a button.
+                var offset = $("#jqxgrid").offset();
+                $('#popupRegister').jqxWindow({ position: { x: parseInt(offset.left) + parseInt(offset.width) / 2, y: parseInt(offset.top) + 100 } });
+                // show the popup window.
+                $('#popupRegister').jqxWindow('open');
+            };
+            var doRowEdit = function (selectedrowindex) {
+
+                var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                    $("#jqxgrid").jqxGrid('ensurerowvisible', selectedrowindex);
+                    // open the popup window when the user clicks a button.
+                    editrow = selectedrowindex;
+                    // get the clicked row's data and initialize the input fields.
+                    var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', editrow);
+                    if (dataRecord != null && dataRecord !== undefined) {
+                        $("#RecordId").val(dataRecord.RecordId);
+                        $("#RemindDate").val(dataRecord.RemindDate);
+                        $("#Memo").val(dataRecord.Memo);
+                        $("#ContactId").val(dataRecord.ContactId);
+                        $("#LeadId").val('@id');
+                        //$("#AgentId").val(dataRecord.AgentId);
+                        $("#State").val(dataRecord.State);
+                        $("#LeadType").val(dataRecord.LeadType);
+                    }
+                    // show the popup window.
+                    //$("#popupWindow").jqxWindow('open');
+                    openEditor(1);
+                }
+            }
+
+            $('#jqxgrid').on('rowdoubleclick', function (event) {
+                var args = event.args;
+                var boundIndex = args.rowindex;
+                var visibleIndex = args.visibleindex;
+                doRowEdit(boundIndex);
+            });
+
+
+            //================= popup Register ================.
+            
+
+            $("#popupRegister").jqxWindow({
+                width: 400,height:350, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#regCancel"), modalOpacity: 0.01
+            });
+            //$("#popupRegister").on('open', function () {
+            //    $("#regUserName").jqxInput('selectAll');
+            //});
+            $('#popupRegister').jqxValidator({
+                hintType: 'label',
+                animationDuration: 0,
+                rules: [
+                     {
+                         input: '#ContactId', message: 'חובה לציין איש קשר!', action: 'select', rule: function (input) {
+                             return validateCombo("ContactId");
+                         }
+                     },
+                    { input: '#Memo', message: 'נדרש תוכן!', action: 'keyup, blur', rule: 'required' }
+                ]
+            });
+
+            //$("#RecordId").val(dataRecord.RecordId);
+            //$("#RemindDate").val(dataRecord.RemindDate);
+            //$("#Memo").val(dataRecord.Memo);
+            //$("#ContactId").val(dataRecord.ContactId);
+            //$("#LeadId").val(dataRecord.LeadId);
+            //$("#AgentId").val(dataRecord.AgentId);
+            //$("#State").val(dataRecord.State);
+            //$("#LeadType").val(dataRecord.LeadType);
+
+            // LeadTraceAdd(int LeadId, int AgentId, int LeadType, int ContactId, string Memo, DateTime? RemindDate, int State, int RecordId)
+            $('#popupRegister').on('validationSuccess', function (event) {
+                var RowId=$("#RecordId").val();
+                var row = {
+                    LeadId: '@id',//$("#LeadId").val(),
+                    //AgentId: $("#AgentId").val(),
+                    LeadType: $("#LeadType").val(),
+                    ContactId: $("#ContactId").val(),
+                    Memo: $("#Memo").val(),
+                    RemindDate: $("#RemindDate").val(),
+                    State: $("#State").val(),
+                    RecordId: RowId
+                };
+
+                var mode=$("#Mode").val(); 
+
+                if (mode == 0) {
+                    $('#jqxgrid').jqxGrid('addrow', null, row);
+                }
+                else if (editrow >= 0) {
+                    var rowID = $('#jqxgrid').jqxGrid('getrowid', editrow);
+                    $('#jqxgrid').jqxGrid('updaterow', rowID, row);
+                }
+
+                $("#popupRegister").jqxWindow('hide');
+            });
+            $("#regCancel").jqxButton({ theme: theme });
+            $("#regSave").jqxButton({ theme: theme });
+            // update the edited row when the user clicks the 'Save' button.
+            $("#regSave").click(function () {
+                $('#popupRegister').jqxValidator('validate');
+
+            });
+
+        });
+    </script>
+}
+<hgroup class="title">
+    <h3 class="rightPan">מעקב שיחות</h3>
+
+</hgroup>
+<div class="clear"></div>
+
+<div class="global-view-1">
+
+    <div class="container-1">
+        <div class="rtl">
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;border:solid 1px #808080"></div>
+                <div style="font-size: 12px; font-family: Verdana, Geneva, 'DejaVu Sans', sans-serif; margin-top: 30px;">
+                    <div id="cellbegineditevent"></div>
+                    <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                    <div id="popupRegister">
+                        <input type="hidden" id="Mode" value="" />
+                        <input type="hidden" id="RecordId" name="RecordId" value="" />
+                        <input type="hidden" id="LeadId" name="LeadId" value="" />
+                        <input type="hidden" id="LeadType" name="LeadType" value="" />
+                        <input type="hidden" id="State" name="State" value="" />
+                        <div>עריכה</div>
+                        <div style="direction:rtl; text-align:right;">
+                            <div class="form-group">
+                                <label class="column">
+                                    איש קשר:
+                                </label>
+                                <div id="ContactId" name="ContactId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    תאריך לתזכורת:
+                                </label>
+                                <div id="RemindDate" name="RemindDate"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    תוכן:
+                                </label>
+                                <textarea id="Memo" name="Memo" style="width:320px; height:80px;text-align:right"></textarea>
+                            </div>
+                            <div>
+                                <input id="regSave" type="button" style="margin-right: 5px;" value="עדכון" />
+                                <input id="regCancel" type="button" value="ביטול" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    activeLayoutMenu("liLeads");
+</script>

@@ -1,0 +1,391 @@
+﻿@model Natam.Mvc.Models.BuildingWizardModel
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+    //string wk = Request["wk"];
+    //int id = Nistec.Types.ToInt(Request["id"]);
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+        .row_detail {
+            margin: 10px;
+            direction: rtl;
+        }
+
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+
+        input {
+            direction: rtl;
+            text-align: right;
+        }
+    </style>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+
+            // First, checks if it isn't implemented yet.
+            //if (!String.prototype.format) {
+            //    String.prototype.format = function () {
+            //        var args = arguments;
+            //        return this.replace(/{(\d+)}/g, function (match, number) {
+            //            return typeof args[number] != 'undefined'
+            //              ? args[number]
+            //              : match
+            //            ;
+            //        });
+            //    };
+            //}
+
+            //JSON.useDateParser();
+            var theme = 'Arctic';
+
+            $("#popupWindow").jqxWindow({ width: 450, height: 460, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01 });
+            $("#contactCancel").jqxButton({ theme: theme });
+            $("#contactSubmit").jqxButton({ theme: theme });
+            $("#contactReset").jqxButton({ theme: theme });
+
+            var purposeSource =
+       {
+           dataType: "json",
+           async: false,
+           dataFields: [
+               { name: 'PurposeId' },
+               { name: 'PurposeName' }
+           ],
+           type: 'POST',
+           url: '@Url.Action("GetPurposeView", "Building")'
+       };
+            var purposeAdapter = new $.jqx.dataAdapter(purposeSource);
+            $("#Purpose").jqxComboBox(
+        {
+            rtl: true,
+            source: purposeAdapter,
+            width: 240,
+            displayMember: 'PurposeName',
+            valueMember: 'PurposeId'
+        });
+
+
+
+            // prepare the data
+            var source =
+            {
+                async: false,
+                id: 'FloorNum',
+                datatype: "json",
+                type: 'POST',
+                url: '@Url.Action("GetWizardFloorGrid", "Building")'
+            };
+
+            source.data = { 'BuildingId': '@Model.BuildingId' };
+            
+            @*, 'BuildingId':'@Model.BuildingId', 'NumOfFloor':'@Model.NumOfFloor', 'StartFloor':'@Model.StartFloor', 'BuildingSize':'@Model.BuildingSize', 'DefaultPurpose':'@Model.DefaultPurpose', 'DefaultFloorHeight':'@Model.DefaultFloorHeight', 'DefaultFloorArea':'@Model.DefaultFloorArea'};*@
+
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) { },
+                loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+            var getRecord = function (index) {
+                return $('#jqxgrid').jqxGrid('getrowdata', index);
+            }
+
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: 800,
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                rendergridrows: function (obj) {
+                    return obj.data;
+                },
+                pageable: false,
+                //pagermode: 'simple',
+                sortable: false,
+                altrows: true,
+
+                columns: [
+                  {
+                      text: 'פעולות', dataField: 'BuildingId', width: 140, cellsalign: 'right', align: 'center', cellsrenderer:
+                          function (row, columnfield, value, defaulthtml, columnproperties) {
+                              var data = $('#jqxgrid').jqxGrid('getrowdata', row);
+                              return '<div style="text-align:center"><a class="linkEdit" href="#" onclick="viewEdit();return false;">עריכה</a></div>';
+                          }
+                  },
+                  { text: 'מספר קומה', dataField: 'FloorNum', width: 70, cellsalign: 'right', align: 'center' },
+                  { text: 'ייעוד', dataField: 'PurposeName', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'גובה קומה', dataField: 'FloorHeight', width: 70, cellsalign: 'right', align: 'center' },
+                  { text: 'שטח-קומה', dataField: 'SumFloorArea', width: 90, cellsalign: 'right', align: 'center' },
+                  {text: 'תאור', dataField: 'FloorDescription', cellsalign: 'right', align: 'center'}
+                  //{ text: 'מאוכלס', datafield: 'SumFloorPopulate', width: 70, cellsalign: 'right', align: 'center', filterable: false },
+                  //{ text: 'פנוי', dataField: 'SumFloorFree', width: 90, cellsalign: 'right', align: 'center', filterable: false },
+                  //{ text: 'משוער', datafield: 'About', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center', filterable: false },
+                  //{ text: 'הערות', dataField: 'Memo', cellsalign: 'right', align: 'center', filterable: false }
+
+                ]
+            });
+
+        });
+
+    </script>
+
+
+    <script type="text/javascript">
+
+        // initialize the popup window and buttons.
+
+
+
+        function viewEdit() {
+            var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+            //var offset = $("#jqxgrid").offset();
+            //$("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+
+            // get the clicked row's data and initialize the input fields.
+            var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+
+            app_jqxcombos.selectComboBoxValue("Purpose", dataRecord.Purpose);
+            $("#WizardKey").val(dataRecord.WizardKey);
+            $("#FloorNum").val(dataRecord.FloorNum);
+            $("#BuildingId").val(dataRecord.BuildingId);
+            $("#FloorDescription").val(dataRecord.FloorDescription);
+            $("#FloorHeight").val(dataRecord.FloorHeight);
+            //$("#AreaType").val(dataRecord.AreaType);
+            // $("#Purpose").val(dataRecord.Purpose);
+            //$("#Measure").val(dataRecord.Measure);
+            $("#SumFloorArea").val(dataRecord.SumFloorArea);
+            //$("#SumFloorPopulate").val(dataRecord.SumFloorPopulate);
+            //$("#SumFloorFree").val(dataRecord.SumFloorFree);
+            //$("#SumFloorRemain").val(dataRecord.SumFloorRemain);
+            $("#About").attr("checked", dataRecord.About);
+            $("#Memo").val(dataRecord.Memo);
+
+            if (dataRecord.BuildingId > 0) {
+                var title = "הגדרת קומה";
+                $("#windowTitle").html(title);
+                $("#divAll").hide();
+                // show the popup window.
+                $("#popupWindow").jqxWindow('show');
+            }
+            else {
+                alert("הגדרת קומה אינה תקינה");
+            }
+        };
+
+        //contactount dialog
+        $('#contactForm').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+               //{
+               //    input: '#FloorHeight', message: 'חובה לציין גובה!', action: 'keyup, blur', rule: function () {
+               //        var value = $("#FloorHeight").val();
+               //        return value > 0;
+               //    }
+               //},
+              {
+                  input: '#SumFloorArea', message: 'חובה לציין שטח קומה!', action: 'keyup, blur', rule: function () {
+                      var value = $("#SumFloorArea").val();
+                      return value > 0;
+                  }
+              },
+               {
+                   input: '#Purpose', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
+                       var index = $("#Purpose").jqxComboBox('getSelectedIndex');
+                       if (index >= 0) { return true; } return false;
+                   }
+               }
+            ]
+        });
+
+        $('#contactSubmit').on('click', function (e) {
+            var validationResult = function (isValid) {
+                if (isValid) {
+                    $.ajax({
+                        url: '@Url.Action("UpdateWizardFloor", "Building")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#contactForm').serialize(),
+                        success: function (data) {
+                            
+                            if (data.Status >= 0) {
+                                $('#popupWindow').jqxWindow('close');
+                                $('#jqxgrid').jqxGrid('source').dataBind();
+                            }
+                            else
+                                alert(data.Message);
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                }
+                else {
+                    e.preventDefault(); // t
+                }
+            }
+            $('#contactForm').jqxValidator('validate', validationResult);
+
+        });
+
+        $('#contactCancel').on('click', function (e) {
+            $('#popupWindow').jqxWindow('close');
+        });
+
+        $('#contactReset').on('click', function (e) {
+            $('#contactForm')[0].reset();
+            $('#contactForm').jqxValidator('hide');
+        });
+
+
+        $('#execToFloor').on('click', function (e) {
+            var activate = $("#chkActivate").is(':checked');
+                    $.ajax({
+                        url: '@Url.Action("ExecWizardToFloor", "Building")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: { 'BuildingId': '@Model.BuildingId', 'Activate': activate },
+                        success: function (data) {
+                            
+                            if (data.Status > 0) {
+                                $('#jqxgrid').jqxGrid({ disabled: true });
+                                var url = '@Url.Action("BuildingDef", "Building")';
+                                app.redirectTo(url + '?id=' + '@Model.BuildingId');
+                            }
+                            else
+                                alert(data.Message);
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+        });
+    </script>
+
+}
+
+
+@section featured {
+
+
+}
+<!--breadcrumb-->
+<div class="breadcrumbs">
+    @Html.ActionLink("Home", "Index", "Home")>
+    @Html.ActionLink("Main", "Main", "Home")>
+    <a href="javascript:parent.history.back()">Buildings</a> >
+    @ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="clear"></div>
+
+
+            <div class="global-view">
+                <div class="container-rtl">
+
+                    <div class="grid-wrap">
+                        <div class="box-title">
+                            <h3>בניית בניין</h3>
+                        </div>
+                        <div style="display: inline; text-align: right; font-size: 18px; direction: rtl;">
+                          <a href="BuildingDef?id=@Model.BuildingId" title="הצג בניין"><span>בניין:</span>@Model.BuildingName</a>
+                        </div>
+
+                        <div id="jqxWidget">
+                            <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                            <div style="margin-top: 30px;">
+                                <input type="checkbox" id="chkActivate" /><span>האם לתקף את הבניין לאחר העדכון</span>
+                                <br />
+                                <input type="button" id="execToFloor" value="עדכון" />
+                                <div id="cellbegineditevent"></div>
+                                <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                            </div>
+                            <div id="popupWindow">
+                                <div>
+                                    <span id="windowTitle"></span>
+                                </div>
+                                <div id="contactBody">
+                                    <form class="contactForm" id="contactForm" method="post">
+                                        <div style="direction: rtl; text-align: right">
+                                            <input type="hidden" id="BuildingId" name="BuildingId" value="" />
+                                            <input type="hidden" id="WizardKey" name="WizardKey" value="" />
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    קומה :
+                                                </label>
+                                                <input id="FloorNum" name="FloorNum" type="number" readonly="readonly" class="text-mid" />
+                                            </div>
+                                            <div id="divCategory" class="form-group">
+                                                <label class="column">
+                                                    ייעוד :
+                                                </label>
+                                                <div id="Purpose" name="Purpose"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    תאור:
+                                                </label>
+                                                <input type="text" id="FloorDescription" name="FloorDescription" class="text-mid" maxlength="50" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    גובה קומה :
+                                                </label>
+                                                <input id="FloorHeight" name="FloorHeight" type="number" step="any"  class="text-mid" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    שטח- מ"ר" :
+                                                </label>
+                                                <input id="SumFloorArea" name="SumFloorArea" type="number" step="any" class="text-mid" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    הערות:
+                                                </label>
+                                                <textarea id="Memo" name="Memo" rows="3" cols="60"></textarea>
+                                            </div>
+                                            <div id="divAll" class="form-group">
+                                                <label class="column">
+                                                    משוער:
+                                                </label>
+                                                <input id="About" name="About" type="checkbox" />
+                                            </div>
+                                            <div style="height: 5px"></div>
+                                            <div>
+                                                <input id="contactSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                                                <input id="contactReset" class="btn-default btn7" type="button" value="ניקוי" />
+                                                <input id="contactCancel" class="btn-default btn7" type="button" value="ביטול" />
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Natam.Mvc.Models.Client>
+@using GridMvc.Html
+
+@{
+    Layout = null;
+    ViewBag.Title = "Buildings";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="@Url.Content("~/Content/css/Gridmvc.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/bootstrap/bootstrap.css")" rel="stylesheet" />
+    <script src="@Url.Content("~/Scripts/jq/jquery.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/plagins/gridmvc.min.js")"></script>
+    <title>Index</title>
+</head>
+<body>
+
+
+ <div class="global">
+    <div class="container">
+
+         @Html.Grid(Model).Columns(columns => 
+                    {
+                        columns.Add(c => c.Id).Titled("Client ID");
+                        columns.Add(c => c.Name).Titled("Name").Filterable(true);
+                        columns.Add(c => c.Email).Titled("Email");
+                    }).WithPaging(3).Sortable(true)
+
+</div>
+     </div>
+     </body>
+</html>
+

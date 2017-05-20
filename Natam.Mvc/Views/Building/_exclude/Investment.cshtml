@@ -1,0 +1,97 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+}
+@section head {
+}
+
+<hgroup class="title">
+    <h3 class="rightPan">השקעות</h3>
+</hgroup>
+<div class="clear"></div>
+<div class="global-view">
+    <div class="container">
+        <form action="" method="post">
+                <div style="width:50%">
+                    <div class="form-group">
+                        <label class="column">
+                            יחידה:</label>
+                        <select>
+                            <option>סוג יחידה 1</option>
+                            <option>סוג יחידה 2</option>
+                            <option>סוג יחידה 3</option>
+                            <option>סוג יחידה 4</option>
+                            <option>סוג יחידה 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג הנכס/שימוש:</label>
+                        <select>
+                                    <option>משרדים</option>
+                                    <option>תעשיה</option>
+                                    <option>מסחר</option>
+
+                                </select>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג יחידה:</label>
+
+                        <input type="checkbox" /><label>קומה</label>
+                        <input type="checkbox" /><label>שטח</label>
+                        <input type="checkbox" /><label>בעלים</label>
+                        <input type="checkbox" /><label>סוג נכס מתוך כרטיס יחידה</label>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            האם כל הבניין מיועד להשקעה:</label>
+                        <input type="checkbox" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            היקף השקעה:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תאור - עברית:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תאור - אנגלית:</label>
+                        <input type="text" class="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            האם לפרסם באינטרנט:</label>
+                        <input type="checkbox" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תמונה:</label>
+                        <input type="file" class="text" />
+                        <img src="~/Images/icons/pic.png" alt="" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תאריך עדכון:</label>
+                        <input type="text" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="column">
+                            קוד נכס:</label>
+                        <input type="hidden" />
+                    </div>
+                </div>
+                <div>
+                    <input type="button" value="עדכון" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+<!--end of content-wrapper-->

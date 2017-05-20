@@ -1,0 +1,640 @@
+﻿@model Natam.Data.Entities.BuildingInfoView
+@{
+    Layout = "~/Views/_View.cshtml";
+    ViewBag.Title = "Buildings";
+}
+
+@section head { 
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+		<script src="~/Scripts/jq/plagins/colorbox/jquery.colorbox-min.js"></script>
+		<link rel="stylesheet" href="~/Scripts/jq/plagins/colorbox/colorbox.css" />
+
+        <script src="~/Scripts/jq/plagins/uploader/js/vendor/jquery.ui.widget.js"></script>
+    <script src="~/Scripts/jq/plagins/uploader/js/jquery.iframe-transport.js"></script>
+    <script src="~/Scripts/jq/plagins/uploader/js/jquery.fileupload.js"></script>
+
+    <link rel="stylesheet" href="~/Scripts/jq/plagins/uploader/css/jquery.fileupload.css">
+
+
+    <style type="text/css">
+
+        .row_detail {margin: 10px;direction:rtl;}
+        .row_link {margin: 10px;direction:rtl;font-size:16px}
+
+    </style>
+
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            // First, checks if it isn't implemented yet.
+            if (!String.prototype.format) {
+                String.prototype.format = function() {
+                    var args = arguments;
+                    return this.replace(/{(\d+)}/g, function(match, number) { 
+                        return typeof args[number] != 'undefined'
+                          ? args[number]
+                          : match
+                        ;
+                    });
+                };
+            }
+
+            JSON.useDateParser();
+            var theme = 'Arctic';
+            // prepare the data
+            
+            var source =
+            {
+                datatype: "json",
+                datafields: [
+                    { name: 'UnitId', type: 'number' },
+                    { name: 'BuildingId', type: 'number' },
+                    { name: 'BuildingName', type: 'string' },
+                    //{ name: 'Street', type: 'string' },
+                    //{ name: 'City', type: 'string' },
+                    { name: 'FloorNum', type: 'number' },
+                    { name: 'UnitNum', type: 'number' },
+                    { name: 'UnitSize', type: 'number' },
+                    { name: 'Price', type: 'number' },
+                    { name: 'ContactName', type: 'string' },
+                    { name: 'ContactPhone', type: 'string' },
+                    { name: 'ContactMobile', type: 'string' },
+                    { name: 'ContactMail', type: 'string' },
+                    //{ name: 'Populate', type: 'bool' },
+                    //{ name: 'UserName', type: 'string' },
+                    //{ name: 'OwnerName', type: 'string' },
+                    { name: 'Memo', type: 'string' },
+                    { name: 'LastUpdate', type: 'date' },
+                    { name: 'Pic1', type: 'string' },
+                    { name: 'Pic2', type: 'string' },
+                    { name: 'Pic3', type: 'string' }
+                    
+                ],
+                id: 'UnitId',
+                type:'POST',
+                url: '@Url.Action("GetUnitGrid", "Building")',
+                //localdata: {},
+                //pagenum: 3,
+                pagesize: 20,
+                root: 'Rows',
+                beforeprocessing: function (data) {
+                    source.totalrecords = data.TotalRows;
+                },
+                pager: function (pagenum, pagesize, oldpagenum) {
+                    // callback called when a page or page size is changed.
+                }
+            };
+            //var rowBegin = 0;
+            //var rowEnd=20
+            source.data = { 'BuildingId': '@Model.BuildingId'};
+
+           
+            //onclick="alert(' + value + ');"
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) {}
+                //loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+            //var dataAdapter = new $.jqx.dataAdapter(source);
+            //var dataAdapter = new $.jqx.dataAdapter(source, { async: true, autoBind: true });
+ 
+            var cellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
+                var qs = "?id={0}&bid={1}".format(value, '@Model.BuildingId');
+                return '<div style="text-align:center"><a href="UnitDef' + qs + '" >הצג</a></div>';
+            };
+            var imgUrl = function (picUrl) {
+                //var imgurl = + datarecord.UnitId.toLowerCase() + '.png';
+                if (picUrl && picUrl != "") {
+                    //alert(picUrl);
+                    return '@Url.Content("~/Uploads/unit")' + '/'+picUrl;
+                }
+                var url= '@Url.Content("~/Images/building.jpg")'
+                return url;
+            };
+            
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+                var photos = null;
+                var actions = null;
+                tabsdiv = $($(parentElement).children()[0]);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    photos = tabsdiv.find('.photos');
+                    actions = tabsdiv.find('.actions');
+
+                    //var title = tabsdiv.find('.title');
+                    //title.text(datarecord.BuildingName);
+
+                    //info container
+                    var infocontainer = $('<div style="margin: 5px;text-align:right;"></div>')
+                    infocontainer.rtl = true;
+                    infocontainer.appendTo($(information));
+                    //var photocolumn = $('<div style="float: left; width: 15%;"></div>');
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 40%;direction:rtl;"></div>');
+                    //container.append(photocolumn);
+                    infocontainer.append(leftcolumn);
+                    infocontainer.append(rightcolumn);
+                    //var photo = $("<div class='jqx-rc-all' style='margin: 10px;'><b>תמונה:</b></div>");
+                    //var image = $("<div style='margin-top: 10px;'></div>");
+                    //var imgurl = imgUrl(datarecord.UnitId)
+                    //var img = $('<img height="60" src="' + imgUrl() + '"/>');
+                    //image.append(img);
+                    //image.appendTo(photo);
+                    //photocolumn.append(photo);
+
+                    var infosection = "<div class='row_detail'><b>{0}:</b>{1}</div>";
+                    
+                    $(leftcolumn).append(infosection.format("קוד יחידה", datarecord.UnitId));
+                    $(leftcolumn).append(infosection.format("מספר קומה", datarecord.FloorNum));
+                    $(leftcolumn).append(infosection.format("מספר יחידה", datarecord.UnitNum));
+                    $(leftcolumn).append(infosection.format("שטח", datarecord.UnitSize));
+                    $(leftcolumn).append(infosection.format("מחיר", datarecord.Price));
+
+                    $(rightcolumn).append(infosection.format("איש קשר", datarecord.ContactName));
+                    $(rightcolumn).append(infosection.format("טלפון", datarecord.ContactPhone));
+                    $(rightcolumn).append(infosection.format("סלולארי", datarecord.ContactMobile));
+                    $(rightcolumn).append(infosection.format("דואל", datarecord.ContactMail));
+                    $(rightcolumn).append(infosection.format("מספר בניין", datarecord.BuildingId));
+
+                    //notes container
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.Memo + '</span></div><br/>'+
+                        '<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + '' + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+
+                    //photos container
+                    var photocontainer = $('<div style="margin: 5px;text-align:right;"></div>')
+                    photocontainer.rtl = true;
+                    
+                    var photo = $("<div class='jqx-rc-all' style='margin: 10px;'><b>תמונה:</b></div>");
+                    var image = $("<div style='margin-top: 10px;'></div>");
+                    var img1 = $('<a class="group1" href="' + imgUrl(datarecord.Pic1) + '"><img src="' + imgUrl(datarecord.Pic1) + '" style="max-width:80px; height:auto;"/></a>').colorbox({ rel: 'group1' });
+                    var img2 = $('<a class="group1" href="' + imgUrl(datarecord.Pic2) + '"><img src="' + imgUrl(datarecord.Pic2) + '" style="max-width:80px; height:auto;"/></a>').colorbox({ rel: 'group1' });
+                    var img3 = $('<a class="group1" href="' + imgUrl(datarecord.Pic3) + '"><img src="' + imgUrl(datarecord.Pic3) + '" style="max-width:80px; height:auto;"/></a>').colorbox({ rel: 'group1' });
+                    var btnUpload = $('<span style="padding:10px;disply:inline;"><input type="button" value="עריכת תמונות" /></span>').on('click', function () {
+                        showImgUploader(datarecord.BuildingId,datarecord.UnitId, datarecord.Pic1, datarecord.Pic2, datarecord.Pic3);
+                    });
+                    //var btnReUpload = $('<span style="padding:10px;disply:inline;"><input type="button" value="מחיקת תמונות" /></span>').on('click', function() {
+                    //    showImgRemover(datarecord.UnitId,datarecord.Pic1,datarecord.Pic2,datarecord.Pic3);
+                    //});
+
+                    //if (datarecord.Pic1 || datarecord.Pic2 || datarecord.Pic3) {
+                    //    image.append(btnReUpload);
+                    //}
+                    image.append(btnUpload);
+
+                    image.append(img1);
+                    image.append(img2);
+                    image.append(img3);
+                    
+                    image.appendTo(photo);
+                    photocontainer.append(photo);
+                    $(photos).append(photocontainer);
+
+                    //actions container
+                    var actionscontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"></div>');
+                    actionscontainer.rtl = true;
+                    actionscontainer.append("<div class='row_link'><a href='../Crm/Advertise?id=" + datarecord.UnitId + "&op=property'>פרסום חדש</a></div><br/>");
+                    actionscontainer.append("<div class='row_link'><a href='../Crm/AdsGrid?id=" + datarecord.UnitId + "&op=property'>דוח פרסום</a></div><br/>");
+                    $(actions).append(actionscontainer);
+
+
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl:true });
+                }
+            }
+
+            // load virtual data.
+            var rendergridrows = function (params) {
+                alert('rendergridrows');
+                var data = generatedata(params.startindex, params.endindex);
+                return data;
+            }
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                virtualmode: true,
+                rendergridrows: function (obj) {
+                    //alert('virtualmode');
+                    console.log(obj)
+                    return obj.data;
+                },
+                pageable: true,
+                pagermode: 'simple',
+                sortable: true,
+                altrows: true,
+                rowdetails: true,
+                rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-left: 30px;'><li class='title'>כללי</li><li>פרטים</li><li>תמונות</li><li>פעולות</li></ul><div class='information'></div><div class='notes'></div><div class='photos'></div><div class='actions'></div></div>", rowdetailsheight: 200 },
+                ready: function () {
+                    $("#jqxgrid").jqxGrid('showrowdetails', 0);
+                },
+                initrowdetails: initrowdetails,
+                columns: [
+                  //{ text: 'קוד בניין', dataField: 'BuildingId', width: 100, cellsalign: 'right', align: 'center', cellsrenderer: cellsrenderer },
+                  { text: 'קוד יחידה', dataField: 'UnitId', width: 100, cellsalign: 'right', align: 'center' , cellsrenderer: cellsrenderer},
+                  { text: 'קומה', dataField: 'FloorNum', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'שטח', dataField: 'UnitSize', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'מחיר', dataField: 'Price', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'איש קשר', dataField: 'ContactName', cellsalign: 'right', align: 'center' },
+                  { text: 'סלולארי', dataField: 'ContactMobile', width: 150, cellsalign: 'right', align: 'center' },
+                  { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+            $("#jqxgrid").on("sort", function (event) {
+                var sortinformation = event.args.sortinformation;
+                var sortdirection = sortinformation.sortdirection.ascending ? "ascending" : "descending";
+                if (!sortinformation.sortdirection.ascending && !sortinformation.sortdirection.descending) {
+                    sortdirection = "null";
+                }
+                var eventData = "Triggered 'sort' event <div>Column:" + sortinformation.sortcolumn + ", Direction: " + sortdirection + "</div>";
+            });
+
+            $("#linkNewUnit").jqxLinkButton({ width: '200', height: '30' });
+            $(".group1").colorbox({ rel: 'group1' });
+
+
+            $('#uploadWindow').jqxWindow({
+                rtl: true,
+                resizable: true,
+                isModal: true,
+                autoOpen: false,
+                width: 400,
+                height: 500,
+                cancelButton: $('#uploadCancel'),
+            });
+
+            $('#reuploadWindow').jqxWindow({
+                rtl: true,
+                resizable: true,
+                isModal: true,
+                autoOpen: false,
+                width: 400,
+                height: 500,
+                cancelButton: $('#reuploadCancel'),
+            });
+
+        });
+        </script>
+
+        <script type="text/javascript">
+
+            function showImgUploader(bid, uid, pic1, pic2, pic3) {
+                $("#uploadBid").val(bid);
+                $("#uploadUid").val(uid);
+
+                if (pic1) {
+                    $("#removelbl1").val(pic1);
+                    $("#files1").html('<img src="' + getImgUrl(pic1) + '" style="max-width:80px; height:auto;"/>');
+                    $("#imgremove1").show();
+                }
+                else
+                    $("#imgremove1").hide();
+
+                if (pic2) {
+                    $("#removelbl2").val(pic2);
+                    $("#files2").html('<img src="' + getImgUrl(pic2) + '" style="max-width:80px; height:auto;"/>');
+                    $("#imgremove2").show();
+                }
+                else
+                    $("#imgremove2").hide();
+
+                if (pic3) {
+                    $("#removelbl3").val(pic3);
+                    $("#files3").html('<img src="' + getImgUrl(pic3) + '" style="max-width:80px; height:auto;"/>');
+                    $("#imgremove3").show();
+                }
+                else
+                    $("#imgremove3").hide();
+
+                $("#uploadHeader").html("עריכת תמונות לנכס :" + uid);
+                $('#uploadWindow').jqxWindow('open');
+            };
+
+        var showImgRemover = function (id, pic1, pic2, pic3) {
+
+            $("#removeid").val(id);
+
+            var state = 0;
+            if (pic1) {
+                state = 1;
+                $("#removelbl1").val(pic1);
+                $("#removeimg1").html('<img src="' + getImgUrl(pic1) + '" style="max-width:80px; height:auto;"/>');
+                $("#repic1").show();
+            } else
+                $("#repic1").hide();
+
+            if (pic2) {
+                state = 1;
+                $("#removelbl2").val(pic1);
+                $("#removeimg2").html('<img src="' + getImgUrl(pic2) + '" style="max-width:80px; height:auto;"/>');
+                $("#repic2").show();
+            } else
+                $("#repic2").hide();
+
+            if (pic3) {
+                state = 1;
+                $("#removelbl3").val(pic1);
+                $("#removeimg3").html('<img src="' + getImgUrl(pic3) + '" style="max-width:80px; height:auto;"/>');
+                $("#repic3").show();
+            } else
+                $("#repic3").hide();
+            if (state == 0) {
+                alert('לא נמצאו תמונות להסרה');
+            }
+
+            //$("removebtn3").prop('disabled', true);
+
+            $("#reuploadHeader").html("הסרת תמונות לנכס :" + id);
+            $('#reuploadWindow').jqxWindow('open');
+        }
+
+        function getImgUrl(picUrl) {
+            //var imgurl = + datarecord.UnitId.toLowerCase() + '.png';
+            if (picUrl && picUrl != "") {
+                return '@Url.Content("~/Uploads/unit/")' + picUrl;
+                }
+            var url = '@Url.Content("~/Images/building.jpg")'
+            return url;
+        };
+
+    </script>
+}
+
+
+@section featured {
+
+
+}
+
+<!--breadcrumb-->
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="@System.Web.HttpContext.Current.Request.UrlReferrer">BuildingQuery</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+
+
+<hgroup class="title">
+    <h3 class="rightPan">רשימת נכסים.</h3>
+</hgroup>
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap">
+            <div style="display: inline; text-align: right;font-size:18px;direction:rtl;">
+                <div><a href="BuildingDef?id=@Model.BuildingId" title="הצג בניין"><span>בניין:</span>@Model.BuildingName</a></div>
+                <div><span>כתובת: </span>@Model.Address</div>
+                <div><a id="linkNewUnit" href="UnitDef?id=0&bid=@Model.BuildingId" title="הוספת יחידה">הוספת יחידה</a></div>
+            </div>
+
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                <div style="margin-top: 30px;">
+                    <div id="cellbegineditevent"></div>
+                    <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                </div>
+
+             </div>
+        </div>
+            <!--window-wrapper-->
+            <div id="uploadWindow">
+                <div id="uploadHeader">
+                 </div>
+                 <div id="uploadBody">
+                    <div style="width:250px">
+                        <span>Select files...</span>
+                        <input type="hidden" id="uploadBid" value="" />
+                        <input type="hidden" id="uploadUid" value="" />
+                        <div style="padding:10px">
+                            <span class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-plus"></i>
+                                <span>תמונה 1</span>
+                                <input id="fileupload1" type="file" name="files[]" multiple>
+                            </span>
+                            <span id="imgremove1" class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-minus"></i>
+                                <span>הסרה 1</span>
+                                <input id="fileremove1" type="button" value="הסרה-1"/>
+                            </span>
+                            <br>
+                            <div id="progress1" class="progress">
+                                <div class="progress-bar progress-bar-success"></div>
+                            </div>
+                            <div id="files1" class="files"></div>
+                        </div>
+                        <div style="padding:10px">
+                            <span class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-plus"></i>
+                                <span>תמונה 2</span>
+                                <input id="fileupload2" type="file" name="files[]" multiple>
+                            </span>
+                            <span id="imgremove2" class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-minus"></i>
+                                <span>הסרה 2</span>
+                                <input id="fileremove2" type="button" value="הסרה-2"/>
+                            </span>
+                            <br>
+                            <div id="progress2" class="progress">
+                                <div class="progress-bar progress-bar-success"></div>
+                            </div>
+                            <div id="files2" class="files"></div>
+                        </div>
+                        <div style="padding:10px">
+                            <span class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-plus"></i>
+                                <span>תמונה 3</span>
+                                <input id="fileupload3" type="file" name="files[]" multiple>
+                            </span>
+                            <span id="imgremove3" class="btn btn-success fileinput-button">
+                                <i class="glyphicon glyphicon-minus"></i>
+                                <span>הסרה 3</span>
+                                <input id="fileremove3" type="button" value="הסרה-3"/>
+                            </span>
+                            <br>
+                            <div id="progress3" class="progress">
+                                <div class="progress-bar progress-bar-success"></div>
+                            </div>
+                            <div id="files3" class="files"></div>
+                        </div>
+                        <div>
+                        <input id="uploadCancel" class="btn-default btn2" type="button" value="סגירה" />
+                    </div>
+                    </div>
+                 </div>
+            </div>
+
+            <div id="reuploadWindow">
+                <div id="reuploadHeader">
+                 </div>
+                 <div id="reuploadBody">
+                    <div style="width:250px">
+                            <input id="removeid" type="hidden" value=""/>
+                        <span>Select files...</span>
+                        <div id="repic1">
+                            <input id="removelbl1" type="hidden" value=""/>
+                            <input id="removebtn1" type="button" value="הסרה-1"/><br />
+                            <div id="removeimg1"" style="padding:10px"></div>
+                        </div>
+                        <div id="repic2">
+                            <input id="removelbl2" type="hidden" value=""/>
+                            <input id="removebtn2" type="button" value="הסרה-2"/><br />
+                            <div id="removeimg2"" style="padding:10px"></div>
+                        </div>
+                        <div id="repic3">
+                            <input id="removelbl3" type="hidden" value=""/>
+                            <input id="removebtn3" type="button" value="הסרה-3"/><br />
+                            <div id="removeimg3" style="padding:10px"></div>
+                        </div>
+                        <div id="refiles"></div>
+                        <div>
+                        <input id="reuploadCancel" class="btn-default btn2" type="button" value="סגירה" />
+                    </div>
+                    </div>
+                 </div>
+            </div>
+
+    </div>
+</div>
+
+                   <script type="text/javascript">
+
+ 
+                       $(function () {
+                           'use strict';
+                           // Change this to the location of your server-side upload handler:
+                            var url = '@Url.Content("~/Ws/UploadFiles.asmx/Upload")';
+                            
+                            var doUpload = function (data,picnum) {
+                                $.each(data.files, function (index, file) {
+                                    var extension = file.name.split('.').pop();
+                                    var fname = $('#uploadBid').val() + '_' + $('#uploadUid').val() + '_unit_pic' + picnum + '.' + extension;
+                                    $('<p/>').text(file.name).appendTo('#files' + picnum);
+                                    $('#files' + picnum).prepend($('<img>', { style: 'max-width:80px;height:auto', src: '@Url.Content("~/Uploads/unit")' + '/' + fname}))//file.name }))
+                                        })
+                                    }
+                            var doPprogress = function (elm, data) {
+                                var progress = parseInt(data.loaded / data.total * 100, 10);
+                                $('#' + elm + ' .progress-bar').css(
+                                    'width',
+                                    progress + '%'
+                                );
+                            }
+                            $('#fileupload1').fileupload({
+                                url: url,
+                                //dataType: 'json',
+                                done: function (e, data) {
+                                    doUpload(data,1);
+                                },
+                                error: function (jqXHR, status, error) {
+                                    alert(error);
+                                },
+                                progressall: function (e, data) {
+                                    doPprogress('progress1', data);
+                                }
+                            }).prop('disabled', !$.support.fileInput)
+                                .parent().addClass($.support.fileInput ? undefined : 'disabled').bind('fileuploadsubmit', function (e, data) {
+                                    data.formData = {
+                                        param1: $('#uploadBid').val(),
+                                        param2: $('#uploadUid').val(),
+                                        param3: "pic1",
+                                        param4: "unit"
+                                    };
+                                });
+                            $('#fileupload2').fileupload({
+                                url: url,
+                                //dataType: 'json',
+                                done: function (e, data) {
+                                    doUpload(data,2);
+                                },
+                                error: function (jqXHR, status, error) {
+                                    alert(error);
+                                },
+                                progressall: function (e, data) {
+                                    doPprogress('progress2', data);
+                                }
+                            }).prop('disabled', !$.support.fileInput)
+                                .parent().addClass($.support.fileInput ? undefined : 'disabled').bind('fileuploadsubmit', function (e, data) {
+                                    data.formData = {
+                                        param1: $('#uploadBid').val(),
+                                        param2: $('#uploadUid').val(),
+                                        param3: "pic2",
+                                        param4: "unit"
+                                    };
+                                });
+                            $('#fileupload3').fileupload({
+                                url: url,
+                                //dataType: 'json',
+                                done: function (e, data) {
+                                    doUpload(data,3);
+                                },
+                                error: function (jqXHR, status, error) {
+                                    alert(error);
+                                },
+                                progressall: function (e, data) {
+                                    doPprogress('progress3', data);
+                                }
+                            }).prop('disabled', !$.support.fileInput)
+                                .parent().addClass($.support.fileInput ? undefined : 'disabled').bind('fileuploadsubmit', function (e, data) {
+                                    data.formData = {
+                                        param1: $('#uploadBid').val(),
+                                        param2: $('#uploadUid').val(),
+                                        param3: "pic3",
+                                        param4: "unit"
+                                    };
+                                });
+
+                            $('#imgremove1').click(function (e) {
+                                e.preventDefault();
+                                doRemove(1);
+                            });
+                            $('#imgremove2').click(function (e) {
+                                e.preventDefault();
+                                doRemove(2);
+                            });
+                            $('#imgremove3').click(function (e) {
+                                e.preventDefault();
+                                doRemove(3);
+                            });
+                            var doRemove = function (num) {
+                                var id = $('#uploadUid').val();
+                                var filename = $('#removelbl' + num).val();
+
+                                $.ajax({
+                                    url: "../../Ws/UploadFiles.asmx/Remove",
+                                    type: "POST",
+                                    dataType: 'json',
+                                    contentType: "application/json; charset=utf-8",
+                                    data: "{'id':'" + id + "', 'itemType':'unit','pic': 'pic" + num + "', 'filename':'" + filename + "'}",
+                                    success: function (data) {
+                                        alert('התמונה הוסרה');
+                                        $('#files'+num).html('');
+                                        //alert(data.Message);
+                                        //if (data.Status >= 0) {
+                                        //}
+                                    },
+                                    error: function (jqXHR, status, error) {
+                                        alert(error);
+                                    }
+                                });
+                            }
+
+                        });
+                    </script>

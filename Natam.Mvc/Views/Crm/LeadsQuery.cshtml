@@ -1,0 +1,193 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+    
+   
+}
+
+@section head {
+
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+        table {
+            direction: rtl;
+        }
+
+        td {
+            padding-top: 0px;
+            padding-bottom: 5px;
+        }
+        input {
+        direction:rtl; text-align:right;
+
+        }
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        $(function () {
+            $('#tab-query li:eq(0) a').tab('show');
+        });
+    </script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        var me = this;
+
+        
+
+        var dealAdapter = app_jqxcombos.createComboCheckAdapter("DealId", "DealName", "DealType", '@Url.Action("GetDealView", "Building")');
+
+        var purposeAdapter = app_jqxcombos.createComboCheckAdapter("PurposeId", "PurposeName", "PurposeType", '@Url.Action("GetPurposeView", "Building")');
+
+        var areaAdapter = app_jqxcombos.createComboCheckAdapter("AreaId", "AreaName", "AreaType", '@Url.Action("GetAreaViewAll", "Building")', 0, 200, false);
+
+        var sizesAdapter = app_jqxcombos.createComboAdapter("SizeId", "SizeTitle", "RequestSize", '@Url.Action("GetRequestSize", "Common")', 0, 200, false);
+
+
+        $(".reset").click(function () {
+            location.reload();
+        });
+        $("#chkExport1").change(function () {
+            if (this.checked) {
+                $("#formGeneral").attr("action", "LeadsExport");
+                $("#ReportType1").val("1");
+            }
+            else {
+                $("#formGeneral").attr("action", "LeadsGrid");
+                $("#ReportType1").val("0");
+            }
+
+        });
+        $("#chkExport2").change(function () {
+            if (this.checked) {
+                $("#formNews").attr("action", "LeadsExport");
+                $("#ReportType2").val("1");
+            }
+            else {
+                $("#formNews").attr("action", "LeadsGrid");
+                $("#ReportType2").val("0");
+            }
+
+        });
+    });
+
+    </script>
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="global-view">
+
+    <div class="container">
+        <div class="box-title">
+            <h3>איתור לקוחות</h3>
+        </div>
+
+        <ul id="tab-query" class="nav nav-tabs">
+            <li class="active">
+                <a href="#tab-general" data-toggle="tab">חיפוש כללי
+                </a>
+            </li>
+            <li><a href="#tab-news" data-toggle="tab">חיפוש לפי מאפיינים</a></li>
+        </ul>
+        <div id="tab-content" class="tab-content" dir="rtl">
+             <div class="tab-pane fade in active" id="tab-general">
+                <div>
+                    <p>חיפוש כללי</p>
+                    <form id="formGeneral" action="LeadsGrid" method="post">
+                        <div class="rtl">
+                            <div class="form-group">
+                                <label class="column">
+                                    שם לקוח:
+                                </label><br />
+                                <input type="text" name="CustomerName" />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    שם איש קשר:
+                                </label><br />
+                                <div style="display: inline">
+                                    <input type="text" name="ContactName" />
+                                </div>
+                            </div>
+                         </div>
+                        <br />
+                        <div>
+                            <input type="hidden" name="AccType" value="1" />
+                            <input type="hidden" id="ReportType1" name="ReportType" value="0" />
+                            <input type="hidden" name="query_type" value="tab-general" />
+                            <input type="submit" value="הצג" class="btn-default btn2" />
+                            <input type="reset" value="נקה" class="btn-default btn2" />
+                            <input type="checkbox" id="chkExport1" /> <span>ייצוא נתונים ?</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tab-pane fade in" id="tab-news">
+                <div>
+                    <p>חיפוש לפי מאפיינים</p>
+                    <form id="formNews" action="LeadsGrid" method="post">
+                        <div class="rtl">
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג עסקה:
+                                </label>
+                                <div id="DealType" name="DealType">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג הנכס/שימוש:
+                                </label>
+                                <div id="PurposeType" name="PurposeType">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    אזור מבוקש:
+                                </label>
+                                <div id="AreaType" name="AreaType">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שטח מבוקש:
+                                </label>
+                                <div id="RequestSize" name="RequestSize">
+                                </div>
+                            </div>
+
+                        </div>
+                        <br />
+                        <div>
+                            <input type="hidden" id="ReportType2" name="ReportType" value="0" />
+                            <input type="hidden" name="query_type" value="tab-news" />
+                            <input type="submit" value="הצג" class="btn-default btn2" />
+                            <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                            <input type="checkbox" id="chkExport2" /> <span>ייצוא נתונים ?</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+         </div>
+    </div>
+</div>
+<script type="text/javascript">
+   app_menu.activeLayoutMenu("liLeads");
+</script>
+
+
+

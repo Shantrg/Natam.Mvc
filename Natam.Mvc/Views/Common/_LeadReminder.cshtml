@@ -1,0 +1,245 @@
+﻿@{
+    ViewBag.Title = "Crm";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+<script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
+<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+<style type="text/css">
+     .trace-head {
+        margin-top:0;
+        padding:0;
+        margin-right: 5px;
+        text-align: right;
+        direction: rtl;
+    }
+    .trace-title {
+        font-weight: bold;
+    }
+</style>
+ 
+}
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var theme = 'Arctic';
+            JSON.useDateParser();
+
+            var source =
+            {
+                dataType: "json",
+
+                datafields:
+                [
+                   { name: 'RecordId', type: 'number' },
+                   { name: 'Creation', type: 'date' },
+                   { name: 'LastUpdate', type: 'date' },
+                   { name: 'RemindDate', type: 'date' },
+                   { name: 'Memo', type: 'string' },
+                   { name: 'ContactId', type: 'number' },
+                   { name: 'LeadId', type: 'number' },
+                   { name: 'AgentId', type: 'number' },
+                   { name: 'State', type: 'number' },
+                   { name: 'LeadType', type: 'number' },
+                   { name: 'Details', type: 'string' },
+                   { name: 'CustomerName', type: 'string' },
+                   { name: 'ContactName', type: 'string' },
+                   { name: 'ContactTitle', type: 'string' },
+                   { name: 'ContactMobile', type: 'string' }
+
+                ],
+                data: {},
+                id: 'RecordId',
+                type: 'POST',
+                url: '@Url.Action("GetLeadReminder", "Common")'
+            };
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                //contentType: "application/json; charset=utf-8",
+                loadError: function (jqXHR, status, error) {
+                    alert("dataAdapter failed: " + error);
+                },
+                loadComplete: function (data) {
+                    //alert("dataAdapter is Loaded");
+                }
+            });
+            dataAdapter.dataBind();
+            var editrow = -1;
+            // initialize jqxGrid
+            $("#jqxgrid").jqxGrid(
+            {
+                rtl: true,
+                width: '100%',
+                height: '180px',
+                //rowsheight: 51,
+                autorowheight: true,
+                autoheight: true,
+                //autoheight: false,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pageable: false,
+                showtoolbar: false,
+                //showheader: false,
+                scrollmode: 'logical',
+
+                columns: [
+                    {
+                        text: '', dataField: 'RecordId', filterable: false, width: 80, cellsalign: 'right', align: 'center', cellsrenderer:
+                        function (row, columnfield, value, defaulthtml, columnproperties) {
+                            var rcd = $('#jqxgrid').jqxGrid('getrowdata', row);
+
+                            var leadDiv = '';
+                            if (rcd.LeadId > 0)
+                                leadDiv = '<div style="text-align:center"><a href="javascript:leads_View(' + rcd.LeadId + ',' + rcd.LeadType + ')" >הצג</a><br/>';
+
+                            return leadDiv + '<div style="text-align:center"><a href="javascript:leads_Completed(' + value + ')" >סיום</a> <br/> <a href="javascript:leads_Delay(' + value + ')" >דחיה</a></div>';
+                        }
+                    },
+                    {text: 'פרטים', datafield: 'Details', filterable: false, width: 190, cellsalign: 'right', align: 'center'},
+                    //{
+                    //    text: 'פרטים', datafield: 'Details', filterable: false, width: 190, cellsalign: 'right', align: 'center',cellclassname:
+                    //    function (row, columnfield, value) {
+                    //        return 'trace-details';
+                    //    }
+                    //},
+                    //{
+                    //    text: 'לקוח', dataField: 'LeadId', filterable: false, width: 190, cellsalign: 'right', align: 'center', cellsrenderer:
+                    //    function (row, columnfield, value, defaulthtml, columnproperties) {
+
+                    //        var rcd = $('#jqxgrid').jqxGrid('getrowdata', row);
+
+                    //        return "<div style='margin-right:5px;text-align:right;direction:rtl;'>"+
+                    //          "<div><span style='font-weight:bold'>לקוח: </span>" + isNull(rcd.CustomerName,"") + "</div>" +
+                    //          "<div><span style='font-weight:bold'>איש קשר: </span>" + isNull(rcd.ContactName,"") + "</div>" +
+                    //          "<div><span style='font-weight:bold'>טלפון: </span>" + isNull(rcd.ContactMobile, "") + "</div>" +
+                    //          "</div>";
+                    //    }
+                    //},
+                //{ text: 'קוד שיחה', datafield: 'RecordId', width: 90, cellsalign: 'right', align: 'center' },
+                //{ text: 'שם הלקוח', datafield: 'CustomerName', width: 120, cellsalign: 'right', align: 'center' },
+                //{ text: 'איש קשר', datafield: 'ContactName', width: 100, cellsalign: 'right', align: 'center' },
+                //{ text: 'תפקיד', datafield: 'ContactTitle', width: 100, cellsalign: 'right', align: 'center' },
+                //{ text: 'טלפון', datafield: 'ContactMobile', width: 100, cellsalign: 'right', align: 'center' },
+                { text: 'נושא', datafield: 'Memo', cellsalign: 'right', align: 'center' },
+                { text: 'תאריך', datafield: 'RemindDate', type: 'date', width: 100, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                //{ text: 'תאריך עדכון', datafield: 'LastUpdate', type: 'date', width: 100, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+        });
+
+        function leads_View(leadId,leadType) {
+            //redirectToLead(id);
+                window.parent.trigger_Reminder(leadId, leadType);
+        }
+
+        function leads_Refresh() {
+            $("#jqxgrid").jqxGrid('source').dataBind();
+        }
+
+        function leads_Completed(id, async) {
+
+            if (typeof async === 'undefined') { async = true; }
+
+            if (confirm("האם לסיים תזכורת " + id)) {
+                $.ajax({
+                    async: async,
+                    type: "POST",
+                    url: "/Common/LeadReminderCompleted",
+                    data: "{ 'id': " + id + " }",
+                    contentType: "application/json; charset=utf-8",
+                    //dataType: "json",
+                    success: function (data) {
+                        app_dialog.popMessage('לקוחות שלי', 'תזכורת ' + id + 'הוסר מהמערכת ', "auto");
+                        leads_Refresh();
+                    },
+                    error: function (e) {
+                        alert(e);
+                    }
+                });
+            }
+        }
+
+        function update_Delay(id, days, async) {
+
+            if (typeof async === 'undefined') { async = true; }
+
+                $.ajax({
+                    async: async,
+                    type: "POST",
+                    url: "/Common/LeadReminderDelay",
+                    data: "{ 'id': " + id + ",'days': " + days + " }",
+                    contentType: "application/json; charset=utf-8",
+                    //dataType: "json",
+                    success: function (data) {
+                        //alert("עודכן");
+                        leads_Refresh();
+                        $("#popupWindow").jqxWindow('hide');
+                    },
+                    error: function (e) {
+                        alert(e);
+                    }
+                });
+        }
+
+        function leads_Delay(id) {
+            $("#Days").val("");
+            $("#RemainderId").val(id)
+            $("#popupWindow").jqxWindow('open');
+        }
+            
+        // initialize the input fields.
+        $("#Days").jqxInput().width(100);
+        
+        // initialize the popup window and buttons.
+        $("#popupWindow").jqxWindow({
+            width: 250, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01
+        });
+        $("#popupWindow").on('open', function () {
+            $("#Days").val("");
+        });
+
+        $("#Cancel").jqxButton();
+        $("#Save").jqxButton();
+        // update the edited row when the user clicks the 'Save' button.
+        $("#Save").click(function () {
+
+            var days = app.toInt($("#Days").val(), 0);
+            if (days > 0 && days <= 30) {
+                var id = app.toInt($("#RemainderId").val(), 0);
+                update_Delay(id, days);
+            }
+            else {
+                alert("נא להקליד מספר ימים בין 1 ל 30");
+            }
+        });
+    </script>
+}
+
+@*<div class="clear"></div>*@
+
+<div class="rtl">
+    <div id="jqxWidget">
+        <div id="jqxgrid" style="position: relative; z-index: 1;"></div>
+        <div id="popupWindow">
+            <input type="hidden" id="RemainderId" value="0" />
+            <div>דחיית תזכורת - בין 1 ל 30 יום</div>
+            <div style="overflow: hidden;direction:rtl">
+                <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
+                    <tr id="trcode">
+                        <td align="right">דחיה בימים:</td>
+                        <td align="left"><input id="Days" type="number" style="direction:rtl;text-align:right;" /></td>
+                    </tr>
+                    <tr>
+                        <td align="right"></td>
+                        <td style="padding-top: 10px;" align="right">
+                            <input style="margin-right: 5px;" type="button" id="Save" value="עדכון" />
+                            <input id="Cancel" type="button" value="ביטול" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

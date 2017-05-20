@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B84526D5-435E-4D56-B323-DBFFAFE54940}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pro</RootNamespace>
+    <AssemblyName>Natam.Lib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WebMatrix.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entities\Building\EntityProp.cs" />
+    <Compile Include="Entities\Building\PlotsView.cs" />
+    <Compile Include="Entities\Building\PropertyView.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entities\Building\WizardView.cs" />
+    <Compile Include="Entities\Building\FloorView.cs" />
+    <Compile Include="Entities\Building\InvestmentView.cs" />
+    <Compile Include="Entities\Crm\LeadsTracking.cs" />
+    <Compile Include="Entities\Crm\TransactionView.cs" />
+    <Compile Include="Entities\Crm\LeadUnitsView.cs" />
+    <Compile Include="Entities\Enums.cs" />
+    <Compile Include="Entities\Lists.cs" />
+    <Compile Include="Lib\TraceHelper.cs" />
+    <Compile Include="Models\AccountQuery.cs" />
+    <Compile Include="Models\CommonQuery.cs" />
+    <Compile Include="Models\QueryBase.cs" />
+    <Compile Include="Models\ResultInfo.cs" />
+    <Compile Include="Models\ReportQuery.cs" />
+    <Compile Include="Models\PropertyQuery.cs" />
+    <Compile Include="Models\LeadsQuery.cs" />
+    <Compile Include="Models\CustomerQuery.cs" />
+    <Compile Include="Models\BuildingQuery.cs" />
+    <Compile Include="Lib\Settings.cs" />
+    <Compile Include="Db\DalTrace.cs" />
+    <Compile Include="Db\DalCrm.cs" />
+    <Compile Include="Db\DbConfig.cs" />
+    <Compile Include="Entities\Admin\LoginView.cs" />
+    <Compile Include="Entities\Building\BuildingQueryView.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entities\Building\BuildingView.cs" />
+    <Compile Include="Entities\BuildingContext.cs" />
+    <Compile Include="Entities\Building\AccountsView.cs" />
+    <Compile Include="Entities\Building\AirConditionView.cs" />
+    <Compile Include="Entities\Building\ContactsView.cs" />
+    <Compile Include="Entities\Building\ParkingView.cs" />
+    <Compile Include="Entities\Building\UnitView.cs" />
+    <Compile Include="Entities\Building\MediaView.cs" />
+    <Compile Include="Entities\Building\PurposeView.cs" />
+    <Compile Include="Entities\Building\ZoneView.cs" />
+    <Compile Include="Entities\Building\DealView.cs" />
+    <Compile Include="Entities\Building\AreaView.cs" />
+    <Compile Include="Entities\Crm\AdsView.cs" />
+    <Compile Include="Entities\Crm\CategoriesView.cs" />
+    <Compile Include="Entities\Crm\NewsView.cs" />
+    <Compile Include="Entities\Crm\LeadsView.cs" />
+    <Compile Include="Db\DbNatam.cs" />
+    <Compile Include="Entities\_Entity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\Pro.en.Designer.cs" />
+    <Compile Include="Resources\Pro.he-IL.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Pro.en.resx" />
+    <EmbeddedResource Include="Resources\Pro.he-IL.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Entities\_Exclude\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Data\Nistec.Data\Nistec.Data.csproj">
+      <Project>{d5fd6c68-86ea-48bf-8f6d-29ce57419500}</Project>
+      <Name>Nistec.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Lib\Nistec.Lib.csproj">
+      <Project>{54f52ed5-aecd-47c6-93d8-7b3358ba7f8c}</Project>
+      <Name>Nistec.Lib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Logger\Nistec.Logger.csproj">
+      <Project>{e510dd2c-859c-476c-9901-60edfc5e71f1}</Project>
+      <Name>Nistec.Logger</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Trace\Nistec.Trace\Nistec.Trace.csproj">
+      <Project>{ee45bbf2-d64b-4884-8387-b209918e8964}</Project>
+      <Name>Nistec.Trace</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Web\Nistec.Web.csproj">
+      <Project>{8c4cff01-180e-41a1-9234-0c1b1e207ae5}</Project>
+      <Name>Nistec.Web</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,493 @@
+﻿@{
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+        td {
+            padding: 4px;
+            height: 20px;
+        }
+
+        .row_detail {
+            margin: 10px;
+            direction: rtl;
+        }
+
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+    </style>
+<style type="text/css">
+
+    .section {
+        direction: rtl;
+        text-align: right;
+        margin: 5px;
+    }
+
+    .hint {
+        direction:rtl;
+        text-align:right;
+        margin-right: 20px;
+        margin-top: 7px;
+        float: right;
+        padding: 5px;
+    }
+   .backButton {
+        float: right;
+        margin-left: 0px;
+    }
+
+    .nextButton {
+        float: left;
+        margin-left: 10px;
+    }
+
+    .buttonsWrapper {
+        float: left;
+        margin-top: 30px;
+        margin-right: 10px;
+        width: 115px;
+    }
+    #contacts {
+        border: none;
+    }
+</style>
+
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            // First, checks if it isn't implemented yet.
+            if (!String.prototype.format) {
+                String.prototype.format = function () {
+                    var args = arguments;
+                    return this.replace(/{(\d+)}/g, function (match, number) {
+                        return typeof args[number] != 'undefined'
+                          ? args[number]
+                          : match
+                        ;
+                    });
+                };
+            }
+
+            JSON.useDateParser();
+            var theme = 'Arctic';
+
+            $("#hTitle").text('רשימת נכסים');
+
+           
+            // prepare the data
+            var source =
+            {
+                //sort: customsortfunc,
+                datatype: "json",
+                datafields: [
+                   { name: 'LeadId', type: 'number' },
+                   { name: 'CustomerName', type: 'string' },
+                   { name: 'Address', type: 'string' },
+                   { name: 'City', type: 'string' },
+                   { name: 'LastUpdate', type: 'date' },
+                   { name: 'ContactId', type: 'number' },
+                   { name: 'ContactName', type: 'string' },
+                   { name: 'Title', type: 'string' }
+                ],
+                id: 'LeadId',
+                type: 'POST',
+                url: '@Url.Action("GetLeadsList4Unit", "Crm")'
+            };
+
+            source.data = { 'unitId': '@id' };
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) {
+                    $("#UnitId").val('@id');
+                }
+                //loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+/*            
+
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+                var actions = null;
+                tabsdiv = $($(parentElement).children()[0]);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    actions = tabsdiv.find('.actions');
+
+                    var title = tabsdiv.find('.title');
+                    title.text(datarecord.BuildingName);
+
+                    //info container
+                    var container = $('<div style="margin: 5px;text-align:right;"></div>')
+                    container.rtl = true;
+                    container.appendTo($(information));
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 45%;direction:rtl;"></div>');
+                    //var photocolumn = $('<div style="float: left; width: 15%;"></div>');
+
+                    //container.append(photocolumn);
+                    container.append(leftcolumn);
+                    container.append(rightcolumn);
+
+                    // var mediaLink = $('<input type="button" value="תמונות"/>')
+                    //.on("click", function (e) {
+                    //    e.preventDefault();
+                    //    mediaEditor(datarecord.BuildingId, datarecord.UnitId, "u");
+                    //});
+                    // $(photocolumn).append(mediaLink);
+
+                    var infosection = "<div class='row_detail'><b>{0}:</b>{1}</div>";
+
+                    $(leftcolumn).append(infosection.format("מספר קומה", datarecord.FloorNum));
+                    $(leftcolumn).append(infosection.format("מספר יחידה", datarecord.UnitNum));
+                    $(leftcolumn).append(infosection.format("שטח", datarecord.UnitSize));
+                    $(leftcolumn).append(infosection.format("מחיר", datarecord.Price));
+
+                    $(rightcolumn).append(infosection.format("בעלים", datarecord.OwnerName));
+                    $(rightcolumn).append(infosection.format("סוכן", datarecord.UserName));
+                    $(rightcolumn).append(infosection.format("קוד יחידה", datarecord.UnitId));
+                    $(rightcolumn).append(infosection.format("קוד בניין", datarecord.BuildingId));
+
+
+                    //notes container
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.Memo + '</span></div><br/>' +
+                        '<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + '' + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl: true });
+                }
+            }
+*/
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '98%',
+                height:'300px',
+                //selectionmode: 'checkbox',
+                autoheight: false,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                //virtualmode: true,
+                rendergridrows: function (obj) {
+                    console.log(obj)
+                    return obj.data;
+                },
+                //pageable: true,
+                //pagermode: 'simple',
+                scrollmode: 'logical',
+                sortable: true,
+                altrows: true,
+                //rowdetails: true,
+                //rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-right: 30px;'><li class='title'>כללי</li><li>פרטים</li><li>תמונות</li></ul><div class='information'></div><div class='notes'></div><div class='actions'></div></div>", rowdetailsheight: 200 },
+                //initrowdetails: initrowdetails,
+                columns: [
+                      {
+                          text: 'פעולות', dataField: 'LeadId', width: 80, cellsalign: 'right', align: 'center',
+                          cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
+                              var contactId = $('#jqxgrid').jqxGrid('getrowdata', row).ContactId;
+                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="leads_4Trans(' + value + ',' + contactId + ');">בחירה</a></div>'
+                          }
+                      },
+                 { text: 'שם הלקוח', dataField: 'CustomerName', width: 150, cellsalign: 'right', align: 'center' },
+                 { text: 'כתובת', dataField: 'Address', cellsalign: 'right', align: 'center' },
+                 { text: 'עיר', dataField: 'City', width: 120, cellsalign: 'right', align: 'center' },
+                 { text: 'שם איש קשר', dataField: 'ContactName', width: 120, cellsalign: 'right', align: 'center' },
+                 { text: 'תפקיד', dataField: 'Title', width: 120, cellsalign: 'right', align: 'center' },
+                 { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 100, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+
+        });
+
+
+        $('#btnComplete').click(function (e) {
+            var unitId = $("#UnitId").val();
+            if (!($.isNumeric(unitId) && unitId > 0)) {
+                alert("לא סומן נכס!");
+                return;
+            }
+            var contactId = $("#ContactId").val();
+            if (!($.isNumeric(contactId) && contactId > 0)) {
+                alert("לא סומן איש קשר!");
+                return;
+            }
+            var clientId = $("#LeadId").val();
+            if (!($.isNumeric(clientId) && clientId != 0)) {
+                alert("לא סומן לקוח!");
+                return;
+            }
+            window.parent.triggerPopertyTransComplete(unitId,clientId, contactId);
+
+        });
+
+        $("#IsUnknownClient").change(function () {
+            if (this.checked) {
+                $("#LeadId").val(-1);
+            }
+            else {
+                $("#LeadId").val();
+            }
+            wizard.validate();
+        });
+
+
+        function leads_4Trans(leadId, contactId) {
+            $("#LeadId").val(leadId);
+            //$("#ContactId").val(contactId);
+            wizard.validate();
+        }
+
+    </script>
+
+    <script type="text/javascript">
+        //wizard
+    var wizard = (function () {
+        //Adding event listeners
+        var _addHandlers = function () {
+            $('.nextButton').click(function () {
+                wizard.validate();
+                $('#jqxTabs').jqxTabs('next');
+            });
+            $('.backButton').click(function () {
+                wizard.validate();
+                $('#jqxTabs').jqxTabs('previous');
+            });
+           
+        };
+        
+        return {
+            //Listbox's source
+            //Initializing the wizzard - creating all elements, adding event handlers and starting the validation
+            init: function () {
+                $('#jqxTabs').jqxTabs({ height: 490, width: 980, keyboardNavigation: false, rtl:true });
+                $('#nextButton1').jqxButton({ width: 50 });
+                $('#nextButton2').jqxButton({ width: 50 });
+                $('#backButton2').jqxButton({ width: 50 });
+                $('#backButton3').jqxButton({ width: 50 });
+
+              var contactsSource =
+              {
+                  dataType: "json",
+                  async: false,
+                  dataFields: [
+                      { name: 'ContactId' },
+                      { name: 'Info' }
+                  ],
+                  data: { 'UnitId': '@id' },
+                  type: 'POST',
+                  url: '@Url.Action("GetContactsByUnitOwner", "Crm")'
+              };
+
+            var contactsAdapter = new $.jqx.dataAdapter(contactsSource);
+            $("#contacts").jqxListBox(
+            {
+                rtl: true,
+                source: contactsAdapter,
+                width: 400,
+                height: 200,
+                //checkboxes: true,
+                displayMember: 'Info',
+                valueMember: 'ContactId'
+            });
+
+            $('#contacts').on('change', function (event) {
+                wizard.validate();
+                var contactId = app_jqxcombos.getSelectedListValue("contacts", 0);
+                $("#ContactId").val(contactId);
+                wizard.validate();
+            });
+
+                _addHandlers();
+                this.validate();
+                this.showHint('נא לבחור את האיש הקשר הרצוי ולהמשיך לשלב הבא');
+
+            },
+            //Validating all wizard tabs
+            validate: function () {
+                if (!this.validateTab1()) {
+                    $('#jqxTabs').jqxTabs('disableAt', 1);
+                    $('#jqxTabs').jqxTabs('disableAt', 2);
+                    return;
+                } else {
+                    $('#jqxTabs').jqxTabs('enableAt', 1);
+                }
+                if (!this.validateTab2()) {
+                    $('#jqxTabs').jqxTabs('disableAt', 2);
+                    return;
+                } else {
+                    $('#jqxTabs').jqxTabs('enableAt', 2);
+                }
+            },
+            //Displaying message to the user
+            showHint: function (message, selector) {
+                if (typeof selector === 'undefined') {
+                    selector = '.hint';
+                }
+                if (message === '') {
+                    message = 'נא להמשיך.';
+                }
+                $(selector).html('<strong>' + message + '</strong>');
+            },
+            //Validating the first tab
+            validateTab1: function () {
+                var contactId = $("#ContactId").val();
+                if (contactId > 0) {
+                    this.showHint('נא להמשיך לשלב הבא.', '#hintTab1');
+                    return true;
+                }
+                else {
+                    this.showHint('נא לבחור את איש הקשר.', '#hintTab1');
+                    return false;
+                }
+            },
+            //Validating the second tab
+            validateTab2: function () {
+                //var products = $('#products').jqxListBox('selectedIndex');
+                //if (!_isItemSelected($('#products').jqxListBox('selectedIndexes'))) {
+                //    this.showHint('You have to select at least one item.', '#hintBasket');
+                //    return false;
+                //} else {
+                //    this.showHint('You can continue.', '#hintBasket');
+                //}
+                //return true;
+
+                var clientId = $("#LeadId").val();
+                if (clientId != 0) {
+                    this.showHint('נא להמשיך לשלב הבא.', '#hintTab2');
+                    this.showHint('סיום.', '#hintTab3');
+                    return true;
+                }
+                else {
+                    this.showHint('נא לבחור את הלקוח הרצוי או לסמן לקוח לא ידוע.', '#hintTab2');
+                    return false;
+                }
+            }
+        }
+    }());
+    //Initializing the wizard
+    wizard.init();
+
+   </script>
+
+}
+
+
+@section featured {
+
+
+}
+
+
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container-rtl">
+
+        <div class="grid-wrap">
+
+            <div style="display: inline; text-align: right; font-size: 18px; direction: rtl;">
+                @*<h3 id="hTitle">רשימת נכסים</h3>*@
+            </div>
+            <div id="jqxWidget">
+
+                <div id='jqxTabs'>
+                    <ul>
+                        <li>בחירת איש קשר</li>
+                        <li style="margin-left: 30px;">בחירת לקוח</li>
+                        <li>סיום</li>
+                    </ul>
+                    <div class="section">
+                        <p>
+                            חובה למלא בכרטיס לקוח: שם חברה, שם איש קשר, כתובת,עיר, טלפון ומייל כדי להתקדם לשלב הבא
+                        </p>       
+                        <div id="contacts">
+                        </div>
+                        <div class="hint" id="hintTab1">
+                        </div>
+                        
+                        <div class="buttonsWrapper">
+                            <input type="button" value="הבא" class="nextButton" id="nextButton1" />
+                        </div>
+                    </div>
+                    <div class="section">
+                        <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                        <div>
+                            <input type="checkbox" id="IsUnknownClient" /><span>דייר\רוכש לא ידוע?</span>
+                        </div>
+                        <div class="hint" id="hintTab2">
+                        </div>
+                        <div class="buttonsWrapper">
+                            <input type="button" value="הקודם" class="backButton" id="backButton2" />
+                            <input type="button" value="הבא" class="nextButton" id="nextButton2" />
+                        </div>
+                    </div>
+                     <div class="section">
+                        <div id="transaction">
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד הנכס שנבחר:
+                                </label>
+                                <input id="UnitId" type="number" name="UnitId" readonly="readonly" />
+                            </div>                            
+                            @*<div class="form-group">
+                                <label class="column">
+                                    קוד בעלים\מוכר שנבחר:
+                                </label>
+                                <input id="OwnerId" type="number" name="OwnerId" readonly="readonly" />
+                            </div>*@
+                           <div class="form-group">
+                                <label class="column">
+                                    איש קשר שנבחר:
+                                </label>
+                                <input id="ContactId" type="number" name="ContactId" readonly="readonly" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד הלקוח שנבחר:
+                                </label>
+                                <input id="LeadId" type="number" name="LeadId" step="any" readonly="readonly" />
+                            </div>
+                        </div>
+                        <div class="hint" id="hintTab3">
+                            <span>לביצוע דוח עסקה לחץ על סיום</span>
+                        </div>
+                        <div class="buttonsWrapper">
+                            <input type="button" value="הקודם" class="backButton" id="backButton3" />
+                            <input type="button" value="סיום" class="nextButton" id="btnComplete" />
+                        </div>
+                    </div>
+               </div>
+                   
+                    <div style="margin-top: 10px;">
+                        
+                        @*<input type="button" id="btnComplete" value="אישור" />*@
+                        <div id="cellbegineditevent"></div>
+                        <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>

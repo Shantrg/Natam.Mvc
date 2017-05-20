@@ -1,0 +1,366 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+   <script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
+   <script type="text/javascript" src="~/Scripts/app/model/leads-def.js"></script>
+ 
+    @*<script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
+    <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
+    <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />*@
+   <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+   
+    <style type="text/css">
+        .styledTable {
+            direction:rtl; text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;padding-left:20px;text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;text-align:right;
+        }
+        .styledRowKey {padding-left:20px;text-align:right;
+        }
+        .styledRowValue {text-align:right;
+        }
+       
+        #dropdownlistContentAreaType{direction:rtl; text-align:right;float:right;}
+        #dropdownlistArrowAreaType {
+            direction: rtl;
+            text-align: right;
+            float: right;
+        }
+
+        .jqx-button jqx-combobox-multi-item jqx-fill-state-normal jqx-rc-all{direction:rtl; text-align:right;float:right;}
+
+    </style>
+}
+
+@section scripts {
+    <script type="text/javascript">
+     var def;
+    $(document).ready(function () {
+        JSON.useDateParser();
+        var theme = 'Arctic';
+
+         def = new app_leads_def(parseInt('@id'), parseInt('@ViewBag.UserId'), parseInt('@ViewBag.UserRole'));
+
+        // prepare the data
+        $("form").submit(function (e) {
+
+            e.preventDefault();
+            def.doSubmit();
+
+        });
+
+        $('#tab-form').on('click', function (e) {
+            //e.preventDefault();
+            def.validateTabs();
+        });
+
+        //$('#checkAccountValidity').click(function (e) {
+        //    e.preventDefault();
+        //    def.checkAccountValidity();
+        //});
+        //$('#btnPropertySearch').click(function (e) {
+        //    propertyDialog = def.propertySearch();//dialogIframe(url, "1020", "510", "איתור נכסים");
+        //});
+
+        //$('#btnPropertyRefresh').click(function (e) {
+        //    loadLeadPropertyList();
+        //});
+
+        //$('#btnPropertyAdd').click(function (e) {
+
+        //    var url = "/Common/_PropertyDef?id=0&pid=" + srcLeadId + "&pt=2";
+        //    propertyDialog = dialogIframe(url, "580", "620", "הגדרת נכס", true);
+        //});
+        //$('#linkTransaction').click(function (e) {
+        //    var url = "/Common/_TransWizard4Buyer?id=" + srcLeadId;
+        //    propertyDialog = dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
+        //});
+        //$('#linkTransAdvice').click(function (e) {
+        //    var url = "/Common/_TransWizard4Advice?id=" + srcLeadId;
+        //    propertyDialog = dialogIframe(url, "1020", "510", "הגדרת  עסקת ייעוץ");
+        //});
+
+        //$('#linkTransfer').click(function (e) {
+        //    var url = "/Common/_LeadTransfer?id=" + srcLeadId;
+        //    propertyDialog = dialogIframe(url, "420", "320", "העברת לקוח");
+        //});
+    });
+
+    //var propertyDialog;
+    function triggerPopertySearchComplete() {
+        app_dialog.dialogIframClose();
+        def.loadLeadPropertyList();
+    }
+    function triggerPropertyComplete() {
+        app_dialog.dialogIframClose();
+        def.loadLeadPropertyList();
+    }
+    function triggerContactComplete(contactId, op) {
+
+        app_dialog.dialogIframClose();
+    }
+    function triggerTransferComplete(id) {
+        app_dialog.dialogIframClose();
+    }
+
+    @*var loadLeadPropertyList = function () {
+
+        var src = "/Common/_LeadPropertyGrid?id=" + '@id';
+        attachIframe("property-iframe", src, 980, 500, false)
+
+        
+    };
+
+    var loadLeadTracking = function () {
+
+        var src = "/Common/_LeadTrace?id=" + '@id';
+        attachIframe("trace-iframe", src, 980, 500, false)
+    };*@
+
+    function triggerPopertyTransComplete(unitId, contactId, transType) {
+        app_dialog.dialogIframClose();
+        if (transType == 3) {
+            var url = "/Crm/TransactionAdviceDef?id=" + unitId + "&tt=3&pid=" + '@id' + "&cid=" + contactId;
+            app.redirectTo(url);
+        }
+        else if (unitId > 0 && contactId > 0) {
+            var url = "/Crm/TransactionBuyerDef?id=" + unitId + "&tt=1&pid=" + '@id' + "&cid=" + contactId;
+            app.redirectTo(url);
+        }
+    };
+
+        
+        function onNotifyClosed(data) {
+            if (data.Status >= 0) {
+                //window.parent.triggerBuildingComplete(data.OutputId);
+                //$('#form')[0].reset();
+                app.redirectTo('leadsGrid');
+            }
+        }
+        function trigger_Prompt(status) {
+            $('#submit').prop('disabled', status == 1);
+            //if (status == 1) {
+            //    $('#submit').attr('disabled','disabled');//.hide();
+            //}
+            window.location.href = '@Url.Action("Leads", "Crm")';
+        }
+</script>
+
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Crm</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+        <div class="box-title">
+            <h3 id="hLeadName">הגדרת לקוח</h3>
+        </div>
+        <div class="rtl">
+            <div id="notif_container"></div>
+            <ul class="nav nav-tabs" id="tab-form">
+                <li class="active"><a id="linkA" data-toggle="tab" href="#tab1">פרטי לקוח</a></li>
+                <li><a id="linkB" data-toggle="tab" href="#tab2">נתונים כללים</a></li>
+                <li><a id="linkC" data-toggle="tab" href="#tab3">רשימת נכסים</a></li>
+                <li><a id="linkD" data-toggle="tab" href="#tab4">מעקב שיחות</a></li>
+            </ul>
+        </div>
+        <div style="height: 50px;">
+        </div>
+        <div id="tag-form">
+            @*@using (Html.BeginForm("UpdateBuilding", "Building", null, FormMethod.Post, new { id = "form", Class = "form" }))
+            {
+                *@<!--Html.AntiForgeryToken(), target = "form-iframe"
+                                Html.ValidationSummary(true)
+                                    -->
+
+
+                <form class="form" id="form" method="post" action="/Crm/UpdateLead" target = "form-iframe">
+                  <input id="LeadId" type="hidden" name="LeadId"  />
+                  <input id="UploadKey" type="hidden" name="UploadKey" />
+                  <input id="ValidateResult" type="hidden"/>
+
+                    <div class="tab-content">
+                        <div id="tab1" class="tab-pane fade in active">
+                            <a id="checkAccountValidity" href="#">בדיקה</a>
+                            <div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        שם חברה<span class="mandatory">(*)</span>:
+                                    </label>
+                                    <input id="CustomerName" type="text" name="CustomerName" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        כתובת:
+                                    </label>
+                                    <input id="Address" name="Address" type="text" class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        עיר:
+                                    </label>
+                                    <input id="City" name="City" type="text" class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        טלפון-1 :
+                                    </label>
+                                    <input id="Phone" type="text" name="Phone" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        טלפון-2 :
+                                    </label>
+                                    <input id="Phone2" type="text" name="Phone2" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מספר פקס :
+                                    </label>
+                                    <input id="Fax" name="Fax" type="text" class="text-mid" />
+                                </div>
+                               <div class="form-group">
+                                    <label class="column">
+                                        תאריך רישום מקורי:
+                                    </label>
+                                    <input id="Creation" readonly="readonly" type="text" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מועד עדכון:
+                                    </label>
+                                    <input id="LastUpdate" readonly="true" type="text" class="text" />
+                                </div>
+                                <div id="contactsGrid"></div>
+
+                            </div>
+                        </div>
+                        <div id="tab2" class="tab-pane fade in">
+                            @*<h4>נתונים כללים</h4>*@
+                            <div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        סוג עסקה:
+                                    </label>
+                                    <div id="DealType" name="DealType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        סוג הנכס/שימוש:
+                                    </label>
+                                    <div id="PurposeType" name="PurposeType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        אזור מבוקש:
+                                    </label>
+                                    <div id="AreaType" name="AreaType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מועד כניסה:
+                                    </label>
+                                    <div id="EntryDate" name="EntryDate" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        שטח מבוקש:
+                                    </label>
+                                    <div id="RequestSize" name="RequestSize">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מספר חניות:
+                                    </label>
+                                    <input id="ParkingNum" name="ParkingNum" type="number" class="number" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        משך החוזה:
+                                    </label>
+                                    <input id="ContractDuration" name="ContractDuration" type="number" class="number" /><span>שנים</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        תקציב למ"ר:
+                                    </label>
+                                    <input id="BadgetForMr" name="BadgetForMr" type="number" class="number" /><span>שח</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        הערות:
+                                    </label>
+                                    <textarea id="Memo" name="Memo" class="textarea-mid"></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                                <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                                <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
+                                <input id="linkTransAdvice" type="button" value="דוח עסקת ייעוץ" class="btn-default btn2" />
+                                <input id="linkTransfer" type="button" value="העברה לסוכן" class="btn-default btn2" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            @*}*@
+            <div id="tab3" class="tab-pane fade in">
+                <div>
+                    <a href="#" id="btnPropertySearch">איתור נכסים</a> | <a href="#" id="btnPropertyAdd">הוספת נכס</a>
+                </div>
+                <div>
+                    <h3><span>רשימת נכסים</span>-<a href="#" id="btnPropertyRefresh">רענון</a></h3>
+                    
+                    <div>
+                        <iframe id="property-iframe" style="width: 980px; height: 480px; text-align: right" frameborder="0"></iframe>
+                        @*@Html.Action("_LeadPropertyGrid", "Common", new { id = @id })*@
+                    </div>
+                </div>  
+            </div>
+            <div id="tab4" class="tab-pane fade in">
+                 <div>
+                    @*<h3>מעקב שיחות</h3>*@
+                    <div>
+                        <iframe id="trace-iframe" style="width: 980px; height: 480px; text-align: right" frameborder="0"></iframe>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center">
+                <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
+                <div id="form-next" style="font-size:18px"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->
+<script type="text/javascript">
+   app_menu.activeLayoutMenu("liLeads");
+</script>
+

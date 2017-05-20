@@ -1,0 +1,179 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Home Page";
+
+    //string Message=null;
+    //model Natam.Mvc.Models.LoginModel
+}
+
+@section head {
+  <script type="text/javascript" src="~/Scripts/jqx/jqxcore.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxdata.js"></script> 
+    <script type="text/javascript" src="~/Scripts/jqx/jqxbuttons.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxlistbox.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxdropdownlist.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxcombobox.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxcheckbox.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxinput.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxpasswordinput.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxmenu.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxpanel.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/jqx/jqxnumberinput.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxwindow.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxtabs.js"></script>
+    <script type="text/javascript" src="~/Scripts/jqx/jqxvalidator.js"></script>
+}
+@section featured {
+}
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#submitButton').jqxButton({height: 25 });
+            $('#rememberMe').jqxCheckBox({ width: 130 });
+            $('#username').jqxInput({ width: 130, height: 25 });
+            $('#password').jqxPasswordInput({ width: 130, height: 25 });
+        
+            // add validation rules.
+            $('#form').jqxValidator({
+                rules: [
+                       { input: '#username', message: 'Username is required!', action: 'keyup, blur', rule: 'required' },
+                       { input: '#username', message: 'Your username must start with a letter!', action: 'keyup, blur', rule: 'startWithLetter' },
+                       { input: '#username', message: 'Your username must be between 3 and 12 characters!', action: 'keyup, blur', rule: 'length=3,12' },
+                       { input: '#password', message: 'Password is required!', action: 'keyup, blur', rule: 'required' },
+                       { input: '#password', message: 'Your password must be between 4 and 12 characters!', action: 'keyup, blur', rule: 'length=4,12' }
+                ]
+            });
+            // validate form.
+            $("#submitButton").click(function () {
+                var validationResult = function (isValid) {
+                    if (isValid) {
+                        // Submit the Form.
+                        $("#form").submit();
+                    }
+                }
+                // Validate the Form.
+                $('#form').jqxValidator('validate', validationResult);
+            });
+
+            $('#jqxValidator').on('validationError', function (event) { 
+                // Some code here. 
+                alert("validationError");
+                $('prompt').val("זיהוי נכשל נסה שוב.");
+            });
+            //$("#form").on('validationSuccess', function () {
+            //    // Display the Server's Response which came as result of the Form Submit.
+            //    $("#form-iframe").fadeIn('fast');
+            //});
+        });
+    </script>
+}
+ 
+<div class="global">
+    
+    <div class="center-box">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <h2 style="text-align:center">ברוכים הבאים לנתם</h2>
+                    <div class="thumb-pad1">
+                        <div class="thumbnail">
+                            <figure><img src="~/images/site/banner.png" style="width:550px" alt="natam"></figure>
+                            <div class="caption">
+                            </div>
+                        </div>
+                     </div>
+                    <a href="#" class="btn-default btn2">אודות נתם</a>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 choose-box">
+                    <div dir="rtl" class="row">
+                        <div class="col-lg-11 col-md-12 col-sm-12 col-lg-offset-1">
+                            <h2>כניסה למערכת</h2>
+                            <section id="loginForm">
+                           <form class="form" id="form" method="post" action='@Url.Action("Login","Home")'>
+                            <fieldset>
+                                <legend></legend>
+                                <ul style="list-style:none; font-size:150%">
+                                    <li>שם משתמש</li>
+                                    <li>
+                                       <input name="username" type="text" id="username" />
+                                    </li>
+                                    <li>סיסמא</li>
+                                    <li>
+                                       <input name="password" type="password" id="password" />
+                                    </li>
+                                    <li>
+                                        זכור אותי ?
+                                        <div name="rememberMe" id="rememberMe" style="margin-left: 50px;"></div>
+                                    </li>
+                                </ul>
+                                <input class="btn-default btn2" type="button" id="submitButton" value="כניסה" />
+                                <input class="btn-default btn2" type="reset" value="נקה" />
+                            </fieldset>
+                            <div class="prompt"></div>
+                        </form>
+                        <iframe id="form-iframe" name="form-iframe" style="width: 800px; height: 400px;" frameborder="0"></iframe>
+                            </section>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore <br>et dolore magna aliqua. Ut enim ad minim veniam quis nostrud.</p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore <br>et dolore magna aliqua. Ut enim ad minim veniam quis nostrud.</p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore <br>et dolore magna aliqua. Ut enim ad minim veniam quis nostrud.</p>
+                            
+
+                       </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="offers-box indent">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <figure><img src="~/images/site/page1_icon1.png" alt=""></figure>
+                    <p class="title">contact us</p>
+                    <span class="hr"><em></em></span>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore <br>et dolore magna aliqua. Ut enim ad minim veniam quis nostrud.</p>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="thumb-pad2">
+                                <div class="thumbnail">
+                                    <figure><img src="~/images/site/page1_symbol1.png" alt=""></figure>
+                                    <div class="caption">
+                                        <p class="title1">Natam</p>
+                                        <p>Yad Harozim, <br>Tel Aviv, 12345. <br>Israel</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6">
+                            <div class="thumb-pad2">
+                                <div class="thumbnail">
+                                    <figure><img src="~/images/site/page1_symbol2.png" alt=""></figure>
+                                    <div class="caption">
+                                        <p class="title2">Give us a call or send us a fax:</p>
+                                        <p><span>Freephone:</span>  972 3 12345678</p>
+                                        <p><span>Telephone:</span>  972 3 12345678</p>
+                                        <p><span>FAX:</span>  972 3 12345678</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6">
+                            <div class="thumb-pad2">
+                                <div class="thumbnail">
+                                    <figure><img src="~/images/site/page1_symbol3.png" alt=""></figure>
+                                    <div class="caption">
+                                        <p class="title2">Send us a message:</p>
+                                        <a href="#">contact@natam.co.il</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

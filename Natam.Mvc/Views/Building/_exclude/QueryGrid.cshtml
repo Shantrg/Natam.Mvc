@@ -1,0 +1,373 @@
+﻿@model Pro.Models.BuildingQuery
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+
+   
+}
+@section head { 
+
+    @Scripts.Render("~/bundles/jqx")
+
+   @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+
+        .row_detail {margin: 10px;direction:rtl;}
+        .row_link {margin: 10px;direction:rtl;font-size:16px}
+
+    </style>
+
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            JSON.useDateParser();
+            var theme = 'Arctic';
+            // prepare the data
+            var source =
+            {
+                datatype: "json",
+                datafields: [
+                    { name: 'BuildingId', type: 'number' },
+                    { name: 'PropertyId', type: 'number' },
+                    { name: 'City', type: 'string' },
+                    { name: 'BuildingName', type: 'string' },
+                    { name: 'Street', type: 'string' },
+                    { name: 'FloorAreaMr', type: 'string' },
+                    { name: 'ContactName', type: 'string' },
+                    { name: 'ContactPhone', type: 'string' },
+                    { name: 'PopulationDate', type: 'date' },
+                    { name: 'UserName', type: 'string' },
+                    { name: 'OwnerName', type: 'string' },
+                    { name: 'BuildingInformation', type: 'string' },
+                    { name: 'BuildingComments', type: 'string' }
+                    
+                ],
+                id: 'PropertyId',
+                type:'POST',
+                url: '@Url.Action("GetQueryGrid", "Building")',
+                //localdata: {},
+                //pagenum: 3,
+                pagesize: 20,
+                root: 'Rows',
+                beforeprocessing: function (data) {
+                    source.totalrecords = data.TotalRows;
+                },
+                pager: function (pagenum, pagesize, oldpagenum) {
+                    // callback called when a page or page size is changed.
+                }
+            };
+            //var rowBegin = 0;
+            //var rowEnd=20
+            source.data = { 'QueryType': '@Model.QueryType', 'Area': '@Model.Area', 'DealType': '@Model.DealType', 'PurposeType': '@Model.PurposeType', 'AreaSizeMin': '@Model.AreaSizeMin', 'AreaSizeMax': '@Model.AreaSizeMax', 'BuildingName': '@Model.BuildingName', 'BuildingStreet': '@Model.BuildingStreet', 'StreetNo': '@Model.StreetNo', 'OwnerId': '@Model.OwnerId', 'BuildingId': '@Model.BuildingId' };
+
+           
+            //onclick="alert(' + value + ');"
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) {},
+                loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+            //var dataAdapter = new $.jqx.dataAdapter(source);
+            //var dataAdapter = new $.jqx.dataAdapter(source, { async: true, autoBind: true });
+ 
+            var cellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
+                if (value<=0)
+                    return '<div style="text-align:center">לא מוגדר</div>';
+                else
+                    return '<div style="text-align:center"><a href="BuildingDef?id=' + value + '" >הצג</a></div>';
+            };
+            var imgUrl = function (id) {
+                //var imgurl = + datarecord.PropertyId.toLowerCase() + '.png';
+
+                var url= '@Url.Content("~/Images/building.jpg")'
+                //alert(url);
+                return url;
+            };
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+                var actions = null;
+                tabsdiv = $($(parentElement).children()[0]);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    actions = tabsdiv.find('.actions');
+
+                    var title = tabsdiv.find('.title');
+                    title.text(datarecord.BuildingName);
+
+                    //info container
+                    var container = $('<div style="margin: 5px;text-align:right;"></div>')
+                    container.rtl = true;
+                    container.appendTo($(information));
+                    var photocolumn = $('<div style="float: left; width: 15%;"></div>');
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 40%;direction:rtl;"></div>');
+                    container.append(photocolumn);
+                    container.append(leftcolumn);
+                    container.append(rightcolumn);
+                    var photo = $("<div class='jqx-rc-all' style='margin: 10px;'><b>תמונה:</b></div>");
+                    var image = $("<div style='margin-top: 10px;'></div>");
+                    var imgurl = imgUrl(datarecord.PropertyId)
+                    var img = $('<img height="60" src="' + imgUrl() + '"/>');
+                    image.append(img);
+                    image.appendTo(photo);
+                    photocolumn.append(photo);
+
+                    var propertyId = "<div class='row_detail'><b>מספר נכס:</b> " + datarecord.PropertyId + "</div>";
+                    var city = "<div class='row_detail'><b>עיר-אזור:</b> " + datarecord.City + "</div>";
+                    var buildingName = "<div class='row_detail'><b>שם הנכס:</b> " + datarecord.BuildingName + "</div>";
+                    var street = "<div class='row_detail'><b>כתובת:</b> " + datarecord.Street + "</div>";
+                    var userName = "<div class='row_detail'><b>סוכן:</b> " + datarecord.UserName + "</div>";
+
+                    $(leftcolumn).append(propertyId);
+                    $(leftcolumn).append(city);
+                    $(leftcolumn).append(buildingName);
+                    $(leftcolumn).append(street);
+                    $(leftcolumn).append(userName);
+                    var floorAreaMr = "<div class='row_detail'><b>שטח:</b> " + datarecord.FloorAreaMr + "</div>";
+                    var contactName = "<div class='row_detail'><b>איש קשר:</b> " + datarecord.ContactName + "</div>";
+                    var contactPhone = "<div class='row_detail'><b>טלפון:</b> " + datarecord.ContactPhone + "</div>";
+                    var populationDate = "<div class='row_detail'><b>מועד עדכון:</b> " + datarecord.PopulationDate + "</div>";
+                    var ownerName = "<div class='row_detail'><b>בעלים:</b> " + datarecord.OwnerName + "</div>";
+                    $(rightcolumn).append(floorAreaMr);
+                    $(rightcolumn).append(contactName);
+                    $(rightcolumn).append(contactPhone);
+                    $(rightcolumn).append(populationDate);
+                    $(rightcolumn).append(ownerName);
+
+                    //notes container
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.BuildingInformation + '</span></div><br/>'+
+                        '<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.BuildingComments + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+                    //actions container
+                    var actionscontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"></div>');
+                    actionscontainer.rtl = true;
+                    actionscontainer.append("<div class='row_link'><a href='../Crm/Advertise?id=" + datarecord.PropertyId + "&op=property'>פרסום חדש</a></div><br/>");
+                    actionscontainer.append("<div class='row_link'><a href='../Crm/AdsGrid?id=" + datarecord.PropertyId + "&op=property'>דוח פרסום</a></div><br/>");
+                    $(actions).append(actionscontainer);
+
+
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl:true });
+                }
+            }
+
+            // load virtual data.
+            var rendergridrows = function (params) {
+                alert('rendergridrows');
+                var data = generatedata(params.startindex, params.endindex);
+                return data;
+            }
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                virtualmode: true,
+                rendergridrows: function (obj) {
+                    //alert('virtualmode');
+                    console.log(obj)
+                    return obj.data;
+                },
+                pageable: true,
+                pagermode: 'simple',
+                sortable: true,
+                rowdetails: true,
+                rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-left: 30px;'><li class='title'></li><li>פרטים</li><li>פעולות</li></ul><div class='information'></div><div class='notes'></div><div class='actions'></div></div>", rowdetailsheight: 200 },
+                ready: function () {
+                    $("#jqxgrid").jqxGrid('showrowdetails', 0);
+                    //$("#jqxgrid").jqxGrid('showrowdetails', 1);
+                },
+                initrowdetails: initrowdetails,
+                columns: [
+                  { text: 'מס בניין', dataField: 'BuildingId', width: 100, cellsalign: 'right', align: 'center', cellsrenderer: cellsrenderer },
+                  { text: 'מס נכס', dataField: 'PropertyId', width: 100, cellsalign: 'right', align: 'center' },
+                  { text: 'אזור-עיר', dataField: 'City', cellsalign: 'right', align: 'center' },
+                  { text: 'שם הבניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center' },
+                  { text: 'רחוב', dataField: 'Street', cellsalign: 'right', align: 'center' },
+                  { text: 'שטח פנוי', dataField: 'FloorAreaMr', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'איש קשר', dataField: 'ContactName', width: 150, cellsalign: 'right', align: 'center' },
+                  { text: 'מועד עדכון', dataField: 'PopulationDate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+             // create context menu
+            var contextMenu = $("#Menu").jqxMenu({ rtl: true, width: 200, height: 58, autoOpenPopup: false, mode: 'popup'});
+            $("#jqxgrid").on('contextmenu', function () {
+                return false;
+            });
+            // handle context menu clicks.
+            $("#Menu").on('itemclick', function (event) {
+                var args = event.args;
+                var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                if ($.trim($(args).text()) == "עדכון") {
+                    editrow = rowindex;
+                    var offset = $("#jqxgrid").offset();
+                    $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+
+                    // get the clicked row's data and initialize the input fields.
+                    var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', editrow);
+                    $("#PropertyId").val(dataRecord.PropertyId);
+                    $("#City").val(dataRecord.City);
+                    $("#BuildingName").val(dataRecord.BuildingName);
+                    $("#Street").val(dataRecord.Street);
+                    $("#FloorAreaMr").val(dataRecord.FloorAreaMr );
+                    $("#ContactName").val(dataRecord.ContactName );
+                    $("#PopulationDate").val(dataRecord.PopulationDate );
+
+                    // show the popup window.
+                    $("#popupWindow").jqxWindow('show');
+                }
+                else {
+                    var rowid = $("#jqxgrid").jqxGrid('getrowid', rowindex);
+                    //$("#jqxgrid").jqxGrid('deleterow', rowid);
+                }
+            });
+            $("#jqxgrid").on('rowclick', function (event) {
+                if (event.args.rightclick) {
+                    $("#jqxgrid").jqxGrid('selectrow', event.args.rowindex);
+                    var scrollTop = $(window).scrollTop();
+                    var scrollLeft = $(window).scrollLeft();
+                    contextMenu.jqxMenu('open', parseInt(event.args.originalEvent.clientX) + 5 + scrollLeft, parseInt(event.args.originalEvent.clientY) + 5 + scrollTop);
+                    return false;
+                }
+            });
+            // initialize the popup window and buttons.
+            $("#popupWindow").jqxWindow({ width: 450, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01 });
+            $("#Cancel").jqxButton({ theme: theme });
+            $("#Save").jqxButton({ theme: theme });
+            // update the edited row when the user clicks the 'Save' button.
+            $("#Save").click(function () {
+                if (editrow >= 0) {
+                    var row = {
+                        PropertyId: $("#PropertyId").val(),
+                        City: $("#City").val(),
+                        BuildingName: $("#BuildingName").val(),
+                        Street: $("#Street").val(),
+                        FloorAreaMr: $("#FloorAreaMr").val(),
+                        ContactName: $("#ContactName").val(),
+                    };
+                    var rowid = $("#jqxgrid").jqxGrid('getrowid', editrow);
+                    $('#jqxgrid').jqxGrid('updaterow', rowid, row);
+                    $("#popupWindow").jqxWindow('hide');
+                }
+            });
+        });
+
+        
+    </script>
+}
+
+
+@section featured {
+
+
+}
+
+@Html.ActionLink("Home", "Index", "Home") >
+@Html.ActionLink("Main", "Main", "Home") >
+@Html.ActionLink("Query", "Query", ViewContext.RouteData.Values["controller"].ToString()) >
+@Html.ActionLink(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["controller"].ToString()) 
+
+
+@*@if(ViewContext.RouteData.Values["controller"].ToString() != "Home") {
+    @:> @Html.ActionLink(ViewContext.RouteData.Values["controller"].ToString(), "Index", ViewContext.RouteData.Values["controller"].ToString()) 
+}
+@if(ViewContext.RouteData.Values["action"].ToString() != "Index"){
+    @:> @Html.ActionLink(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["controller"].ToString()) 
+}*@
+
+<hgroup class="title">
+    <h3 class="rightPan">רשימת נכסים</h3>
+</hgroup>
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap">
+            <div style="display: inline; text-align: right">
+                <a href="http://www.emap.co.il/emap/" title="הצג מפה" target="_blank">
+                    <img src="~/Images/icons/emap.png" alt="emap" /></a>
+            </div>
+
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                <div style="margin-top: 30px;">
+                    <div id="cellbegineditevent"></div>
+                    <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                </div>
+                <div id="popupWindow">
+                    <div>תצוגה</div>
+                    <div style="overflow: hidden; direction:rtl">
+                        <table>
+                            <tr>
+                                <td align="right">מס:</td>
+                                <td align="left">
+                                    <input id="PropertyId" /></td>
+                            </tr>
+                            <tr>
+                                <td align="right">אזור-עיר:</td>
+                                <td align="left">
+                                    <input id="City" /></td>
+                            </tr>
+                            <tr>
+                                <td align="right">שם הבניין:</td>
+                                <td align="left">
+                                    <input id="BuildingName" /></td>
+                            </tr>
+                            <tr>
+                                <td align="right">רחוב:</td>
+                                <td align="left">
+                                    <div id="Street"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">שטח פנוי:</td>
+                                <td align="left">
+                                    <div id="FloorAreaMr"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">איש קשר:</td>
+                                <td align="left">
+                                    <div id="ContactName"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="right">מועד עדכון:</td>
+                                <td align="left">
+                                    <div id="PopulationDate"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                            <tr>
+                                <td align="right"></td>
+                                <td style="padding-top: 10px;" align="right">
+                                    <input style="margin-right: 5px;" type="button" id="Save" value="Save" /><input id="Cancel" type="button" value="Cancel" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div dir="rtl" id='Menu'>
+                    <ul>
+                        <li>הצג</li>
+                        <li>עדכון</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

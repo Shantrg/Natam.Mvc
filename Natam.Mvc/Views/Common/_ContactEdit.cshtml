@@ -1,0 +1,222 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+    int pid = Nistec.Types.ToInt(Request.QueryString["pid"]);
+    int op = Nistec.Types.ToInt(Request.QueryString["op"]);
+    string uk = Request.QueryString["uk"];
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+}
+
+@section scripts {
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        @*loadData('@id','@pid');
+
+            var loadData = function (id,pid) {*@
+
+        var view_source =
+        {
+            datatype: "json",
+            datafields: [
+                    { name: 'ContactId', type: 'number' },
+                    { name: 'ParentId', type: 'number' },
+                    { name: 'ContactName', type: 'string' },
+                    { name: 'Title', type: 'string' },
+                    { name: 'Email', type: 'string' },
+                    { name: 'Mobile', type: 'string' },
+                    { name: 'Phone1', type: 'string' },
+                    { name: 'Details', type: 'string' },
+                    { name: 'Role', type: 'number' }
+        ],
+            id: 'ContactId',
+            data: { 'id': '@id', 'pid': '@pid', 'op': '@op', 'uk': '@uk' },
+            type: 'POST',
+            url: '@Url.Action("GetContactEdit", "Common")'
+        };
+
+        var srcAccountType;
+        var uk = '@uk';
+        var viewAdapter = new $.jqx.dataAdapter(view_source, {
+            loadComplete: function (record) {
+                if (record) {
+                    srcAccountType = record.AccountType;
+
+                    $('#ParentId').val(record.ParentId);
+                    $('#ContactId').val(record.ContactId);
+                    $('#Title').val(record.Title);
+                    $('#ContactName').val(record.ContactName);
+                    $('#Email').val(record.Email);
+                    $('#Mobile').val(record.Mobile);
+                    $('#Phone1').val(record.Phone1);
+                    $('#Details').val(record.Details);
+                    $('#Role').val(record.Role);
+                    if (uk && uk !== undefined)
+                        $('#UploadKey').val(uk);
+
+                }
+            },
+            loadError: function (jqXHR, status, error) {
+            },
+            beforeLoadComplete: function (records) {
+            }
+        });
+         viewAdapter.dataBind();
+            //}
+
+
+            //contactount dialog
+            $('#contactForm').jqxValidator({
+                rtl: true,
+                hintType: 'label',
+                animationDuration: 0,
+                rules: [
+                      { input: '#ContactName', message: 'חובה לציין שם!', action: 'keyup, blur', rule: 'required' },
+                      { input: '#Title', message: 'חובה לציין תפקיד!', action: 'keyup, blur', rule: 'required' },
+                      { input: '#Email', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
+                      {
+                          input: '#Mobile', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+                      function (input, commit) {
+                          var val = input.val();
+                          var re = /^([0-9])+$/
+                          return val ? re.test(val) : true;
+                      }
+                      },
+                      {
+                          input: '#Phone1', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+                      function (input, commit) {
+                          var val = input.val();
+                          var re = /^([0-9])+$/
+                          return val ? re.test(val) : true;
+                      }
+                      },
+                      //{ input: '#Mobile', message: 'חובה לציין טלפון!', action: 'keyup, blur', rule: 'required' },
+                      //{
+                      //    input: '#Mobile', message: 'טלפון נייד אינו תקין!', action: 'valuechanged, blur', rule:
+                      //              function (input, commit) {
+                      //                  var val = input.val();
+                      //                  var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                      //                  return val ? re.test(val) : true;
+                      //              }
+                      //}
+                ]
+            });
+
+            $('#contactSubmit').on('click', function (e) {
+
+                e.preventDefault();
+                var actionurl = $('#contactForm').attr('action');
+
+                var validationResult = function (isValid) {
+                    if (isValid) {
+                        $.ajax({
+                            url: actionurl,
+                            type: 'post',
+                            dataType: 'json',
+                            data: $('#contactForm').serialize(),
+                            success: function (data) {
+                                
+                                if (data.Status >= 0) {
+                                    
+                                    //$('#contactWindow').jqxWindow('close');
+                                    var pid = $('#ParentId').val();
+                                    //$('#contactForm')[0].reset();
+                                    $('#ParentId').val(pid);
+                                    //$('#ContactId').val(data.OutputId);
+                                    window.parent.triggerContactComplete(data.OutputId, '@op');
+                                }
+                                else
+                                {
+                                    alert(data.Message);
+                                }
+                            },
+                            error: function (jqXHR, status, error) {
+                                alert(error);
+                            }
+                        });
+                    }
+                }
+                $('#contactForm').jqxValidator('validate', validationResult);
+
+            });
+
+            $('#contactCancel').on('click', function (e) {
+                $('#contactForm')[0].reset();
+                $('#contactForm').jqxValidator('hide');
+            });
+        });
+
+    </script>
+}
+
+<div style="margin: 0px;">
+
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+        <div id="contactWindow">
+            <div id="contactHeader">
+            </div>
+            <div id="contactBody">
+                <form class="contactForm" id="contactForm" method="post" action="/Common/UpdateContact" target="contact-iframe">
+                    <div style="direction: rtl; text-align: right">
+                        <input type="hidden" id="ParentId" name="ParentId" value="@pid" />
+                        <input type="hidden" id="ContactId" name="ContactId" value="" />
+                        <input type="hidden" id="Role" name="Role" value="0" />
+                        <input type="hidden" id="UploadKey" name="UploadKey" />
+                      <div class="form-group">
+                            <label class="column">
+                                שם <span class="mandatory">(*)</span>:
+                            </label>
+                            <input id="ContactName" name="ContactName" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                תפקיד <span class="mandatory">(*)</span>:
+                            </label>
+                            <input id="Title" name="Title" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                טלפון נייד :
+                            </label>
+                            <input id="Mobile" name="Mobile" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                דאר אלקטרוני:
+                            </label>
+                            <input id="Email" name="Email" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                טלפון 1 :
+                            </label>
+                            <input id="Phone1" name="Phone1" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                הערות:
+                            </label>
+                            <textarea id="Details" name="Details" rows="2" cols="40" maxlength="500"></textarea>
+                        </div>
+                        <div style="height: 5px"></div>
+                        <div>
+                            <input id="contactSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                            <input id="contactCancel" class="btn-default btn7" type="button" value="ביטול" />
+                        </div>
+                        <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end of content-wrapper-->

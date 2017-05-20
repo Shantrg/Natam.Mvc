@@ -1,0 +1,507 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+}
+
+@section head { 
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+
+        .row_detail {margin: 10px;direction:rtl;}
+        .row_link {margin: 10px;direction:rtl;font-size:16px}
+        input {direction: rtl;text-align:right;}
+
+    </style>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        // First, checks if it isn't implemented yet.
+        //if (!String.prototype.format) {
+        //    String.prototype.format = function () {
+        //        var args = arguments;
+        //        return this.replace(/{(\d+)}/g, function (match, number) {
+        //            return typeof args[number] != 'undefined'
+        //              ? args[number]
+        //              : match
+        //            ;
+        //        });
+        //    };
+        //}
+
+        //JSON.useDateParser();
+        var theme = 'Arctic';
+
+        $("#popupWindow").jqxWindow({ width: 450,height:580, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01 });
+        $("#contactCancel").jqxButton({ theme: theme });
+        $("#contactSubmit").jqxButton({ theme: theme });
+        $("#contactReset").jqxButton({ theme: theme });
+
+        // prepare the data
+        var source =
+        {
+            id: 'InvestId',
+            datatype: "json",
+            datafields: [
+                    { name: 'InvestId', type: 'number' },
+                    { name: 'BuildingId', type: 'number' },
+                    { name: 'UnitId', type: 'number' },
+                    { name: 'AllBuilding', type: 'bool' },
+                    { name: 'TypeOfInvestment', type: 'number' },
+                    { name: 'SizeOfInvestment', type: 'number' },
+                    { name: 'DescreptionHeb', type: 'string' },
+                    { name: 'IsYields', type: 'number' },
+                    { name: 'RevenuesOfYear', type: 'number' },
+                    { name: 'RequestedPrice', type: 'number' },
+                    { name: 'Comment', type: 'string' },
+                    { name: 'Creation', type: 'date' },
+                    { name: 'LastUpdate', type: 'date' },
+                    { name: 'Yields', type: 'number' },
+                    { name: 'BuildingName', type: 'string' },
+                    { name: 'Address', type: 'string' },
+                    { name: 'City', type: 'string' },
+                    { name: 'AgentName', type: 'string' },
+            ],
+            type: 'POST',
+            url: '@Url.Action("GetInvestmentGrid", "Building")',
+                //pagenum: 3,
+                pagesize: 20,
+                root: 'Rows',
+                beforeprocessing: function (data) {
+                    source.totalrecords = data.TotalRows;
+                },
+                pager: function (pagenum, pagesize, oldpagenum) {
+                    // callback called when a page or page size is changed.
+                },
+                sort: function () {
+                    // update the grid and send a request to the server.
+                    $("#jqxgrid").jqxGrid('updatebounddata', 'sort');
+                },
+                filter: function () {
+                    $("#jqxgrid").jqxGrid('updatebounddata', 'filter');
+                }
+            };
+            source.data = {};
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) {},
+                //loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+
+            /*
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+                var actions = null;
+                tabsdiv = $($(parentElement).children()[0]);
+                alert(tabsdiv);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    actions = tabsdiv.find('.actions');
+
+                    var title = tabsdiv.find('.title');
+                    title.text(datarecord.BuildingName);
+
+                    //info container
+                    var container = $('<div style="margin: 5px;text-align:right;"></div>')
+                    container.rtl = true;
+                    container.appendTo($(information));
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 40%;direction:rtl;"></div>');
+                    var photocolumn = $('<div style="float: left; width: 15%;"></div>');
+
+                    container.append(photocolumn);
+                    container.append(leftcolumn);
+                    container.append(rightcolumn);
+
+                    // var mediaLink = $('<input type="button" value="תמנות"/>')
+                    //.on("click", function (e) {
+                    //    e.preventDefault();
+                    //    mediaEditor(datarecord.BuildingId, datarecord.UnitId, "u");
+                    //});
+                    // $(photocolumn).append(mediaLink);
+
+                    var infosection = "<div class='row_detail'><b>{0}:</b>{1}</div>";
+
+
+                    $(leftcolumn).append(infosection.format("הערות", datarecord.Comment));
+
+                    $(rightcolumn).append(infosection.format("קוד השקעה", datarecord.InvestId));
+                    $(rightcolumn).append(infosection.format("הכנסה שנתית", datarecord.RevenuesOfYear));
+                    $(rightcolumn).append(infosection.format("נוצר ב", datarecord.Creation));
+
+                    //var ownerContainer = $("<div style='margin: 10px;direction:rtl;'><b>בעלים:</b> <a href='#' data-rel='popup' data-position-to='window' data-role='button' data-theme='a' data-inline='true'>" + datarecord.OwnerName + "</a></div>")
+                    //  .on("click", function (e) {
+                    //      e.preventDefault();
+                    //      accountDisplay(datarecord.OwnerId, "בעלים");
+                    //  });
+
+                    //$(rightcolumn).append(ownerContainer);
+
+                    //notes container
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.DescreptionHeb + '</span></div><br/>' +
+                        '<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + '' + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+                    //actions container
+                    var actionscontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"></div>');
+                    actionscontainer.rtl = true;
+
+                   // var invContainer = $("<div style='margin: 10px;direction:rtl;'><b>עריכה:</b> <a href='#' data-rel='popup' data-position-to='window' data-role='button' data-theme='a' data-inline='true'>פירוט השקעה</a></div>")
+                   //.on("click", function (e) {
+                   //    e.preventDefault();
+                   //    investmentEdit(datarecord.InvestId, datarecord.BuildingId, datarecord.UnitId);
+                   //});
+                   // actionscontainer.append(invContainer);
+
+                    var idType = datarecord.UnitId > 0 ? 'u' : 'b';
+                    if (idType == 'u')
+                        actionscontainer.append("<span class='row_link'><a href='UnitDef?id=" + datarecord.UnitId + "&bid=" + datarecord.BuildingId + "'>הצג יחידה</a></span>");
+
+                    actionscontainer.append("<span class='row_link'><a href='BuildingDef?id=" + datarecord.BuildingId + "'>הצג בניין</a></span>");
+
+                    //actionscontainer.append(mediaLink);
+
+                    $(actions).append(actionscontainer);
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl: true });
+                }
+            };
+            */
+            var getRecord = function (index) {
+                return $('#jqxgrid').jqxGrid('getrowdata', index);
+            }
+
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                virtualmode: true,
+                rendergridrows: function (obj) {
+                    return obj.data;
+                },
+                pageable: true,
+                pagermode: 'simple',
+                sortable: true,
+                altrows: true,
+                filterable: true,
+                //autoshowfiltericon: true,
+                //columnmenuopening: function (menu, datafield, height) {
+                //    var column = $("#jqxgrid").jqxGrid('getcolumn', datafield);
+                //    if (column.filtertype === "custom") {
+                //        menu.height(155);
+                //        setTimeout(function () {
+                //            menu.find('input').focus();
+                //        }, 25);
+                //    }
+                //    else menu.height(height);
+                //},
+                showfilterrow: true,
+                //rowdetails: true,
+                //rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-right: 30px;'><li class='title'>כללי</li><li>פרטים</li><li>פעולות</li></ul><div class='information'></div><div class='notes'></div><div class='actions'></div></div>", rowdetailsheight: 200 },
+                //ready: function () {
+                //    //$("#jqxgrid").jqxGrid('showrowdetails', 0);
+                //    //$("#jqxgrid").jqxGrid('showrowdetails', 1);
+                //},
+                //initrowdetails: initrowdetails,
+                columns: [
+                  {
+                      text: 'קוד השקעה', dataField: 'InvestId', width: 70, cellsalign: 'right', align: 'center', filterable: false, cellsrenderer:
+                          function (row, columnfield, value, defaulthtml, columnproperties) {
+                              var data = $('#jqxgrid').jqxGrid('getrowdata', row);
+                              //return '<div style="text-align:center"><a class="linkEdit" href="#" onclick="investmentEdit(' + data.InvestId + ',' + data.BuildingId + ',' + data.UnitId + '); return false;" >הצג</a></div>';
+                              return '<div style="text-align:center"><a class="linkEdit" href="#" onclick="viewEdit();return false;">הצג</a></div>';
+                          }
+                  },
+                  {
+                      text: 'שם בניין', dataField: 'BuildingName', width: 150, cellsalign: 'right', align: 'center', filtertype: 'textbox', filtercondition: 'contains', cellsrenderer:
+                          function (row, columnfield, value, defaulthtml, columnproperties) {
+                              var data = $('#jqxgrid').jqxGrid('getrowdata', row);
+                              return '<div style="text-align:right"><a href="BuildingDef?id=' + data.BuildingId + '">' + value + '</a></div>';
+                          }
+                  },
+                  { text: 'כתובת', dataField: 'Address', cellsalign: 'right', align: 'center', filtertype: 'textbox', filtercondition: 'contains' },
+                  { text: 'עיר', dataField: 'City', width: 120, cellsalign: 'right', align: 'center', filtertype: 'textbox', filtercondition: 'contains' },
+                  //{ text: 'סוג שטח', dataField: 'TypeOfInvestment', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'שטח-מ"ר', dataField: 'SizeOfInvestment', width: 90, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'בניין שלם', datafield: 'AllBuilding', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'מחיר', dataField: 'RequestedPrice', width: 90, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'מניב', dataField: 'IsYields', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'תשואה', dataField: 'Yields', width: 90, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'סוכן', dataField: 'AgentName', width: 100, cellsalign: 'right', align: 'center', filterable: false },
+                  { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center', filterable: false }
+                ]
+            });
+            
+            /*
+            $('#jqxgrid').on('rowexpand', function (event) {
+                //$('.rowdetailWrapper').html(''); //to clear the row details
+                var index = $('#jqxgrid').jqxGrid('getrowboundindex', event.args.rowindex);
+                var rowdata = $('#jqxgrid').jqxGrid('getrowdata', index);
+
+                var details = event.args.details;// $('#jqxgrid').jqxGrid('getrowdetails', index);
+
+                var rows = $('#jqxgrid').jqxGrid('getrows');
+                var parentElement = details;
+                //var parentElement = $(rows[index]).html();
+                alert(parentElement);
+                //var htmlElement = event.args.element;
+                //var item = $('#jqxgrid').jqxGrid('getItem', htmlElement);
+                //var parentId = item.parentId;
+                //alert(parentId);
+                var tabsdiv = showRowdetails(index, parentElement, $('#jqxgrid'), rowdata);//Pass false to get correct parent element from holder
+                var html= tabsdiv[0].outerHTML;
+                alert(html);
+                event.args.details = html;
+            });
+            */
+        });
+
+        function triggerInvestmentComplete(id,bid,uid){
+            
+            app_dialog.dialogIframClose();
+            $('#jqxgrid').jqxGrid('source').dataBind();
+        }
+ 
+    </script>
+}
+
+
+@section featured {
+
+
+}
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Buildings</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<hgroup class="title">
+    <h3 class="rightPan">רשימת השקעות</h3>
+</hgroup>
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap">
+             <div style="display: inline; text-align: right; font-size: 18px; direction: rtl;">
+            </div>
+
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                <div style="margin-top: 30px;">
+                    <div id="cellbegineditevent"></div>
+                    <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                </div>
+                <div id="popupWindow">
+                            <div>
+                                <span id="windowTitle"></span>
+                            </div>
+                            <div id="contactBody">
+                                <form class="contactForm" id="contactForm" method="post" action="/Building/UpdateInvestment" target="contact-iframe">
+                                    <div style="direction: rtl; text-align: right">
+                                        <input type="hidden" id="InvestId" name="InvestId" value="" />
+                                        <input type="hidden" id="BuildingId" name="BuildingId" value="" />
+                                        <input type="hidden" id="UnitId" name="UnitId" value="" />
+                                        <div id="divAll" class="form-group">
+                                            <label class="column">
+                                                בניין שלם:
+                                            </label>
+                                            <input id="AllBuilding" name="AllBuilding" type="checkbox" />
+                                        </div>
+                                        <div id="divCategory" class="form-group">
+                                            <label class="column">
+                                                סוג שטח :
+                                            </label>
+                                            <div id="TypeOfInvestment" name="TypeOfInvestment" style="display: inline-block; text-align: right"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                שטח- מ"ר" :
+                                            </label>
+                                            <input id="SizeOfInvestment" name="SizeOfInvestment" type="text" class="text-mid" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                הכנסה שנתית :
+                                            </label>
+                                            <input id="RevenuesOfYear" name="RevenuesOfYear" type="text" class="text-mid" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                מחיר :
+                                            </label>
+                                            <input id="RequestedPrice" name="RequestedPrice" type="text" class="text-mid" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                מניב? :
+                                            </label>
+                                            <input id="IsYields" name="IsYields" type="checkbox" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                תאור:
+                                            </label>
+                                            <textarea id="DescreptionHeb" name="DescreptionHeb" rows="5" cols="50"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                הערות:
+                                            </label>
+                                            <textarea id="Comment" name="Comment" rows="3" cols="50"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                נוצר ב:
+                                            </label>
+                                            <input id="Creation" name="Creation" type="text" readonly="readonly" class="text-mid" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                מועד עדכון:
+                                            </label>
+                                            <input id="LastUpdate" name="LastUpdate" type="text" readonly="readonly" class="text-mid" />
+                                        </div>
+                                        <div style="height: 5px"></div>
+                                        <div>
+                                            <input id="contactSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                                            <input id="contactReset" class="btn-default btn7" type="button" value="ניקוי" />
+                                            <input id="contactCancel" class="btn-default btn7" type="button" value="ביטול" />
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    // initialize the popup window and buttons.
+ 
+    function viewEdit() {
+        var rowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+        //var offset = $("#jqxgrid").offset();
+        //$("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+
+        // get the clicked row's data and initialize the input fields.
+        var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', rowindex);
+
+        $("#InvestId").val(dataRecord.InvestId);
+        $("#UnitId").val(dataRecord.UnitId);
+        $("#BuildingId").val(dataRecord.BuildingId);
+        $("#AllBuilding").attr("checked",dataRecord.AllBuilding);
+        $("#TypeOfInvestment").val(dataRecord.TypeOfInvestment);
+        $("#SizeOfInvestment").val(dataRecord.SizeOfInvestment);
+        $("#DescreptionHeb").val(dataRecord.DescreptionHeb);
+        $("#IsYields").attr("checked", dataRecord.IsYields);
+        $("#RevenuesOfYear").val(dataRecord.RevenuesOfYear);
+        $("#RequestedPrice").val(dataRecord.RequestedPrice);
+        $("#Comment").val(dataRecord.Comment);
+        $("#Creation").val(formatShortDate(dataRecord.Creation));
+        $("#LastUpdate").val(formatShortDate(dataRecord.LastUpdate));
+
+        if (dataRecord.UnitId > 0) {
+            var title = "הגדרת השקעה ליחידה";
+            $("#windowTitle").html(title);
+            $("#divAll").hide();
+        }
+        else {
+            var title = "הגדרת השקעה לבניין";
+            $("#windowTitle").html(title);
+            $("#divAll").show();
+        }
+        // show the popup window.
+        $("#popupWindow").jqxWindow('show');
+    };
+
+    //contactount dialog
+    $('#contactForm').jqxValidator({
+        rtl: true,
+        hintType: 'label',
+        animationDuration: 0,
+        rules: [
+           {
+               input: '#SizeOfInvestment', message: 'חובה לציין שטח!', action: 'keyup, blur', rule: function () {
+                   var value = $("#SizeOfInvestment").val();
+                   return value > 0;
+               }
+           },
+          {
+              input: '#RevenuesOfYear', message: 'חובה לציין הכנסה שנתית!', action: 'keyup, blur', rule: function () {
+                  var value = $("#RevenuesOfYear").val();
+                  return value > 0;
+              }
+          },
+          {
+              input: '#RequestedPrice', message: 'חובה לציין מחיר!', action: 'keyup, blur', rule: function () {
+                  var value = $("#RequestedPrice").val();
+                  return value > 0;
+              }
+          }
+        ]
+    });
+
+    $('#contactSubmit').on('click', function (e) {
+        var validationResult = function (isValid) {
+            if (isValid) {
+                $.ajax({
+                    url: '@Url.Action("UpdateInvestment", "Building")',
+                    type: 'post',
+                    dataType: 'json',
+                    data: $('#contactForm').serialize(),
+                    success: function (data) {
+                        alert(data.Message);
+                        if (data.Status >= 0) {
+                            $('#popupWindow').jqxWindow('close');
+                            $('#jqxgrid').jqxGrid('source').dataBind();
+                        }
+                    },
+                    error: function (jqXHR, status, error) {
+                        alert(error);
+                    }
+                });
+            }
+            else {
+                e.preventDefault(); // t
+            }
+        }
+        $('#contactForm').jqxValidator('validate', validationResult);
+
+    });
+
+    $('#contactCancel').on('click', function (e) {
+        $('#popupWindow').jqxWindow('close');
+    });
+
+    $('#contactReset').on('click', function (e) {
+        $('#contactForm')[0].reset();
+        $('#contactForm').jqxValidator('hide');
+    });
+</script>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

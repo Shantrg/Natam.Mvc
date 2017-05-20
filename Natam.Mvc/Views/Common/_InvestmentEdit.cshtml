@@ -1,0 +1,225 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+    int bid = Nistec.Types.ToInt(Request["bid"]);
+    int uid = Nistec.Types.ToInt(Request["uid"]);
+
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+}
+
+@section scripts {
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        var view_source =
+        {
+            datatype: "json",
+            async: false,
+            datafields: [
+                { name: 'InvestId', type: 'number' },
+                { name: 'BuildingId', type: 'number' },
+                { name: 'UnitId', type: 'number' },
+                { name: 'AllBuilding', type: 'bool' },
+                { name: 'TypeOfInvestment', type: 'number' },
+                { name: 'SizeOfInvestment', type: 'number' },
+                { name: 'DescreptionHeb', type: 'string' },
+                { name: 'IsYields', type: 'number' },
+                { name: 'RevenuesOfYear', type: 'number' },
+                { name: 'RequestedPrice', type: 'number' },
+                { name: 'Comment', type: 'string' },
+                { name: 'Creation', type: 'date' },
+                { name: 'LastUpdate', type: 'date' }
+            ],
+            id: 'InvestId',
+            data: { 'id': '@id', 'bid': '@bid', 'uid': '@uid' },
+            type: 'POST',
+            url: '@Url.Action("GetInvestmentEdit", "Building")'
+        };
+
+        var srcAccountType;
+
+        var viewAdapter = new $.jqx.dataAdapter(view_source, {
+            loadComplete: function (record) {
+                if (record) {
+                    app_jqxform.loadDataForm("contactForm", record);
+
+                    if ('@uid' > 0) {
+                                var title = "הגדרת השקעה ליחידה";
+                                $("#contactHeader").append("<h4>" + title + "</h4>");
+                                $("#divAll").hide();
+                            }
+                            else {
+                                var title = "הגדרת השקעה לבניין";
+                                $("#contactHeader").append("<h4>" + title + "</h4>");
+                                $("#divAll").show();
+                            }
+                        }
+                    },
+                    loadError: function (jqXHR, status, error) {
+                    },
+                    beforeLoadComplete: function (records) {
+                    }
+                });
+                viewAdapter.dataBind();
+            //}
+
+
+            //contactount dialog
+            $('#contactForm').jqxValidator({
+                rtl: true,
+                hintType: 'label',
+                animationDuration: 0,
+                 rules: [
+                    {
+                        input: '#SizeOfInvestment', message: 'חובה לציין שטח!', action: 'keyup, blur', rule: function () {
+                            var value = $("#SizeOfInvestment").val();
+                            return value > 0;
+                        }
+                    },
+                   {
+                       input: '#RevenuesOfYear', message: 'חובה לציין הכנסה שנתית!', action: 'keyup, blur', rule: function () {
+                           var value = $("#RevenuesOfYear").val();
+                           return value > 0;
+                       }
+                   },
+                   {
+                       input: '#RequestedPrice', message: 'חובה לציין מחיר!', action: 'keyup, blur', rule: function () {
+                           var value = $("#RequestedPrice").val();
+                           return value > 0;
+                       }
+                   }
+                ]
+            });
+
+            $('#contactSubmit').on('click', function (e) {
+
+                e.preventDefault();
+                var actionurl = $('#contactForm').attr('action');
+
+                var validationResult = function (isValid) {
+                    if (isValid) {
+                        $.ajax({
+                            url: actionurl,
+                            type: 'post',
+                            dataType: 'json',
+                            data: $('#contactForm').serialize(),
+                            success: function (data) {
+                                alert(data.Message);
+                                if (data.Status >= 0) {
+                                    window.parent.triggerInvestmentComplete(id,bid,uid);
+                                    $('#contactForm')[0].reset();
+                                    //$('#InvestId').val(data.OutputId);
+                                }
+                            },
+                            error: function (jqXHR, status, error) {
+                                alert(error);
+                            }
+                        });
+                    }
+                }
+                $('#contactForm').jqxValidator('validate', validationResult);
+
+            });
+
+            $('#contactCancel').on('click', function (e) {
+                $('#contactForm')[0].reset();
+                $('#contactForm').jqxValidator('hide');
+            });
+        });
+
+    </script>
+}
+
+<div style="margin: 0px;">
+
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+        <div id="contactWindow">
+            <div id="contactHeader">
+
+            </div>
+            <div id="contactBody">
+                <form class="contactForm" id="contactForm" method="post" action="/Building/UpdateInvestment" target="contact-iframe">
+                    <div style="direction: rtl; text-align: right">
+                        <input type="hidden" id="InvestId" name="InvestId" value="" />
+                        <input type="hidden" id="BuildingId" name="BuildingId" value="" />
+                        <input type="hidden" id="UnitId" name="UnitId" value="" />
+                        <div id="divAll" class="form-group">
+                            <label class="column">
+                                בניין שלם:
+                            </label>
+                            <input id="AllBuilding" name="AllBuilding" type="checkbox" />
+                        </div>
+                        <div id="divCategory" class="form-group">
+                            <label class="column">
+                                סוג שטח :
+                            </label>
+                            <div id="TypeOfInvestment" name="TypeOfInvestment" style="display: inline-block; text-align: right"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                שטח- מ"ר" :
+                            </label>
+                            <input id="SizeOfInvestment" name="SizeOfInvestment" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                הכנסה שנתית :
+                            </label>
+                            <input id="RevenuesOfYear" name="RevenuesOfYear" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                מחיר :
+                            </label>
+                            <input id="RequestedPrice" name="RequestedPrice" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                מניב? :
+                            </label>
+                            <input id="IsYields" name="IsYields" type="checkbox" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                תאור:
+                            </label>
+                            <textarea id="DescreptionHeb" name="DescreptionHeb" rows="7" cols="60"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                הערות:
+                            </label>
+                            <textarea id="Comment" name="Comment" rows="3" cols="60"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                נוצר ב:
+                            </label>
+                            <input id="Creation" name="Creation" type="text" readonly="readonly" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                מועד עדכון:
+                            </label>
+                            <input id="LastUpdate" name="LastUpdate" type="text" readonly="readonly" class="text-mid" />
+                        </div>
+                        <div style="height: 5px"></div>
+                        <div>
+                            <input id="contactSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                            <input id="contactCancel" class="btn-default btn7" type="button" value="ניקוי" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end of content-wrapper-->

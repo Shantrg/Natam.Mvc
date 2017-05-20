@@ -1,0 +1,160 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int accid = Nistec.Types.ToInt(Request.QueryString["id"]);
+ 
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            
+           
+            var newsSource =
+               {
+                   dataType: "json",
+                   dataFields: [
+                       { name: 'NewsId' },
+                       { name: 'NewsName' }
+                   ],
+                   type: 'POST',
+                   url: '@Url.Action("GetNewsView", "Common")'
+               };
+
+            var newsAdapter = new $.jqx.dataAdapter(newsSource, {
+                async: false,
+                //contentType: "application/json; charset=utf-8",
+                loadError: function (jqXHR, status, error) {
+                    //alert("newsAdapter failed: " + error);
+                },
+                loadComplete: function (data) {
+                    //alert("newsAdapter is Loaded");
+                }
+            });
+            //newsAdapter.dataBind();
+
+
+            $("#NewsTypeList").jqxListBox(
+            {
+                rtl: true,
+                source: newsAdapter,
+                width: 500,
+                height: 210,
+                multiple: true,
+                checkboxes: true,
+                displayMember: 'NewsName',
+                valueMember: 'NewsId'
+            });
+
+            var view_source =
+                {
+                    datatype: "json",
+                    datafields: [
+                            { name: 'NewsId', type: 'number' },
+                            { name: 'AccountId', type: 'number' }
+                    ],
+                    id: 'AccountId',
+                    data: { 'accid': '@accid'},
+                    type: 'POST',
+                    url: '@Url.Action("GetAccountNews", "Common")'
+                };
+
+                var srcAccountType;
+
+                var viewAdapter = new $.jqx.dataAdapter(view_source, {
+                    async: false,
+                    loadComplete: function (records) {
+                        if (records) {
+
+                            var newsType = app_jqxcombos.getDataCheckedList(records, "NewsId");
+                            var accid = '@accid';
+                            $('#AccountId').val(accid);
+                            app_jqxcombos.selectCheckList("NewsTypeList", newsType);
+                            //$("#newsHeader").append("<h4>הגדרת קבוצת דיוור</h4>");
+
+                        }
+                    },
+                    loadError: function (jqXHR, status, error) {
+                    },
+                    beforeLoadComplete: function (records) {
+                    }
+                });
+                viewAdapter.dataBind();
+            //}
+
+
+            //news dialog
+
+                $('#newsSubmit').on('click', function (e) {
+                    app_jqxcombos.renderCheckList("NewsTypeList", "NewsType");
+                    $.ajax({
+                        url: '@Url.Action("UpdateAccountNews", "Common")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#newsForm').serialize(),
+                        success: function (data) {
+                            alert(data.Message);
+                            if (data.Status >= 0) {
+                                var accid = $('#AccountId').val();
+                                window.parent.triggerNewsComplete(accid);
+                                $('#newsForm')[0].reset();
+                                $('#AccountId').val(accid);
+                            }
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                });
+
+            $('#newsCancel').on('click', function (e) {
+                $('#newsForm')[0].reset();
+                $('#newsForm').jqxValidator('hide');
+            });
+        });
+
+    </script>
+}
+
+<div style="margin: 0px;">
+
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+        <div id="newsWindow">
+            <div id="newsHeader">
+            </div>
+            <div id="newsBody">
+                <form class="newsForm" id="newsForm" method="post" action="/Common/UpdateAccountNews">
+                    <input type="hidden" id="NewsType" name="NewsType" />
+                    <div style="direction: rtl; text-align: right">
+                        <div class="form-group">
+                            <label class="column">
+                                לקוח :</label>
+                            <input id="AccountId" name="AccountId" readonly="true" type="text" class="text-mid" />
+                        </div>
+                             <div class="form-group">
+                                <label class="column">
+                                    קבוצות דיוור:</label>
+                                <div id="NewsTypeList" style="padding: 0px" data-type="checklist">
+                                </div>
+                            </div>
+                        <div style="height: 5px"></div>
+                        <div>
+                            <input id="newsSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                            <input id="newsCancel" class="btn-default btn7" type="button" value="ביטול" />
+                            <!--<input class="btn-default btn2" type="button" value="הוספת אנשי קשר" />-->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end of content-wrapper-->

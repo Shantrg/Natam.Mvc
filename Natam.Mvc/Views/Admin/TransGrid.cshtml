@@ -1,0 +1,224 @@
+﻿@model Pro.Models.LeadsQuery
+@{
+    Layout = "~/Views/Shared/_ViewAdmin.cshtml";
+    ViewBag.Title = "Buildings";
+      
+}
+@section head { 
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+    <script type="text/javascript" src="~/jqwidgets/jqxdata.export.js"></script>
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    <style type="text/css">
+        input {
+            direction:rtl;text-align:right;
+        }
+    </style>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        var NScustomers = {};
+
+        $(document).ready(function () {
+            JSON.useDateParser();
+            var theme = 'Arctic';
+            // prepare the data
+            var source =
+            {
+                
+                datatype: "json",
+                datafields: [
+                    { name: 'TransId', type: 'number' },
+                    { name: 'TransType', type: 'number' },
+                    { name: 'TransTypeName', type: 'string' },
+                    { name: 'InvoiceNo', type: 'string' },
+                    { name: 'PropertyId', type: 'number' },
+                    { name: 'Property_Type', type: 'number' },
+                    { name: 'Property_Address', type: 'string' },
+                    { name: 'Property_City', type: 'string' },
+                    { name: 'Property_Floor', type: 'number' },
+                    { name: 'Property_Size', type: 'number' },
+                    { name: 'Creation', type: 'date' },
+                    //{ name: 'LastUpdate', type: 'date' },
+                    { name: 'ContractDate', type: 'date' },
+                    { name: 'BuildingName', type: 'string' },
+                    { name: 'ClientId', type: 'number' },
+                    { name: 'Client_Name', type: 'string' },
+                    { name: 'Seller_Id', type: 'number' },
+                    { name: 'Seller_Name', type: 'string' },
+                    { name: 'AgentId', type: 'number' }
+                ],
+                id: 'TransId',
+                type:'POST',
+                url: '@Url.Action("GetTransGrid", "Admin")',
+                data:{},
+                pagenum: 3,
+                pagesize: 20,
+                pager: function (pagenum, pagesize, oldpagenum) {
+                    // callback called when a page or page size is changed.
+                }
+            };
+
+
+            //var dataAdapter = new $.jqx.dataAdapter(source);
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                async: false,
+                loadComplete: function (data) { },
+                loadError: function (xhr, status, error) { alert(' status: ' + status + '\n error ' + error) }
+            });
+ 
+            /*
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+
+                NScustomers.currentIndex = index;
+
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+
+                tabsdiv = $($(parentElement).children()[0]);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    var title = tabsdiv.find('.title');
+                    title.text(datarecord.CustomerName);
+                    var tabcontacts = tabsdiv.find('.tabcontacts');
+                    //var tabnews = tabsdiv.find('.tabnews');
+
+                    var container = $('<div style="margin: 5px;text-align:right;"></div>')
+                    container.rtl = true;
+                    container.appendTo($(information));
+
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 40%;direction:rtl;"></div>');
+                    container.append(leftcolumn);
+                    container.append(rightcolumn);
+                   
+                    var divLeft = $("<div style='margin: 10px;'><b>שטח מבוקש:</b> " + datarecord.RequestSize + "</div>" +
+                        "<div style='margin: 10px;'><b>משך החוזה:</b> " + datarecord.ContractDuration + " שנים</div>" +
+                        "<div style='margin: 10px;'><b>תקציב למ''ר:</b> " + datarecord.BadgetForMr + " שח</div>");
+                    divLeft.rtl = true;
+                    var divRight = $("<div style='margin: 10px;'><b>מועד כניסה:</b> " + formatDefaultShortDate(datarecord.EntryDate) + "</div>" +
+                        "<div style='margin: 10px;'><b>פקס:</b> " + datarecord.Fax + "</div>" +
+                        "<div style='margin: 10px;'><b>קוד לקוח:</b> " + datarecord.LeadId + "</div>");
+
+                    divRight.rtl = true;
+                    $(leftcolumn).append(divLeft);
+                    $(rightcolumn).append(divRight);
+
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.Memo + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+                    var accid = datarecord.LeadId;//parseInt(datarecord.AccountId);
+
+                    //contacts
+                    initContactGrid(tabcontacts, index, accid);
+
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl: true });
+                }
+            };
+            */
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pagermode: 'simple',
+                pageable: true,
+                sortable: true,
+                showfilterrow: true,
+                filterable: true,
+                //rowdetails: true,
+                //rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-right: 30px;'><li class='title'></li><li>פרטים</li><li>אנשי קשר</li></ul><div class='information'></div><div class='notes'></div><div class='tabcontacts'></div></div>", rowdetailsheight: 200 },
+                //ready: function () {
+                //    $("#jqxgrid").jqxGrid('showrowdetails', 0);
+                //},
+                //initrowdetails: initrowdetails,
+                columns: [
+                  {
+                      text: 'מס. עסקה', dataField: 'TransId', filterable: false, width: 100, cellsalign: 'right', align: 'center', cellsrenderer:
+                      function (row, columnfield, value, defaulthtml, columnproperties) {
+                          var transtype = $('#jqxgrid').jqxGrid('getrowdata', row).TransType;
+                          return '<div style="text-align:center"><a href="javascript:trans_Edit(' + value + ',' + transtype + ')" title="הצג עסקה" >'+value+'</a></div>';
+                      }
+                  },
+                  { text: 'עסקה מצד', dataField: 'TransTypeName', width: 110, filtercondition: 'starts_with', cellsalign: 'right', align: 'center' },
+                  { text: 'שם לקוח', dataField: 'Client_Name', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
+                  { text: 'עיר הנכס', dataField: 'Property_City', width: 140, filtercondition: 'starts_with', cellsalign: 'right', align: 'center' },
+                  { text: 'כתובת הנכס', dataField: 'Property_Address', filtercondition: 'starts_with', cellsalign: 'right', align: 'center' },
+                  { text: 'שם המוכר', dataField: 'Seller_Name', filtercondition: 'CONTAINS', width: 150, cellsalign: 'right', align: 'center' },
+                  { text: 'מועד העסקה', type: 'date', dataField: 'Creation', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+            
+            //$("#linkCustomerDef").jqxLinkButton({ width: '120', height: '30' });
+            $('#btnclearfilter').jqxButton({ width: '120', height: '30' });
+            $('#btnclearfilter').click(function () {
+                $("#jqxgrid").jqxGrid('clearfilters');
+            });
+            
+        });
+
+   
+        function trans_Refresh() {
+            try {
+                $("#jqxgrid").jqxGrid('source').dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        };
+
+        function trans_Edit(id, transtype) {
+
+            app_rout.redirectToTrans(id, transtype);
+
+        }
+  
+
+    </script>
+}
+
+
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Crm</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap">
+            <div class="rtl">
+                <h3>רשימת עסקאות</h3>
+                </div>
+                <div style="display: inline; float: right">
+                    <input style="margin-top: 10px;" value="הסר סינון" id="btnclearfilter" type="button" />
+                </div>
+
+                <div id="jqxWidget">
+                    <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                    <div style="margin-top: 30px;">
+                        <div id="cellbegineditevent"></div>
+                        <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liLeads");
+</script>

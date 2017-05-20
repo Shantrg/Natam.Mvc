@@ -1,0 +1,150 @@
+﻿  .btn-bar a {
+        display: inline;
+        list-style: none;
+        padding: 5px 25px;
+        text-align: center;
+        background-color: #6b6dbb;
+        border: 1px solid #33842a;
+        color: #fff;
+        width: auto;
+        -moz-border-radius: 10px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px; /*give the button a drop shadow*/
+        -webkit-box-shadow: 0 0 4px rgba(0,0,0, .75);
+        -moz-box-shadow: 0 0 4px rgba(0,0,0, .75);
+        box-shadow: 0 0 4px rgba(0,0,0, .75); /*style the text*/
+    }
+
+    .btn-bar a:hover {
+        display: inline;
+        list-style: none;
+ 
+        background-color: #399630; 
+        -webkit-box-shadow: 0 0 1px rgba(0,0,0, .75);
+        -moz-box-shadow: 0 0 1px rgba(0,0,0, .75);
+        box-shadow: 0 0 1px rgba(0,0,0, .75);
+
+    }
+
+
+    /*ul.toolbar li a {
+        background: none;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    ul.toolbar li a:hover {
+        color: #333;
+        text-decoration: none;
+
+    }*/
+
+           .btn-dialog {
+            box-shadow: none;
+            position: relative;
+            text-decoration: none !important;
+            padding: 0 31px;
+            /*font: 14px/42px 'Arial';*/
+            margin: 0;
+            text-shadow: none;
+            color: #ffffff;
+            border: 0;
+            border-radius: 7px;
+            background: #697580;
+            display: inline-block;
+            -webkit-transition: all 0.25s ease;
+            transition: all 0.25s ease;
+        }
+
+        .btn-dialog:hover {
+            color: #ffffff;
+            background: #337AB7;
+            text-decoration: none !important;
+            -webkit-transition: all 0.25s ease;
+            transition: all 0.25s ease;
+        }
+
+
+        /*.ui-dialog .ui-dialog-titlebar {
+            display: none;
+        }
+
+        .ui-widget-content {
+            border: none;
+        }*/
+
+        /*dialog override*/
+
+/*.ui-dialog-osx {
+    -moz-border-radius: 0 0 8px 8px;
+    -webkit-border-radius: 0 0 8px 8px;
+    border-radius: 0 0 8px 8px;
+    border-width: 0 8px 8px 8px;
+}
+
+.ui-widget {
+    font-family: Verdana,Arial,sans-serif;
+    font-size: .8em;
+}*/
+.ui-dialog-osx {
+    border: 1px solid #4B92CC;
+}
+
+.ui-widget-content; {
+    direction: rtl;
+    background: #fff;
+    /*border: 1px solid #337AB7;*/
+    border: 0 none !important;
+    color: #000000;
+}
+
+.ui-dialog {
+    left: 0;
+    outline: 0 none;
+    padding: 0 !important;
+    position: absolute;
+    top: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none !important;
+    overflow: auto;
+    position: relative;
+    padding: 0 !important;
+}
+
+.ui-widget-header {
+    background: #4B92CC;
+    border: 0;
+    color: #fff;
+    font-weight: normal;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    padding: 0.1em .5em;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    position: relative;
+    font-size: 1em;
+}
+
+/*end dialog override*/
+        
+        /* Custom dialog/modal headers */
+
+        /*.dialog-header-error {
+            background-color: #d2322d;
+        }
+
+        .dialog-header-wait {
+            background-color: #428bca;
+        }
+
+        .dialog-header-notify {
+            background-color: #eeeeee;
+        }
+
+        .dialog-header-confirm {
+            background-color: #333333;
+        }*/

@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_ViewAdmin.cshtml";
+    Page.Title = "Cms";
+    int id = Nistec.Types.ToInt(Request.QueryString["pid"]);
+    string pagename = ViewBag.PageName;
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <script type="text/javascript" src="~/jqwidgets/jqxdatatable.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/jqxeditor.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/jqxcolorpicker.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/ex/mc-cmsWeb.js"></script>
+    <link rel="stylesheet" href="~/jqwidgets/ex/mc-cmsWeb.css" type="text/css" />
+
+}
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var pid = '@id'
+            editCmsSection(pid, '@Url.Action("GetCmsPage", "Cms")', '@Url.Action("CmsSectionUpdate", "Cms")');
+        });
+    </script>
+
+}
+
+<hgroup class="title">
+
+    <h3 class="rightPan">עריכת תוכן</h3>
+
+</hgroup>
+
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container-rtl">
+
+        <div>
+            <a href="CmsSite">Cms Site</a>
+        </div>
+        <h4>Page: @pagename</h4>
+        <div style="margin-top: 20px; position: relative; z-index: 1;" id="dataTable"></div>
+
+        <div id="window">
+            <div>
+            </div>
+            <div>
+                <div id="editorText">
+                    <label id="lblText">Text:</label><br />
+                    <input id="valText" type="text" value="" style="width: 80%" />
+                </div>
+                <div id="editorLink">
+                    <ul>
+                        <li>
+                            <label id="lblLinkTitle">Title:</label><br />
+                            <input id="valLinkTitle" type="text" value="" style="width: 80%" />
+                        </li>
+                        <li>
+                            <label id="lblLink">Link:</label><br />
+                            <input id="valLink" type="text" value="" style="width: 80%;direction:ltr" />
+                        </li>
+                    </ul>
+                </div>
+                <div id="editorAttr" style="display: none">
+                    <ul>
+                        <li>
+                            <label>Title:</label><br />
+                            <input id="titleAttr" type="text" value="" style="width: 80%" />
+                        </li>
+                        <li id="liAttr1">
+                            <label id="lblAttr1">Value:</label><br />
+                            <input id="valAttr1" type="text" value="value" style="width: 80%" />
+                        </li>
+                        <li id="liAttr2">
+                            <label id="lblAttr2">Value:</label><br />
+                            <input id="valAttr2" type="text" value="value" style="width: 80%" />
+                        </li>
+                        <li id="liAttr3">
+                            <label id="lblAttr3">Value:</label><br />
+                            <input id="valAttr3" type="text" value="value" style="width: 80%" />
+                        </li>
+                    </ul>
+                </div>
+                <div id="editorHtml">
+                    <textarea id="editor"></textarea>
+                </div>
+                <p></p>
+                <div style="margin: 10px">
+                    <input type="text" id="hdnSectionId" value="" disabled="disabled" />
+                    <input type="text" id="hdnSectionType" value="" disabled="disabled" />
+                    <input type="button" class="button" id="btnCancel" value="ביטול" />
+                    <input type="button" class="button" id="btnUpdtate" value="עדכון" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

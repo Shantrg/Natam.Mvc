@@ -1,0 +1,1158 @@
+﻿@{
+    Layout = "~/Views/_View.cshtml";
+    Page.Title = "Building";
+
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+   @*<script type="text/javascript" src="~/jqwidgets/jqxfileupload.js"></script>*@
+    <script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
+
+    
+
+    <script type="text/javascript" src="~/Scripts/jq/plagins/blockUI.js"></script>
+   <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
+   <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />
+
+    <style type="text/css">
+        .styledTable {
+            direction:rtl; text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;padding-left:20px;text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;text-align:right;
+        }
+        .styledRowKey {padding-left:20px;text-align:right;
+        }
+        .styledRowValue {text-align:right;
+        }
+    </style>
+}
+
+@section scripts {
+    <script type="text/javascript">
+
+       
+        $(document).ready(function () {
+            JSON.useDateParser();
+            var ownerSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AccountId' },
+                    { name: 'AccountName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetOwnerView", "Building")'
+            };
+            var ownerAdapter = new $.jqx.dataAdapter(ownerSource);
+            $("#BuildingOwnerId").jqxComboBox(
+            {
+                rtl: true,
+                source: ownerAdapter,
+                width: 240,
+                //height: 120,
+                //promptText: "בחירת ייעוד הנכס",
+                displayMember: 'AccountName',
+                valueMember: 'AccountId'
+            });
+            var managementSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AccountId' },
+                    { name: 'AccountName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetManagementView", "Building")'
+            };
+            var managementAdapter = new $.jqx.dataAdapter(managementSource);
+            $("#ManagementCompany").jqxComboBox(
+            {
+                rtl: true,
+                source: managementAdapter,
+                width: 240,
+                //height: 120,
+                //promptText: "בחירת ייעוד הנכס",
+                displayMember: 'AccountName',
+                valueMember: 'AccountId'
+            });
+
+            var airSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AirConditionId' },
+                    { name: 'AirConditionName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetAirConditionView", "Building")'
+            };
+            var airAdapter = new $.jqx.dataAdapter(airSource);
+            $("#AirConditionType").jqxComboBox(
+            {
+                rtl: true,
+                source: airAdapter,
+                width: 240,
+                displayMember: 'AirConditionName',
+                valueMember: 'AirConditionId'
+            });
+
+            var purposeSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'PurposeId' },
+                    { name: 'PurposeName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetPurposeView", "Building")'
+            };
+            var purposeAdapter = new $.jqx.dataAdapter(purposeSource);
+            $("#PurposeType").jqxListBox(
+            {
+                rtl: true,
+                source: purposeAdapter,
+                width: 240,
+                height: 200,
+                checkboxes: true,
+                displayMember: 'PurposeName',
+                valueMember: 'PurposeId'
+            });
+
+            var areaSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AreaId' },
+                    { name: 'AreaName' }
+                ],
+                data: { 'zone': 0 },
+                type: 'POST',
+                url: '@Url.Action("GetAreaViewAll", "Building")'
+            };
+            var areaAdapter = new $.jqx.dataAdapter(areaSource);
+
+            $("#AreaId").jqxComboBox(
+            {
+                rtl: true,
+                source: areaAdapter,
+                width: 240,
+                //height: 180,
+                //multiple:true,
+                //promptText: "בחירת אזור",
+                displayMember: 'AreaName',
+                valueMember: 'AreaId'
+            });
+
+            //$("#jqxFileUpload").jqxFileUpload({
+            //    browseTemplate: 'success',
+            //    uploadTemplate: 'primary',
+            //    cancelTemplate: 'danger',
+            //    width: 300,
+            //    uploadUrl: '../../Ws/UploadFiles.asmx/Upload',
+            //    fileInputName: 'fileToUpload'
+            //});
+
+            //$('#jqxFileUpload').on('uploadEnd', function (event) {
+            //    var args = event.args;
+            //    var fileName = args.file;
+            //    var serverResponse = args.response;
+
+            //    $("#spnResponse").html(serverResponse);
+            //});
+
+      
+          //JSON.useDateParser();
+          var theme = 'Arctic';
+          // prepare the data
+          var source =
+          {
+              datatype: "json",
+              datafields: [
+            { name: 'BuildingId', type: 'number' },
+            { name: 'BuildingName', type: 'string' },
+            { name: 'AreaId', type: 'number' },
+            { name: 'Street', type: 'string' },
+            { name: 'StreetNo', type: 'number' },
+            { name: 'City', type: 'string' },
+            { name: 'ZipCode', type: 'number' },
+            { name: 'PurposeType', type: 'string' },
+            { name: 'BuildingSizeTrade', type: 'number' },
+            { name: 'BuildingSizeOffice', type: 'number' },
+            { name: 'BuildingSizeTotal', type: 'number' },
+            { name: 'BuildingSizeNoParks', type: 'number' },
+            { name: 'ElevatorNo', type: 'number' },
+            { name: 'BuildingPopulateTime', type: 'date' },
+            { name: 'LastUpdate', type: 'date' },
+            { name: 'BuildingPriceForSale', type: 'float' },
+            { name: 'BuildingPriceForRent', type: 'float' },
+            { name: 'ManagementCompany', type: 'number' },
+            { name: 'BuildingOwnerId', type: 'number' },
+            { name: 'FloorNoUp', type: 'number' },
+            { name: 'FloorNoDown', type: 'number' },
+            { name: 'SecurityCompany', type: 'number' },
+            { name: 'ParkingNo', type: 'number' },
+            //{ name: 'ParkingPrice', type: 'float' },
+            //{ name: 'ParkingPayInclude', type: 'bool' },
+            //{ name: 'ParkingAttached', type: 'bool' },
+            { name: 'AirConditionType', type: 'number' },
+            { name: 'Investment', type: 'bool' },
+            { name: 'BuildingAdmin', type: 'string' },
+            { name: 'BuildingAdminPhone', type: 'string' },
+            { name: 'BuildingAdminMail', type: 'string' },
+            { name: 'BuildingAdmin2', type: 'string' },
+            { name: 'BuildingAdmin2Phone', type: 'string' },
+            { name: 'BuildingAdmin2Mail', type: 'string' },
+            { name: 'BuildingGrossNet', type: 'string' },
+            { name: 'OverloadGround', type: 'number' },
+            { name: 'OverloadUp', type: 'number' },
+            { name: 'ManagementFees', type: 'float' },
+            { name: 'BuildingBasementSize', type: 'number' },
+            { name: 'PicPath', type: 'string' }
+          //{ name: 'BuildingInternetEnable', type: 'bool' }
+              ],
+              id: 'BuildingId',
+              type: 'POST',
+              url: '@Url.Action("GetBuilding", "Building")'
+
+          };
+          source.data = { 'id': '@id' };
+
+          //var selectComboBoxValue = function (tag, value) {
+          //    //alert(tag);
+          //    //alert(value);
+
+          //    var item = $("#" + tag).jqxComboBox('getItemByValue', value);
+          //    //alert(item);
+          //    if (item)
+          //        $("#" + tag).jqxComboBox('selectIndex', item.index);
+                  
+          //        //$("#" + tag).val(item.label);
+          //};
+
+          //var selectCheckListIndex = function (tag, value) {
+          //    var item = $("#" + tag).jqxListBox('getItemByValue', value);
+          //    if (item) {
+          //        //alert(item.label);
+          //        $("#" + tag).jqxListBox('checkIndex', item.index);
+          //    }
+          //};
+
+          //var selectCheckList = function (tag, value) {
+          //    if (value) {
+          //        var items = value.split(",");
+          //        for (index = 0; index < items.length; ++index) {
+          //            selectCheckListIndex(tag, items[index]);
+          //        }
+          //    }
+          //};
+          var loadPic = function (tag, value) {
+              //alert(tag);
+              //alert(value);
+              if (value) {
+                  var img = $('<img height="60" src="' + value + '"/>');
+                  $("#" + tag).html(img);
+              }
+          };
+
+          var srcManagementCompany;
+          var srcPurposeType;
+          var srcAirConditionType;
+          var srcBuildingOwnerId;
+          var srcAreaId;
+          var srcBuildingId;
+
+          var dataAdapter = new $.jqx.dataAdapter(source, {
+              loadComplete: function (record) {
+                  // get data records.
+                  //var length = records.length;
+                  //var record = records[i];
+
+                  $("#BuildingId").val(record.BuildingId);
+                  $("#BuildingName").val(record.BuildingName);
+                  $("#Street").val(record.Street);
+                  $("#StreetNo").val(record.StreetNo);
+                  $("#City").val(record.City);
+                  $("#ZipCode").val(record.ZipCode);
+                  $("#BuildingSizeTrade").val(record.BuildingSizeTrade);
+                  $("#BuildingSizeOffice").val(record.BuildingSizeOffice);
+                  $("#BuildingSizeTotal").val(record.BuildingSizeTotal);
+                  $("#BuildingSizeNoParks").val(record.BuildingSizeNoParks);
+                  $("#ElevatorNo").val(record.ElevatorNo);
+                  //$("#BuildingPopulateTime").val(record.BuildingPopulateTime);
+
+                  //$("#LastUpdate").val(formatJsonDate(record.LastUpdate, "dd/mm/yyyy HH:MM"));
+                  //$("#LastUpdate").val(record.LastUpdate.toLocaleDateString());
+                  $("#BuildingPriceForSale").val(record.BuildingPriceForSale);
+                  $("#BuildingPriceForRent").val(record.BuildingPriceForRent);
+                  $("#FloorNoUp").val(record.FloorNoUp);
+                  $("#FloorNoDown").val(record.FloorNoDown);
+                  $("#SecurityCompany").val(record.SecurityCompany);
+                  $("#ParkingNo").val(record.ParkingNo);
+                  //$("#ParkingPrice").val(record.ParkingPrice);
+                  //$("#ParkingPayInclude").val(record.ParkingPayInclude);
+                  //$("#ParkingAttached").val(record.ParkingAttached);
+                  $("#Investment").val(record.Investment);
+                  //$("#BuildingAdmin").val(record.BuildingAdmin);
+                  //$("#BuildingAdminPhone").val(record.BuildingAdminPhone);
+                  //$("#BuildingAdminMail").val(record.BuildingAdminMail);
+                  //$("#BuildingAdmin2").val(record.BuildingAdmin2);
+                  //$("#BuildingAdmin2Phone").val(record.BuildingAdmin2Phone);
+                  //$("#BuildingAdmin2Mail").val(record.BuildingAdmin2Mail);
+                  $("#BuildingGrossNet").val(record.BuildingGrossNet);
+                  $("#OverloadGround").val(record.OverloadGround);
+                  $("#OverloadUp").val(record.OverloadUp);
+                  $("#ManagementFees").val(record.ManagementFees);
+                  $("#BuildingBasementSize").val(record.BuildingBasementSize);
+
+                  $("#BuildingPopulateTime").jqxDateTimeInput({ formatString: 'dd/MM/yyyy' });
+
+                  srcManagementCompany = record.ManagementCompany;
+                  srcPurposeType = record.PurposeType;
+                  srcAirConditionType = record.AirConditionType;
+                  srcBuildingOwnerId = record.BuildingOwnerId;
+                  srcAreaId = record.AreaId;
+                  srcBuildingId = record.BuildingId;
+
+                  selectComboBoxValue("ManagementCompany", record.ManagementCompany);
+                  selectCheckList("PurposeType", record.PurposeType);
+                  selectComboBoxValue("AirConditionType", record.AirConditionType);
+                  selectComboBoxValue("BuildingOwnerId", record.BuildingOwnerId);
+                  selectComboBoxValue("AreaId", record.AreaId);
+
+                  loadPic("PicPath", record.PicPath);
+
+                  //$("#addOwner").css('display', srcBuildingOwnerId > 0 ? 'none' : 'inline');
+                  //$("#addManagement").css('display', srcManagementCompany > 0 ? 'none' : 'inline');
+                  $("#divImages").css('display', srcBuildingId > 0 ? 'inline' : 'none');
+
+                 
+
+                  //$("#PicPath").val(record.PicPath);
+                  //$("#BuildingInternetEnable").val(record.BuildingInternetEnable);
+
+              },
+              loadError: function (jqXHR, status, error) {
+              },
+              beforeLoadComplete: function (records) {
+
+              }
+          });
+          // perform data binding.
+          dataAdapter.dataBind();
+
+        $('#btnImages').click(function (e) {
+            e.preventDefault();
+            //popupIframe("_Media?bid=" + srcBuildingId + "&pid=0&pt=b", "900", "520");
+            mediaEditor(srcBuildingId, 0, "b");
+        });
+          
+
+          $('#accWindow').jqxWindow({
+              rtl: true,
+              resizable: true,
+              isModal: true, 
+              autoOpen: false,
+              width: 400,
+              height: 500,
+              cancelButton: $('#accCancel'),
+          });
+
+          //var getSelectedOwner = function () {
+          //    var item = $("#BuildingOwnerId").jqxComboBox('getSelectedItem');
+          //    if (!item)
+          //        return 0;
+          //    return item.value;
+          //};
+
+          $('#showOwner').click(function (e) {
+              e.preventDefault();
+              //var item = $("#BuildingOwnerId").jqxComboBox('getSelectedItem');
+              //if (!item)
+              //    return;
+              var val = getSelectedComboValue("BuildingOwnerId", 0);
+              if (val != 0)
+                  accountDisplay(val, "בעלים");
+          });
+
+          $('#refreshOwner').click(function () {
+              ownerAdapter.dataBind();
+              selectComboBoxValue("BuildingOwnerId", srcBuildingOwnerId);
+          });
+          //$('#addOwner').click(function (e) {
+          //    e.preventDefault();
+          //    $('#accHeader').html("הגדרת בעלים");
+          //    $('#AccountType').val("2");
+          //    $('#accWindow').jqxWindow('open');
+          //});
+          $('#editOwner').click(function (e) {
+              e.preventDefault();
+              var val = getSelectedOwner();
+              //popupIframe("_AccountEdit?id=" + val + "&acctype=2", "400", "550");
+              accountEdit(val, 2);
+          });
+
+          //var getSelectedManagement = function () {
+          //    var item = $("#ManagementCompany").jqxComboBox('getSelectedItem');
+          //    if (!item)
+          //        return 0;
+          //    return item.value;
+          //};
+
+          $('#showManagement').click(function (e) {
+              e.preventDefault();
+              //var item = $("#ManagementCompany").jqxComboBox('getSelectedItem');
+              //if (!item)
+              //    return;
+              var val = getSelectedComboValue("ManagementCompany", 0);
+              if (val != 0)
+                  accountDisplay(val, "חברת ניהול");
+          });
+          $('#refreshManagement').click(function () {
+              managementAdapter.dataBind();
+              selectComboBoxValue("ManagementCompany", srcManagementCompany);
+          });
+          //$('#addManagement').click(function (e) {
+          //    e.preventDefault();
+          //    $('#accHeader').html("הגדרת חברת ניהול");
+          //    $('#AccountType').val("6");
+          //    $('#accWindow').jqxWindow('open');
+          //});
+          $('#editManagement').click(function (e) {
+              e.preventDefault();
+              var val = getSelectedComboValue("ManagementCompany", 0);
+              //popupIframe("_AccountEdit?id=" + val + "&acctype=6", "400", "420");
+              accountEdit(val, 26);
+          });
+            /*
+          var accountDisplay = function (val,title) {
+              $.ajax({
+                  type: "POST",
+                  url: "../../Ws/CrmWs.asmx/GetAccountDetails",
+                  data: "{ 'id': '" + val + "' }",
+                  contentType: "application/json; charset=utf-8",
+                  dataType: "json",
+                  success: function (data) {
+                      dialogMessage(title, data.d);
+                  },
+                  error: function (e) {
+                      //$("#divResult").html("WebSerivce unreachable");
+                  }
+              });
+          }
+
+          function dialogMessage(caption, msg) {
+              //var newDiv = $(document.createElement('div'));
+              //$(newDiv).html(msg);
+              //$(newDiv).dialog();
+
+              $('<div style="direction:rtl"></div>').dialog({
+                  //modal: true,
+                  title: caption,
+                  open: function () {
+                      $(this).html(msg);
+                  },
+                  buttons: {
+                      Ok: function () {
+                          $(this).dialog("close");
+                      }
+                  }
+              });
+          }
+          */
+ 
+        //initialize validator.
+        $('#form').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+                   { input: '#BuildingName', message: 'חובה לציין שם בניין!', action: 'keyup, blur', rule: 'required' },
+                   {
+                       input: '#AreaId', message: 'חובה לציין אזור!', action: 'select', rule: function (input) {
+                           var index = $("#AreaId").jqxComboBox('getSelectedIndex');
+                           if (index >= 0) { return true; } return false;
+                       }
+                   },
+                   {
+                       input: '#PurposeType', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
+                           var items = $("#PurposeType").jqxListBox('getCheckedItems');
+                           //var index = $("#PurposeType").jqxListBox('getSelectedIndex');
+                           if (items && items.length > 0)
+                               return true;
+                           return false;
+                           //if (index >= 0) { return true; } return false;
+                       }
+                   },
+                   {
+                       input: '#BuildingOwnerId', message: 'חובה לציין בעלים עיקריים!', action: 'select', rule: function (input) {
+                           var index = $("#BuildingOwnerId").jqxComboBox('getSelectedIndex');
+                           if (index >= 0) { return true; } return false;
+                       }
+                   },
+                  { input: '#Street', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
+                  {
+                      input: '#StreetNo', message: 'חובה לציין מספר בית!', action: 'keyup, blur', rule: function () {
+                          var value = $("#StreetNo").val();
+                          return value > 0;
+                      }
+                  },
+                  { input: '#City', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' }
+                  //{ input: '#BuildingAdminMail', message: 'אימייל מנהל בניין לא תקין!', action: 'keyup', rule: 'email' },
+                  //{
+                  //    input: '#BuildingAdminPhone', message: 'טלפון נייד מנהל בניין אינו תקין!', action: 'valuechanged, blur', rule:
+                  //              function (input, commit) {
+                  //                  var val = input.val();
+                  //                  var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                  //                  return val ? re.test(val) : true;
+                  //              }
+                  //},
+                  //{ input: '#BuildingAdmin2Mail', message: 'אימייל מנהל בניין 2 לא תקין!', action: 'keyup', rule: 'email' },
+                  //{
+                  //    input: '#BuildingAdmin2Phone', message: 'טלפון נייד מנהל בניין 2 אינו תקין!', action: 'valuechanged, blur', rule:
+                  //              function (input, commit) {
+                  //                      var val = input.val();
+                  //                      var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                  //                      return val ? re.test(val) : true;
+                  //              }
+                  //}
+            ]
+        });
+        $("form").submit(function (e) {
+
+            var validationResult = function (isValid) {
+                if (isValid) {
+                    // Submit the Form.
+                    //$("#form").submit();
+                    $.blockUI({ timeout: 4000 });
+                    $("#form-iframe").load(function () {
+                        $.unblockUI();
+                        $("#form-next").html('<a href="Home/Main">המשך</a>')
+                    });
+
+                }
+                else {
+                    e.preventDefault(); // t
+                }
+            }
+            // Validate the Form.
+            $('#form').jqxValidator('validate', validationResult);
+
+        });
+        // validate form.
+        //$("#submit").click(function () {
+        //    var validationResult = function (isValid) {
+        //        if (isValid) {
+        //            alert('submit');
+        //            // Submit the Form.
+        //            //$("#form").submit();
+        //            $('form').triggerHandler('submit')
+        //        }
+        //    }
+        //    // Validate the Form.
+        //    $('#form').jqxValidator('validate', validationResult);
+        //});
+        $("#form").on('validationSuccess', function () {
+            //alert('validationSuccess');
+            // Display the Server's Response which came as result of the Form Submit.
+            $("#form-iframe").fadeIn('fast');
+        });
+
+        $('#reset').on('click', function () {
+            //alert("reset");
+            $("#form-iframe").html('').fadeOut('fast');
+            $("#form-next").html('')
+            location.reload();
+        });
+@*
+        //account dialog
+        $('#accForm').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+                  { input: '#AccountName', message: 'חובה לציין שם!', action: 'keyup, blur', rule: 'required' },
+                  //{ input: '#ContactName', message: 'חובה לציין איש קשר!', action: 'keyup, blur', rule: 'required' },
+                  { input: '#accStreet', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
+                  { input: '#accCity', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' },
+                  { input: '#AccountEmail', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
+                  {
+                      input: '#AccountPhone1', message: 'טלפון 1 אינו תקין!', action: 'valuechanged, blur', rule:
+                                function (input, commit) {
+                                    var val = input.val();
+                                    var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                                    return val ? re.test(val) : true;
+                                }
+                  },
+                  {
+                      input: '#Fax', message: 'פקס אינו תקין!', action: 'valuechanged, blur', rule:
+                                function (input, commit) {
+                                    var val = input.val();
+                                    var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                                    return val ? re.test(val) : true;
+                                }
+                  }
+            ]
+        });
+        
+        $('#accSubmit').on('click', function (e) {
+            var validationResult = function (isValid) {
+                if (isValid) {
+                    $.ajax({
+                        url: '@Url.Action("UpdateAccount", "Building")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#accForm').serialize(),
+                        success: function(data) {
+                            alert(data.Message);
+                            if (data.Status >= 0) {
+                                $('#accWindow').jqxWindow('close');
+                                var accType = $('#AccountType').val();
+                                if(accType=="2")
+                                    ownerAdapter.dataBind();
+                                else if (accType == "6")
+                                    managementAdapter.dataBind();
+                            }
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                }
+                else {
+                    e.preventDefault(); // t
+                }
+            }
+            $('#accForm').jqxValidator('validate', validationResult);
+            
+        });
+*@ 
+    });
+
+
+    //$('#submit').on('click', function () {
+    //    alert('onclick');
+    //    $('#form').jqxValidator('validate', validationResult);
+    //});
+
+    //$("#form").on('submit', function () {
+
+    //    $.blockUI({ timeout: 4000 });
+
+    //    $("#form-iframe").load(function () {
+    //        $.unblockUI();
+    //    });
+
+    //    //var blockUi= function(){
+    //    //    $.blockUI({
+    //    //        css: {
+    //    //            border: 'none',
+    //    //            padding: '15px',
+    //    //            backgroundColor: '#000',
+    //    //            '-webkit-border-radius': '10px',
+    //    //            '-moz-border-radius': '10px',
+    //    //            opacity: .5,
+    //    //            color: '#fff'
+    //    //        }
+    //    //    });
+    //    //    //setTimeout($.unblockUI, 2000);
+    //    //}
+
+    //var validationResult = function (isValid) {
+    //    alert(isValid);
+    //        if (isValid) {
+    //            //alert("isValid");
+    //            // Submit the Form.
+    //            //$("#form").submit();
+    //            return true;
+    //        }
+    //        return false;
+    //    }
+    ////    // Validate the Form.
+    ////    $('#form').jqxValidator('validate', validationResult);
+    ////});
+
+    //$("#form").on('validationSuccess', function () {
+    //    alert("validationSuccess");
+    //    // Display the Server's Response which came as result of the Form Submit.
+    //    //$("#form-iframe").fadeIn('fast');
+    //    //$("#form").submit();
+    //});
+
+
+
+    //validate form.
+    //$("#submit").click(function () {
+    //    //alert("click");
+    //    $("#form").submit();
+
+    //    var validationResult = function (isValid) {
+    //        if (isValid) {
+    //            alert("isValid");
+    //            // Submit the Form.
+    //            $("#form").submit();
+    //        }
+    //    }
+    //    // Validate the Form.
+    //    $('#form').jqxValidator('validate', validationResult);
+    //});
+
+
+
+    //$('#jqxValidator').on('validationError', function (event) { 
+    //    // Some code here. 
+    //    alert('validationError');
+    //});
+
+    //$("#form").on('validationError', function () {
+    //    alert("validationError");
+    //    // Display the Server's Response which came as result of the Form Submit.
+    //    //$("#form-iframe").fadeIn('fast');
+    //});
+
+    //$('#submitform').on('click', function () {
+    //    alert("click");
+    //    //$('#form').jqxValidator('validate');
+    //});
+
+    
+</script>
+
+}
+
+<!--breadcrumb-->
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+@Html.ActionLink("UnitQuery", "UnitQuery", "Building")>
+@ViewContext.RouteData.Values["action"].ToString()
+
+<hgroup class="title">
+    <h3 class="rightPan">הגדרת בניין.</h3>
+</hgroup>
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+        <div>
+            <ul class="nav nav-tabs" id="tab-building">
+                <li><a id="linkA" data-toggle="tab" href="#sectionA">כללי</a></li>
+                <li><a id="linkB" data-toggle="tab" href="#sectionB">נתונים כללים</a></li>
+                <li><a id="linkC" data-toggle="tab" href="#sectionC">חניון</a></li>
+                <li><a id="linkD" data-toggle="tab" href="#sectionD">מנהל</a></li>
+                <li><a id="linkE" data-toggle="tab" href="#sectionE">מחירים</a></li>
+                <li><a id="linkF" data-toggle="tab" href="#sectionF">הערות</a></li>
+            </ul>
+
+        </div>
+        <div style="height: 50px;">
+        </div>
+        <div>
+            @*@using (Html.BeginForm("UpdateBuilding", "Building", null, FormMethod.Post, new { id = "form", Class = "form" }))
+            {
+                *@<!--Html.AntiForgeryToken(), target = "form-iframe"
+                                Html.ValidationSummary(true)
+                                    -->
+
+                <form class="form" id="form" method="post" action="/Building/UpdateBuilding" target = "form-iframe">
+
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <h4>כללי</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד בניין:</label>
+                                <input id="BuildingId" type="number" name="BuildingId" class="number" readonly="true" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שם בניין:</label>
+                                <input id="BuildingName" type="text" name="BuildingName" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    השקעה:</label>
+                                <input id="Investment" name="Investment" type="checkbox" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג הנכס/שימוש:</label>
+                                <div id="PurposeType" name="PurposeType" style="padding: 10px">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שם האזור:</label>
+                                <div id="AreaId" name="AreaId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    רחוב:</label>
+                                <input id="Street" name="Street" type="text" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מס' בית:</label>
+                                <input id="StreetNo" name="StreetNo" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עיר:</label>
+                                <input id="City" name="City" type="text" class="text" placeholder="עיר" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מיקוד:</label>
+                                <input id="ZipCode" name="ZipCode" type="text" class="number" placeholder="00000" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    בעלים עיקריים:</label>
+                                <a id="showOwner" href="#">הצג</a>|
+                                <a id="refreshOwner" href="#">רענן</a>|
+                                <a id="editOwner" href="#">עריכה</a>
+                                <div id="BuildingOwnerId" name="BuildingOwnerId">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionB" class="tab-pane fade in">
+                        <h4>נתונים כללים</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שטח למסחר:</label>
+                                <input id="BuildingSizeTrade" name="BuildingSizeTrade" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שטח למשרדים:</label>
+                                <input id="BuildingSizeOffice" name="BuildingSizeOffice" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סה"כ שטח:</label>
+                                <input id="BuildingSizeNoParks" name="BuildingSizeNoParks" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סה"כ שטח ללא חניות:</label>
+                                <input id="BuildingSizeTotal" name="BuildingSizeTotal" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מס' קומות מעל הקרקע:</label>
+                                <input id="FloorNoUp" name="FloorNoUp" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מס' קומות מתחת לקרקע:</label>
+                                <input id="FloorNoDown" name="FloorNoDown" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עומס מותר ק"ק:</label>
+                                <input id="OverloadGround" name="OverloadGround" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עומס מותר קומות:</label>
+                                <input id="OverloadUp" name="OverloadUp" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג מיזוג:</label>
+                                <div id="AirConditionType" name="AirConditionType"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מספר מעליות:</label>
+                                <input id="ElevatorNo" name="ElevatorNo" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    גודל מרתפים:</label>
+                                <input id="BuildingBasementSize" name="BuildingBasementSize" type="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שמירה:</label>
+                                <input id="SecurityCompany" name="SecurityCompany" type="checkbox" value="כן" />
+                            </div>
+
+                            @*<div class="form-group">
+                                <label class="column">
+                                    חניון:</label>
+                                <input type="checkbox" value="כן" />
+                            </div>*@
+                        </div>
+                    </div>
+                    <div id="sectionC" class="tab-pane fade in">
+                        <h4>חניון</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מקומות חניה:</label>
+                                <input id="ParkingNo" name="ParkingNo" type="number" class="number" />
+                            </div>
+                            <!--
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר למקום חניה:</label>
+                                <input id="ParkingPrice" name="ParkingPrice" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    חניות צמודות:</label>
+                                <input id="ParkingAttached" name="ParkingAttached" type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    תשלום כולל חניה ?:</label>
+                                <input id="ParkingPayInclude" name="ParkingPayInclude" type="checkbox" value="כן" />
+                            </div>
+                                -->
+                        </div>
+                    </div>
+                    <div id="sectionD" class="tab-pane fade in">
+                        <h4>מנהל</h4>
+                        <div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    שם חברת ניהול:</label>
+                                <a id="showManagement" href="#">הצג</a>|
+                                <a id="refreshManagement" href="#">רענן</a>|
+                                <a id="editManagement" href="#">עריכה</a>
+                                <div id="ManagementCompany" name="ManagementCompany">
+                                </div>
+                            </div>
+                            <!--
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין:</label>
+                                <input id="BuildingAdmin" name="BuildingAdmin" type="text" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין-טלפון:</label>
+                                <input id="BuildingAdminPhone" name="BuildingAdminPhone" type="text" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין-דואל:</label>
+                                <input id="BuildingAdminMail" name="BuildingAdminMail" type="text" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין 2:</label>
+                                <input id="BuildingAdmin2" name="BuildingAdmin2" type="text" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין 2-טלפון:</label>
+                                <input id="BuildingAdmin2Phone" name="BuildingAdmin2Phone" type="text" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין 2-דואל:</label>
+                                <input id="BuildingAdmin2Mail" name="BuildingAdmin2Mail" type="text" class="text" />
+                            </div>
+                            -->
+                        </div>
+                    </div>
+                    <div id="sectionE" class="tab-pane fade in">
+                        <h4>מחירים</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר מכירה למ"ר:</label>
+                                <input id="BuildingPriceForSale" name="BuildingPriceForSale" type="number" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר שכירות למ"ר:</label>
+                                <input id="BuildingPriceForRent" name="BuildingPriceForRent" type="number" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    דמי אחזקה למ"ר:</label>
+                                <input id="ManagementFees" name="ManagementFees" type="number" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    יחס נטו ברוטו:</label>
+                                <input id="BuildingGrossNet" name="BuildingGrossNet" type="number" step="any" class="number" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionF" class="tab-pane fade in">
+                        <h4>מידע כללי</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מועד אכלוס:</label>
+                                <div id="BuildingPopulateTime" name="BuildingPopulateTime"></div>
+                            </div>
+                            <div id="divImages" class="form-group">
+                                <label class="column">
+                                    תמונות:</label>
+                                <input id="btnImages" type="button" value="הצג תמונות" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                    </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    מועד עדכון:</label>
+                                <input id="LastUpdate" readonly="true" type="text" class="text" />
+                            </div>
+                            <!--
+                            <div class="form-group">
+                                <label class="column">
+                                    הערות:</label>
+                                <textarea rows="3" cols="60"></textarea>
+                            </div>
+                            -->
+                            @*<div class="form-group">
+                                <label class="column">
+                                    תמונה:</label>
+                                <div id="jqxFileUpload" style="display: none"></div>
+                                <br />
+                                <br />
+                                <span id="spnResponse"></span>
+                            </div>
+                            <div class="form-group">
+                                <div id="PicPath"></div>
+                            </div>*@
+                        </div>
+                    </div>
+                    <div id="sectionG" class="tab-pane fade in">
+                        <h4>אינטרנט</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    אינטרנט?</label>
+                                <input id="BuildingInternetEnable" name="BuildingInternetEnable" type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    זיהוי בעלים?</label>
+                                <input type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    חשיפת תמונה ומידע?</label>
+                                <input type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    חשיפת כתובת?</label>
+                                <input type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    רזרבי 1?</label>
+                                <input type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    רזרבי 2?</label>
+                                <input type="checkbox" value="כן" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div>
+                        <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                        <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                    </div>
+                </div>
+                </form>
+            @*}*@
+            <div style="text-align: center">
+                <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
+                <div id="form-next" style="font-size:18px"></div>
+            </div>
+@*
+            <!--window-wrapper-->
+            <div id="accWindow">
+                <div id="accHeader">
+                 </div>
+                 <div id="accBody">
+                     <form class="accForm" id="accForm" method="post" action="/Building/UpdateAccount" target = "acc-iframe">
+                     <div style="direction:rtl;text-align:right">
+                         <input type="hidden" id="AccountType" name="AccountType" value="2" />
+                     <div class="form-group">
+                        <label class="column">
+                            שם הלקוח:</label>
+                        <input id="AccountName" name="AccountName" type="text" class="text-mid" />
+                    </div>
+                   <div class="form-group">
+                        <label class="column">
+                            שם חברה:</label>
+                        <input id="CompanyName" name="CompanyName" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            כתובת:</label>
+                        <input id="accStreet" name="Street"  type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            עיר:</label>
+                        <input id="accCity" name="City" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מיקוד:</label>
+                        <input id="accZipCode" name="ZipCode" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מספר טלפון:</label>
+                        <input id="AccountPhone1" name="AccountPhone1" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מספר פקס:</label>
+                        <input id="Fax" name="Fax" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            דאר אלקטרוני:</label>
+                        <input id="AccountEmail" name="AccountEmail" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            אינטרנט:</label>
+                        <input id="WebSite" name="WebSite" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            הערות:</label>
+                        <input id="AccountDetails" name="AccountDetails"  type="text" class="text-mid" />
+                    </div>
+                    <div style="height: 5px"></div>
+                    <div>
+                        <input id="accSubmit" class="btn-default btn2" type="button" value="עדכון" />
+                        <input id="accCancel" class="btn-default btn2" type="button" value="ביטול" />
+                        <!--<input class="btn-default btn2" type="button" value="הוספת אנשי קשר" />-->
+                    </div>
+                 </div>
+                    </form>
+                </div>
+            </div>
+*@
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->
+

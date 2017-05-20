@@ -1,0 +1,165 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+    
+   
+}
+
+@section head {
+
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+        table {
+            direction: rtl;
+        }
+
+        td {
+            padding-top: 0px;
+            padding-bottom: 5px;
+        }
+        input {
+        direction:rtl; text-align:right;
+
+        }
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+    </style>
+    <script>
+        $(function () {
+            $('#tab-query li:eq(0) a').tab('show');
+        });
+    </script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        var me = this;
+
+        var dealAdapter = app_jqxcombos.createCheckListAdapter("NewsId", "NewsName", "NewsTypeList", '@Url.Action("GetNewsView", "Common")', 400, 200);
+        $('#NewsTypeList').on('checkChange', function (event) {
+            app_jqxcombos.listCheckBoxToInput("NewsTypeList", "selectedNews");
+        });
+
+        $(".reset").click(function () {
+            location.reload();
+        });
+        $("#chkExport1").change(function () {
+            if (this.checked) {
+                $("#formGeneral").attr("action", "CustomersExport");
+                $("#ReportType1").val("1");
+            }
+            else {
+                $("#formGeneral").attr("action", "CustomersGrid");
+                $("#ReportType1").val("0");
+            }
+
+        });
+        $("#chkExport2").change(function () {
+            if (this.checked) {
+                $("#formNews").attr("action", "CustomersExport");
+                $("#ReportType2").val("1");
+            }
+            else {
+                $("#formNews").attr("action", "CustomersGrid");
+                $("#ReportType2").val("0");
+            }
+
+        });
+    });
+
+    </script>
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="global-view">
+
+    <div class="container">
+        
+        <div class="box-title">
+            <h3>איתור לקוחות</h3>
+        </div>
+        <ul id="tab-query" class="nav nav-tabs">
+            <li class="active">
+                <a href="#tab-general" data-toggle="tab">חיפוש כללי
+                </a>
+            </li>
+            <li><a href="#tab-news" data-toggle="tab">חיפוש לפי קבוצת דיוור</a></li>
+        </ul>
+        <div id="tab-content" class="tab-content" dir="rtl">
+             <div class="tab-pane fade in active" id="tab-general">
+                <div>
+                    <p>חיפוש כללי</p>
+                    <form id="formGeneral" action="CustomersGrid" method="post">
+                        <div class="rtl">
+                            <div class="form-group">
+                                <label class="column">
+                                    שם לקוח:
+                                </label><br />
+                                <input type="text" name="CustomerName" />
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    שם איש קשר:
+                                </label><br />
+                                <div style="display: inline">
+                                    <input type="text" name="ContactName" />
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div>
+                            <input type="hidden" name="AccType" value="1" />
+                            <input type="hidden" id="ReportType1" name="ReportType" value="0" />
+                            <input type="hidden" name="query_type" value="tab-general" />
+                            <input type="submit" value="הצג" class="btn-default btn2" />
+                            <input type="reset" value="נקה" class="btn-default btn2" />
+                            <input type="checkbox" id="chkExport1" /> <span>ייצוא נתונים ?</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tab-pane fade in" id="tab-news">
+                <div>
+                    <p>חיפוש לפי קבוצת דיוור</p>
+                    <form id="formNews" action="CustomersGrid" method="post">
+                        <div class="rtl">
+                            <div class="form-group">
+                                <div class="rtl">
+                                    <div id="NewsTypeList" name="NewsTypeList"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div>
+                            <input type="hidden" name="AccType" value="1" />
+                            <input type="hidden" id="ReportType2" name="ReportType" value="0" />
+                            <input type="hidden" id="selectedNews" name="selectedNews" value="" />
+                            <input type="hidden" name="query_type" value="tab-news" />
+                            <input type="submit" value="הצג" class="btn-default btn2" />
+                            <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                            <input type="checkbox" id="chkExport2" /> <span>ייצוא נתונים ?</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+         </div>
+    </div>
+</div>
+<script type="text/javascript">
+   app_menu.activeLayoutMenu("liCustomers");
+</script>
+
+
+

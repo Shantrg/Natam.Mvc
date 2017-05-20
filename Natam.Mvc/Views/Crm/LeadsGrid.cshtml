@@ -1,0 +1,485 @@
+﻿@model Pro.Models.LeadsQuery
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+      
+}
+@section head { 
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+    <script type="text/javascript" src="~/jqwidgets/jqxdata.export.js"></script>
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    <style type="text/css">
+        input {
+            direction:rtl;text-align:right;
+        }
+    </style>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+
+        var NScustomers = {};
+        var isMobile = app.IsMobile();
+
+        $(document).ready(function () {
+            JSON.useDateParser();
+            var theme = 'Arctic';
+            // prepare the data
+            var source =
+            {
+                datatype: "json",
+                datafields: [
+                    { name: 'LeadId', type: 'number' },
+                    { name: 'CustomerName', type: 'string' },
+                    { name: 'Address', type: 'string' },
+                    { name: 'City', type: 'string' },
+                    { name: 'Phone', type: 'string' },
+                    { name: 'Creation', type: 'date' },
+                    { name: 'LastUpdate', type: 'date' },
+                    { name: 'Fax', type: 'string' },
+                    { name: 'Commission', type: 'string' },
+                    { name: 'PurposeType', type: 'string' },
+                    { name: 'DealType', type: 'string' },
+                    { name: 'RequestSize', type: 'string' },
+                    { name: 'AreaType', type: 'string' },
+                    { name: 'EntryDate', type: 'date' },
+                    { name: 'ParkingNum', type: 'number' },
+                    { name: 'ContractDuration', type: 'number' },
+                    { name: 'BadgetForMr', type: 'number' },
+                    { name: 'Status', type: 'number' },
+                    { name: 'AgentId', type: 'number' },
+                    { name: 'ContractCopy', type: 'string' },
+                    { name: 'UploadKey', type: 'string' },
+                    { name: 'Address', type: 'string' },
+                    { name: 'Fax', type: 'string' },
+                    { name: 'Memo', type: 'string' }
+                ],
+                id: 'LeadId',
+                type:'POST',
+                url: '@Url.Action("GetLeadsGrid", "Crm")',
+                pagenum: 3,
+                pagesize: 20,
+                pager: function (pagenum, pagesize, oldpagenum) {
+                    // callback called when a page or page size is changed.
+                }
+            };
+
+            source.data = { 'QueryType': '@Model.QueryType', 'CustomerName': '@Model.CustomerName', 'ContactName': '@Model.ContactName', 'DealType': '@Model.DealType', 'PurposeType': '@Model.PurposeType', 'AreaType': '@Model.AreaType', 'RequestSize': '@Model.RequestSize' };
+
+            //var dataAdapter = new $.jqx.dataAdapter(source);
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                async: false,
+                loadComplete: function (data) { },
+                loadError: function (xhr, status, error) { alert(' status: ' + status + '\n error ' + error) }
+            });
+            var cellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
+
+                //return '<div style="text-align:center"><a href="CustomerDef?id=' + value + '" >הצג</a></div>';
+                return '<div style="text-align:center"><a href="javascript:leads_Edit(' + value + ')" >הצג</a></div>';
+            };
+            var contactcellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
+                var accid = $('#jqxgrid').jqxGrid('getrowdata', row).AccountId;
+               
+                return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="app_contacts.contactEdit(' + value + ',' + accid + ',0);" >הצג</a> | <a href="#" onclick="app_contacts.contactDelete(' + value + ');">הסר</a></div>'
+            };
+
+            NScustomers.nastedContactGrids = new Array();
+
+            var initContactGrid = function (tabControl, index, id) {
+                //contacts
+                var nastedcontainer = $('<div style="float:right;margin:5px"></div>');
+                nastedcontainer.rtl = true;
+                var nastedsource = {
+                    datafields: [
+                          { name: 'ContactId', type: 'number' },
+                          { name: 'ParentId', type: 'number' },
+                          { name: 'ContactName', type: 'string' },
+                          { name: 'Title', type: 'string' },
+                          { name: 'Email', type: 'string' },
+                          { name: 'Mobile', type: 'string' }
+                    ],
+                    datatype: "json",
+                    id: 'ContactId',
+                    type: 'POST',
+                    url: '@Url.Action("GetContactsView", "Crm")',
+                    data: { 'parentId': id, 'role': 3, 'uk': null }
+                }
+                NScustomers.nastedContactGrids[index] = nastedcontainer;
+              
+                var nastedAdapter = new $.jqx.dataAdapter(nastedsource);
+                nastedcontainer.jqxGrid({
+                    source: nastedAdapter, width: '98%', height: 130,
+                    rtl: true,
+                    columns: [
+                      { text: 'שם איש קשר', datafield: 'ContactName', cellsalign: 'right', align: 'center' },
+                       {
+                           text: 'טלפון נייד', datafield: 'Mobile', align: 'center', cellsrenderer: function (row, datafield, value) {
+                               return isMobile ? '<a style="float:right;"  href="tel:' + value + '">' + value + '</a>' : '<span style="float:right">' + value + '</span>';
+                           }
+                       },
+                      {
+                          text: 'דואר אלקטרוני', datafield: 'Email', align: 'center', cellsrenderer: function (row, datafield, value) {
+                              return '<a href="mailto:' + value + '">' + value + '</a>';
+                          }
+                      },
+                      { text: 'תפקיד', datafield: 'Title', cellsalign: 'right', align: 'center', hidden: isMobile },
+                    {
+                        text: 'פעולות', dataField: 'ContactId', cellsalign: 'right', align: 'center',
+                        cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
+
+                            var rcd = $('#jqxgrid').jqxGrid('getrowdata', row);
+                            var accid = (rcd) ? rcd.ParentId : 0;
+                            return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="leads_contactEdit(' + value + ',' + accid + ',0);" >הצג</a> | <a href="#" onclick="leads_contactDelete(' + value + ');">הסר</a></div>'
+                        }
+                    }
+
+                    ]
+                });
+                var additem = $('<a title="הוספת איש קשר חדש" href="#" style="padding-left:10px;padding-right:10px;float:right;">הוסף</a>')
+                .click(function () {
+                    NScustomers.contactDialog = app_contacts.contactEdit(0, id, 3);
+                });
+                var refreshcontacts = $('<a title="רענון רשימת אנשי קשר" href="#" style="padding-left:10px;float:right;">רענון</a>')
+                .click(function () {
+                    nastedAdapter.dataBind();
+                });
+
+                $(tabControl).append(additem);
+                $(tabControl).append(refreshcontacts);
+                $(tabControl).append(nastedcontainer);
+
+            };
+@*
+            NScustomers.nastedNewsGrids = new Array();
+            var initNewsGrid = function (tabControl, index, id) {
+
+                var nastedcontainer = $('<div style="float:right;margin:5px"></div>');
+                nastedcontainer.rtl = true;
+                var nastedsource = {
+                    datafields: [
+                          { name: 'NewsId', type: 'number' },
+                          { name: 'NewsName', type: 'string' },
+                    ],
+                    datatype: "json",
+                    id: 'NewsId',
+                    type: 'POST',
+                    url: '@Url.Action("GetAcoountNews", "Crm")',
+                    data: { 'accountId': id }
+                }
+                NScustomers.nastedNewsGrids[index] = nastedcontainer;
+
+                var nastedAdapter = new $.jqx.dataAdapter(nastedsource);
+                nastedcontainer.jqxGrid({
+                    source: nastedAdapter, width: '90%', height: 130,
+                    rtl: true,
+                    columns: [
+                      {
+                          text: 'פעולות', dataField: 'NewsId', width: 100, cellsalign: 'right', align: 'center',
+                          cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
+                              var accid = id;//  $('#jqxgrid').jqxGrid('getrowdata', row).AccountId;
+                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="leads_newsDelete(' + value + ',' + accid + ');" >הסר</a></div>'
+                          }
+                      },
+                      { text: 'שם דיוור', datafield: 'NewsName', cellsalign: 'right', align: 'center' },
+                    ]
+                });
+                var additem = $('<div style="margin:10px"><input type="button" value="הוסף" title="הוספת דיוור" /></div>')
+                .click(function () {
+                    NScustomers.newsDialog=popupIframe("/Common/_AccountNews?id=" + id, "580", "400");
+                });
+                var refreshitem = $('<div style="margin:10px"><input type="button" value="רענן" title="רענון קבוצת דיוור" /></div>')
+                .click(function () {
+                    nastedAdapter.dataBind();
+                });
+
+                $(tabControl).append(nastedcontainer);
+                $(tabControl).append(additem);
+                $(tabControl).append(refreshitem);
+
+            };
+*@
+            var initrowdetails = function (index, parentElement, gridElement, datarecord) {
+
+                NScustomers.currentIndex = index;
+
+                var tabsdiv = null;
+                var information = null;
+                var notes = null;
+
+                tabsdiv = $($(parentElement).children()[0]);
+                if (tabsdiv != null) {
+                    information = tabsdiv.find('.information');
+                    notes = tabsdiv.find('.notes');
+                    var title = tabsdiv.find('.title');
+                    title.text(datarecord.CustomerName);
+                    var tabcontacts = tabsdiv.find('.tabcontacts');
+                    var taboptions = tabsdiv.find('.taboptions');
+
+                    var container = $('<div style="margin: 5px;text-align:right;"></div>')
+                    container.rtl = true;
+                    container.appendTo($(information));
+
+                    var leftcolumn = $('<div style="float: left; width: 45%;direction:rtl;"></div>');
+                    var rightcolumn = $('<div style="float: right; width: 40%;direction:rtl;"></div>');
+                    container.append(leftcolumn);
+                    container.append(rightcolumn);
+                   
+                    var divLeft = $("<div style='margin: 10px;'><b>שטח מבוקש:</b> " + datarecord.RequestSize + "</div>" +
+                        "<div style='margin: 10px;'><b>משך החוזה:</b> " + datarecord.ContractDuration + " שנים</div>" +
+                        "<div style='margin: 10px;'><b>תקציב למ''ר:</b> " + datarecord.BadgetForMr + " שח</div>");
+                    divLeft.rtl = true;
+                    var divRight = $("<div style='margin: 10px;'><b>מועד כניסה:</b> " + formatDefaultShortDate(datarecord.EntryDate) + "</div>" +
+                        "<div style='margin: 10px;'><b>פקס:</b> " + datarecord.Fax + "</div>" +
+                        "<div style='margin: 10px;'><b>קוד לקוח:</b> " + datarecord.LeadId + "</div>");
+
+                    divRight.rtl = true;
+                    $(leftcolumn).append(divLeft);
+                    $(rightcolumn).append(divRight);
+
+                    var notescontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"><span>' + datarecord.Memo + '</span></div>');
+                    notescontainer.rtl = true;
+                    $(notes).append(notescontainer);
+
+                    var leadid = datarecord.LeadId;//parseInt(datarecord.AccountId);
+
+                    var optionscontainer = $('<div style="white-space: normal; margin: 5px;text-align:right;"></div>');
+                    optionscontainer.rtl = true;
+
+                    var linkEdit = $('<div style="margin:5px"><a href="#" >הצג לקוח</a></div>')
+                    .click(function () {
+                        leads_Edit(leadid);
+                    });
+                    var linkRemove = $('<div style="margin:5px"><a href="#" >הסר לקוח</a></div>')
+                    .click(function () {
+                        leads_Delete(leadid);
+                    });
+
+                    optionscontainer.append(linkEdit);
+                    optionscontainer.append(linkRemove);
+                    taboptions.append(optionscontainer);
+
+                    //contacts
+                    initContactGrid(tabcontacts, index, leadid);
+
+                    $(tabsdiv).jqxTabs({ width: '95%', height: 170, rtl: true });
+                }
+            };
+
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                pagermode: 'simple',
+                pageable: true,
+                sortable: true,
+                showfilterrow: true,
+                filterable: true,
+                rowdetails: true,
+                rowdetailstemplate: { rowdetails: "<div style='margin: 10px;'><ul style='margin-right: 30px;'><li class='title'></li><li>פרטים</li><li>אנשי קשר</li><li>אפשרויות</li></ul><div class='information'></div><div class='notes'></div><div class='tabcontacts'></div><div class='taboptions'></div></div>", rowdetailsheight: 200 },
+                //ready: function () {
+                //    $("#jqxgrid").jqxGrid('showrowdetails', 0);
+                //},
+                initrowdetails: initrowdetails,
+                columns: [
+                  {
+                      text: '*', dataField: 'LeadId', filterable: false, width: 80, cellsalign: 'right', align: 'center', hidden: isMobile, cellsrenderer:
+                      function (row, columnfield, value, defaulthtml, columnproperties) {
+                          //return '<div style="text-align:center"><a href="javascript:leads_Edit(' + value + ')" >הצג</a> | <a href="#" onclick="leads_Delete(' + value + ');">הסר</a></div>'
+                          return '<div style="text-align:center"><a href="javascript:leads_Edit(' + value + ')" >הצג</a></div>'
+                      }
+                  },
+                  { text: 'שם לקוח', dataField: 'CustomerName', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
+                  {
+                      text: 'טלפון', dataField: 'Phone', filtercondition: 'starts_with',  cellsalign: 'right', align: 'center',cellsrenderer : function (row, datafield, value) {
+                          return isMobile ?  '<a style="float:right;"  href="tel:' + value + '">' + value + '</a>': '<span style="float:right">'+ value+ '</span>';
+                      }
+                  },
+                   {
+                       text: 'דואר אלקטרוני', dataField: 'Email', filtercondition: 'starts_with',  cellsalign: 'right', align: 'center', cellsrenderer: function (row, datafield, value) {
+                           return '<a href="mailto:' + value + '">' + value + '</a>';
+                       }
+                   },
+                  { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: isMobile },
+                  { text: 'כתובת', dataField: 'Address', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: isMobile },
+                  { text: 'מועד עדכון', type: 'date', dataField: 'LastUpdate', cellsformat: 'd', cellsalign: 'right', align: 'center', hidden: isMobile }
+                ]
+            });
+            $('#jqxgrid').on('rowdoubleclick', function (event) {
+                var args = event.args;
+                var boundIndex = args.rowindex;
+                var visibleIndex = args.visibleindex;
+                var id = $("#jqxgrid").jqxGrid('getrowid', boundIndex);
+                //var mid = $('#jqxgrid').jqxGrid('getrowdata', boundIndex).LeadId;
+                leads_Edit(id);
+            });
+
+            //$("#linkCustomerDef").jqxLinkButton({ width: '120', height: '30' });
+            $('#btnclearfilter').jqxButton();
+            $('#btnclearfilter').click(function () {
+                $("#jqxgrid").jqxGrid('clearfilters');
+            });
+            $('#btnCustomerDef').jqxButton();
+            $('#btnCustomerDef').click(function () {
+                leads_Edit(0);
+            });
+            $('#btnCustomerQuery').jqxButton();
+            $('#btnCustomerQuery').click(function () {
+                app.redirectTo("LeadsQuery");
+            });
+            @*$('#btnCustomerAll').jqxButton();
+            $('#btnCustomerAll').click(function () {
+                app.redirectTo('@Url.Action("LeadsGrid","Crm")');
+            });*@
+
+            //$("#excelExport").jqxButton({ width: '120', height: '30' });
+            //$("#excelExport").click(function () {
+            //    $("#jqxgrid").jqxGrid('exportdata', 'xls', 'Customers',true, null, false,null,'utf-8');   
+
+            //});
+            
+        });
+
+        function triggerContactComplete(accid) {
+            leads_contactRefresh();
+            app_dialog.dialogClose(NScustomers.contactDialog);
+        };
+
+        function triggerAccComplete(accType,accid) {
+            leads_Refresh();
+            app_dialog.dialogClose(NScustomers.accountDialog);
+        };
+
+        //function triggerNewsComplete(accid) {
+        //    leads_newsRefresh();
+        //    dialogClose(NScustomers.newsDialog);
+        //};
+
+        function leads_contactRefresh() {
+            try {
+                var i = NScustomers.currentIndex;
+                var g = NScustomers.nastedContactGrids[i];
+                var adapter = g.jqxGrid('source');
+                adapter.dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        };
+
+        function leads_contactDelete(id) {
+            app_contacts.contactDelete(id, false);
+            leads_contactRefresh();
+        }
+
+        function leads_contactEdit(id, accid) {
+            app_contacts.contactEdit(id, accid, 0);
+            leads_contactRefresh();
+        }
+
+        //function leads_newsRefresh() {
+        //    try {
+        //        var i = NScustomers.currentIndex;
+        //        var g = NScustomers.nastedNewsGrids[i];
+        //        var adapter = g.jqxGrid('source');
+        //        adapter.dataBind();
+        //    }
+        //    catch (e) {
+        //        alert(e);
+        //    }
+        //};
+        //function leads_newsDelete(id, accid) {
+        //    accountNewsRemove(id, accid);
+        //    leads_newsRefresh();
+        //}
+
+        function leads_Refresh() {
+            try {
+                $("#jqxgrid").jqxGrid('source').dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        };
+        function leads_Edit(id) {
+            @*var accountType = '@acctype';
+            NScustomers.accountDialog = accountEdit(id, accountType);*@
+
+            app_rout.redirectToLead(id);
+
+        }
+        function leads_Delete(id) {
+
+            if (typeof async === 'undefined') { async = true; }
+
+            if (confirm("האם למחוק לקוח " + id)) {
+                $.ajax({
+                    async: async,
+                    type: "POST",
+                    url: "/Crm/DeleteLead",
+                    data: "{ 'LeaId': '" + id + "' }",
+                    contentType: "application/json; charset=utf-8",
+                    //dataType: "json",
+                    success: function (data) {
+                        app_dialog.popMessage('לקוחות שלי', 'לקוח ' + id + 'הוסר מהמערכת ', "auto");
+                        leads_Refresh();
+                    },
+                    error: function (e) {
+                        alert(e);
+                    }
+                });
+            }
+        }
+
+        
+   
+
+    </script>
+}
+
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Crm</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap rtl">
+            <div class="box-title">
+                <h3>רשימת לקוחות</h3>
+            </div>
+
+                <div style="display: block; float: right">
+                    <input value="איתור לקוח" id="btnCustomerQuery" type="button" class="btn-default btn2" />
+                    <input value="הוספת לקוח" id="btnCustomerDef" type="button" class="btn-default btn2" />
+                    <input value="הסר סינון" id="btnclearfilter" type="button" class="btn-default btn2" />
+                    @*<input value="הצגת כל הלקוחות" id="btnCustomerAll" type="button" class="btn-default btn2" />*@
+                    
+                </div>
+
+                <div id="jqxWidget">
+                    <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                    <div style="margin-top: 30px;">
+                        <div id="cellbegineditevent"></div>
+                        <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liLeads");
+</script>

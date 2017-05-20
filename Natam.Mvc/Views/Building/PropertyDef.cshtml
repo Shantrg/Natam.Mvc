@@ -1,0 +1,409 @@
+﻿@model Pro.Data.Entities.BuildingInfoView
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    int bid = Nistec.Types.ToInt(Request.QueryString["bid"]);
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
+    <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
+    <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />
+
+}
+
+@section scripts {
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            @if (bid <= 0)
+          {
+              return;
+          }
+            JSON.useDateParser();
+            var theme = 'Arctic';
+
+            var dealAdapter = app_jqxcombos.createCheckListAdapter("DealId", "DealName", "listDeal", '@Url.Action("GetDealView", "Building")', 240, 80, "DealType");
+            var purposeAdapter = app_jqxcombos.createComboAdapter("PurposeId", "PurposeName", "PurposeId", '@Url.Action("GetPurposeView", "Building")', 240, 0, false);
+            var ownerAdapter = app_jqxcombos.createComboAdapter("AccountId", "AccountName", "OwnerId", '@Url.Action("GetOwnerView", "Building")', 240, 0, false);
+
+            var source =
+            {
+                datatype: "json",
+                datafields: [
+
+                      { name: 'UnitId', type: 'number' },
+                      { name: 'BuildingId', type: 'number' },
+                      { name: 'FloorNum', type: 'number' },
+                      { name: 'UnitNum', type: 'number' },
+                      { name: 'UnitSize', type: 'number' },
+                      { name: 'Price', type: 'number' },
+                      { name: 'Populate', type: 'bool' },
+                      { name: 'Memo', type: 'string' },
+                      { name: 'LastUpdate', type: 'date' },
+                      { name: 'AgentId', type: 'number' },
+                      { name: 'DealType', type: 'string' },
+                      { name: 'DealId', type: 'number' },
+                      { name: 'PurposeId', type: 'number' },
+                      { name: 'OwnerId', type: 'number' }
+
+                ],
+                data: { 'id': '@id' },
+                id: 'UnitId',
+                type: 'POST',
+                url: '@Url.Action("GetUnit", "Building")'
+
+            };
+            $("#divImages").css('display', 'none');
+
+            var srcOwnerId;
+            var srcBuildingId;
+            var srcUnitId;
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (record) {
+
+                    $("#BuildingName").val('@Model.BuildingName');
+
+                    if (record.UnitId <= 0) {
+                        $("#BuildingId").val('@Model.BuildingId');
+                    }
+                    else {
+                        app_jqxform.loadDataForm("form", record);
+                    }
+
+                    srcUnitId = record.UnitId;
+                    srcOwnerId = record.OwnerId;
+                    srcBuildingId = record.BuildingId
+
+                    app_jqxcombos.selectComboBoxValue("PurposeId", record.PurposeId);
+                    app_jqxcombos.selectComboBoxValue("OwnerId", srcOwnerId);
+                    app_jqxcombos.selectCheckList("listDeal", record.DealType, "DealType");
+
+                    $("#divImages").css('display', srcBuildingId > 0 ? 'inline' : 'none');
+                },
+                loadError: function (jqXHR, status, error) {
+                },
+                beforeLoadComplete: function (records) {
+
+                }
+            });
+            // perform data binding.
+            dataAdapter.dataBind();
+
+            $('#btnImages').click(function (e) {
+                e.preventDefault();
+                app_popup.mediaEditor(srcBuildingId, srcUnitId, "u");
+            });
+
+            $('#showOwner').click(function (e) {
+                e.preventDefault();
+                var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);//item.value;
+                if (val != 0)
+                    app_accounts.accountDisplay(val, "בעלים");
+            });
+            $('#refreshOwner').click(function () {
+                ownerAdapter.dataBind();
+                app_jqxcombos.selectComboBoxValue("OwnerId", srcOwnerId);
+            });
+
+            $('#editOwner').click(function (e) {
+                e.preventDefault();
+                var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);
+                app_accounts.accountEdit(val, 2);
+            });
+
+            var accSource =
+              {
+                  dataType: "json",
+                  dataFields: [
+                      { name: 'AccountId' },
+                      { name: 'AccountName' }
+                  ],
+                  type: 'POST',
+                  url: '@Url.Action("GetDealView", "Building")'
+              };
+            var dealAdapter = new $.jqx.dataAdapter(dealSource);
+
+        });
+
+    </script>
+
+
+    <script type="text/javascript">
+
+
+        function triggerInvestmentComplete(id, bid, uid) {
+            app_dialog.dialogIframClose();
+        }
+
+        function triggerAccComplete(accType,accId) {
+            
+            $('#accWindow').jqxWindow('close');
+            
+            if (accType == "2")
+                ownerAdapter.dataBind();
+            else if (accType == "6")
+                managementAdapter.dataBind();
+        }
+
+        function clickLink(elementName) {
+            $('#' + elementName).click();
+            $('#form').jqxValidator('validate');
+        }
+
+        //initialize validator.
+        $('#form').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+                   {
+                       input: '#FloorNum', message: 'חובה לציין קומה!', action: 'keyup, blur', rule: function () {
+                           var value = $("#FloorNum").val();
+                           //!isNaN(value) && value > 0;;
+                           return value > 0;
+                       }
+                   },
+                   {
+                       input: '#UnitSize', message: 'חובה לציין שטח!', action: 'keyup, blur', rule: function () {
+                           var value = $("#UnitSize").val();
+                           return value > 0;
+                       }
+                   },
+                   {
+                       input: '#Price', message: 'חובה לציין מחיר!', action: 'keyup, blur', rule: function () {
+                           var value = $("#Price").val();
+                           return value > 0;
+                       }
+                   },
+                   {
+                       input: '#listDeal', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
+                           var items = $("#listDeal").jqxListBox('getCheckedItems');
+                           //var index = $("#PurposeType").jqxListBox('getSelectedIndex');
+                           if (items && items.length > 0)
+                               return true;
+                           return false;
+                           //if (index >= 0) { return true; } return false;
+                       }
+                   },
+                {
+                    input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
+                        var index = $("#OwnerId").jqxComboBox('getSelectedIndex');
+                        if (index >= 0) { return true; } return false;
+                    }
+                },
+                {
+                    input: '#PurposeId', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
+                        var index = $("#PurposeId").jqxComboBox('getSelectedIndex');
+                        if (index >= 0) { return true; } return false;
+                    }
+                }
+            ]
+        });
+
+        $("form").submit(function (e) {
+
+            var validationResult = function (isValid) {
+
+                e.preventDefault();
+                var actionurl = $('#form').attr('action');
+
+                if (isValid) {
+                    //========================================
+                    $.ajax({
+                        url: actionurl,
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#form').serialize(),
+                        success: function (data) {
+                            alert(data.Message);
+                            if (data.Status >= 0) {
+                                //window.parent.triggerBuildingComplete(data.OutputId);
+                                //$('#form')[0].reset();
+                                $('#UnitId').val(data.OutputId);
+                            }
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+
+                }
+            }
+            // Validate the Form.
+            $('#form').jqxValidator('validate', validationResult);
+
+        });
+
+        $("#form").on('validationSuccess', function () {
+            // Display the Server's Response which came as result of the Form Submit.
+            $("#form-iframe").fadeIn('fast');
+        });
+
+        $('#reset').on('click', function () {
+            $("#form-iframe").html('').fadeOut('fast');
+            $("#form-next").html('')
+            location.reload();
+        });
+
+    </script>
+
+}
+<!--breadcrumb-->
+<div class="breadcrumbs">
+    @Html.ActionLink("Home", "Index", "Home")>
+    @Html.ActionLink("Main", "Main", "Home")>
+    <a href="javascript:parent.history.back()">Buildings</a> >
+    @ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+<hgroup class="title">
+    <h3 class="rightPan">טופס הודעה</h3>
+</hgroup>
+<div class="clear"></div>
+<div class="global-view">
+    <div class="container">
+        <div style="text-align:right">
+            <div style="display: inline; text-align: right;font-size:18px;direction:rtl;">
+                <div><a href="BuildingDef?id=@Model.BuildingId" title="הצג בניין"><span>בניין:</span>@Model.BuildingName</a></div>
+                <div><span>כתובת: </span>@Model.Address</div>
+            </div>
+
+        </div>
+        <div>
+            @using (Html.BeginForm("UpdateUnit", "Building", null, FormMethod.Post, new { id = "form", target = "form-iframe", Class = "form" }))
+            {
+                <!--Html.AntiForgeryToken()
+                Html.ValidationSummary(true)
+                    -->
+
+                <input type="hidden" id="AgentId" name="AgentId" />
+                <input type="hidden" id="UnitId" name="UnitId" />
+                <input type="hidden" id="DealType" name="DealType" />
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד בניין:
+                                </label>
+                                <input id="BuildingId" type="number" name="BuildingId" readonly="true" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שם בניין:
+                                </label>
+                                <input id="BuildingName" type="text" readonly="true" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    קומה:
+                                </label>
+                                <input id="FloorNum" type="number" name="FloorNum" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שטח:
+                                </label>
+                                <input id="UnitSize" type="number" name="UnitSize" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר:
+                                </label>
+                                <input id="Price" type="number" name="Price" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג הנכס/שימוש:
+                                </label>
+                                <div id="PurposeId" name="PurposeId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג עסקה:
+                                </label>
+                                <div id="listDeal" name="listDeal" style="padding: 10px">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מאוכלס?:
+                                </label>
+                                <input id="Populate" name="Populate" type="checkbox" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    בעלים:
+                                </label>
+                                <a id="showOwner" href="#">הצג</a>|
+                                <a id="refreshOwner" href="#">רענן</a>|
+                                <a id="editOwner" href="#">עריכה</a>
+                                <div id="OwnerId" name="OwnerId">
+                                </div>
+                            </div>
+                            <!--
+                            <span>איש קשר:</span>
+                             <div class="form-group">
+                                <label class="column">
+                                      שם:</label>
+                                <input id="ContactName" type="text" name="ContactName" class="text" />
+                            </div>
+                              <div class="form-group">
+                                <label class="column">
+                                     טלפון:</label>
+                                <input id="ContactPhone" type="text" name="ContactPhone" class="text" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                     סלולאר:</label>
+                                <input id="ContactMobile" type="text" name="ContactMobile" class="text" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                     דואל:</label>
+                                <input id="ContactMail" type="text" name="ContactMail" class="text" />
+                            </div>
+                                -->
+                            <div class="form-group">
+                                <label class="column">
+                                    הערות:
+                                </label><br />
+                                <textarea id="Memo" name="Memo" rows="4" cols="60"></textarea>
+                            </div>
+                            <div id="divImages" class="form-group">
+                                <label class="column">
+                                    תמונות:
+                                </label>
+                                <input id="btnImages" type="button" value="הצג תמונות" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מועד עדכון:
+                                </label>
+                                <input id="LastUpdate" disabled="disabled" type="text" name="LastUpdate" class="text" />
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                        <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                    </div>
+
+                </div>
+            }
+            <div style="text-align:center">
+                <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 200px;text-align:right" frameborder="0"></iframe>
+                <div id="form-next" style="font-size:18px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->

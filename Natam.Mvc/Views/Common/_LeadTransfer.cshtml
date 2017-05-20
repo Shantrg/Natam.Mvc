@@ -1,0 +1,116 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+
+}
+
+@section scripts {
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        var id = '@id';
+        $('#LeadId').val(id);
+
+        var agentAdapter = app_jqxcombos.createListAdapter("UserId", "DisplayName", "listAgents", '@Url.Action("GetAgentTransferList", "Common")', 200, 120);
+        $('#listAgents').on('change', function (event) {
+            app_jqxcombos.listBoxToInput("listAgents", "AgentId");
+        });
+
+  
+
+
+            //account dialog
+            $('#accForm').jqxValidator({
+                rtl: true,
+                //hintType: 'label',
+                animationDuration: 0,
+                rules: [
+                      { input: '#AgentId', message: 'חובה לציין סוכן', action: 'keyup, blur', rule: 'required' },
+                      { input: '#LeadId', message: 'חובה לציין לקוח', action: 'keyup, blur', rule: 'required' }
+                ]
+            });
+
+            $('#accSubmit').on('click', function (e) {
+
+                e.preventDefault();
+
+                var actionurl = $('#accForm').attr('action');
+                var validationResult = function (isValid) {
+                    if (isValid) {
+                        //ajaxForm("/Common/UpdateAccount", "accForm", onSuccess);
+
+                        $.ajax({
+                            url: actionurl,
+                            type: 'post',
+                            dataType: 'json',
+                            data: $('#accForm').serialize(),
+                            success: function (data) {
+                                alert(data.Message);
+                                if (data.Status > 0) {
+                                    window.parent.triggerTransferComplete(data.OutputId);
+                                }
+                            },
+                            error: function (jqXHR, status, error) {
+                                alert(error);
+                            }
+                        });
+                    }
+                }
+                $('#accForm').jqxValidator('validate', validationResult);
+
+            });
+        });
+
+    </script>
+}
+
+<div style="margin: 0px;">
+
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+        <div id="accWindow">
+            <div id="accHeader">
+            </div>
+            <div id="accBody">
+                <form class="accForm" id="accForm" method="post" action="/Common/TransferLead">
+                    <div style="direction: rtl; text-align: right">
+                        <div id="divCategory" class="form-group">
+                            <label class="column">
+                                בחירת סוכן :
+                            </label>
+                            <div id="listAgents" name="listAgents"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                קוד סוכן :
+                            </label>
+                            <input id="AgentId" name="AgentId" type="text" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                קוד לקוח:
+                            </label>
+                            <input id="LeadId" name="LeadId" type="text" readonly />
+                        </div>
+                        <div style="height: 5px"></div>
+                        <div>
+                            <input id="accSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                            <input id="accCancel" class="btn-default btn7" type="button" value="ביטול" />
+
+                        </div>
+                        <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end of content-wrapper-->

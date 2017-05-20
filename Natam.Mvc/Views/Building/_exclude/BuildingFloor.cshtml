@@ -1,0 +1,117 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+}
+@section head {
+}
+
+<hgroup class="title">
+    <h3 class="rightPan">הגדרת קומה</h3>
+</hgroup>
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+        <form action="" method="post">
+            <div>
+                <div style="height: 500px;">
+                    <div class="form-group">
+                        <label class="column">
+                            קוד נכס:</label>
+                        <input type="number" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תאריך עדכון:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מס' קומה:</label>
+                        <input type="text" class="text-short" />
+                        <span>מתוך</span><input type="text" class="text-short" /><span>מספר קומות</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סה"כ שטח קומה:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            שם חברה:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            איש קשר:</label>
+                        <input type="text" class="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            גודל יחידה:</label>
+                        <input type="number" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מחיר למ"ר:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג העסקה:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג נכס:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            שם דייר:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            תאריך פינוי:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סה"כ שטח קומה:</label>
+                        <input type="text" /><span>מחושב</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סך היחידות:</label>
+                        <input type="text" /><span>מחושב</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            הערות:</label>
+                        <input type="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                        </label>
+                        <input type="checkbox" />
+                        <span>מידע מבעלים?</span>
+                        <input type="checkbox" />
+                        <span>האם מאוכלס</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            קוד קומה:</label>
+                        <input type="hidden" />
+                    </div>
+                </div>
+                <div>
+                    <input type="button" value="עדכון" />
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+<!--end of content-wrapper-->

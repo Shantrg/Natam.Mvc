@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Pro.Data.Entities.BuildingView>
+@using GridMvc.Html
+
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+}
+
+@section head {
+    <link rel="stylesheet" href="~/Content/css/Gridmvc.css">
+    <script type="text/javascript" src="~/Scripts/plagins/gridmvc.min.js"></script>
+}
+@section featured {
+}
+
+<hgroup class="title">
+    <h3 class="rightPan">רשימת נכסים</h3>
+</hgroup>
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+        <div class="grid-wrap">
+            @Html.Grid(Model).Columns(columns =>
+                    {
+                        columns.Add(c => c.Building_ID).Titled("קוד נכס");
+                        columns.Add(c => c.Building_Name).Titled("שם הנכס");
+                        columns.Add(c => c.D_L_Update).Titled("מועד עדכון");
+                        columns.Add(c => c.City).Titled("עיר");
+                        columns.Add(c => c.Street).Titled("רחוב");
+                        columns.Add(c => c.Business_Managing_Name).Titled("סוכן");
+                    }).WithPaging(15).Sortable().Filterable().WithMultipleFilters()
+
+        </div>
+
+    </div>
+</div>

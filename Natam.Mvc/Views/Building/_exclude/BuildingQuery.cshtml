@@ -1,0 +1,366 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+    
+   
+}
+  
+@section head {
+
+  
+    @Scripts.Render("~/bundles/jqx")
+     @Scripts.Render("~/bundles/jqxgrid")
+
+    <style type="text/css">
+        table {
+            direction: rtl;
+        }
+
+        td {
+            padding-top: 0px;
+            padding-bottom: 5px;
+        }
+    </style>
+    <script>
+        $(function () {
+            $('#tab-query li:eq(0) a').tab('show');
+        });
+    </script>
+
+       <script type="text/javascript">
+           $(document).ready(function () {
+               
+               var dealSource =
+               {
+                   dataType: "json",
+                   dataFields: [
+                       { name: 'DealId' },
+                       { name: 'DealName' }
+                   ],
+                   data: {},
+                   type: 'POST',
+                   url: '@Url.Action("GetDealView", "Building")'
+               };
+               var dealAdapter = new $.jqx.dataAdapter(dealSource, {
+                   contentType: "application/json; charset=utf-8",
+                   loadError: function (jqXHR, status, error) {
+                       //alert("dealAdapter failed: " + error);
+                   },
+                   loadComplete: function (data) {
+                       //alert("dealAdapter is Loaded");
+                   }
+               });
+               // perform Data Binding.
+               //dealAdapter.dataBind();
+
+               $("#listDeal").jqxListBox(
+               {
+                   rtl: true,
+                   source: dealAdapter,
+                   width: 200,
+                   height: 120,
+                   //promptText: "בחירת סוג עסקה",
+                   displayMember: 'DealName',
+                   valueMember: 'DealId'
+               });
+
+               var purposeSource =
+               {
+                   dataType: "json",
+                   dataFields: [
+                       { name: 'PurposeId' },
+                       { name: 'PurposeName' }
+                   ],
+                   data: {},
+                   type: 'POST',
+                   url: '@Url.Action("GetPurposeView", "Building")'
+               };
+               var purposeAdapter = new $.jqx.dataAdapter(purposeSource, {
+                   contentType: "application/json; charset=utf-8",
+                   loadError: function (jqXHR, status, error) {
+                       //alert("purposeAdapter failed: " + error);
+                   },
+                   loadComplete: function (data) {
+                       //alert("purposeAdapter is Loaded");
+                   }
+               });
+               // perform Data Binding.
+               //purposeAdapter.dataBind();
+
+               $("#listPurpose").jqxListBox(
+               {
+                   rtl: true,
+                   source: purposeAdapter,
+                   width: 200,
+                   height: 120,
+                   //promptText: "בחירת ייעוד הנכס",
+                   displayMember: 'PurposeName',
+                   valueMember: 'PurposeId'
+               });
+
+               // prepare the data
+               var zoneSource =
+               {
+                   dataType: "json",
+                   dataFields: [
+                       { name: 'ZoneId' },
+                       { name: 'ZoneName' }
+                   ],
+                   data: {},
+                   type: 'POST',
+                   url: '@Url.Action("GetZoneView", "Building")'
+               };
+               var zoneAdapter = new $.jqx.dataAdapter(zoneSource, {
+                   contentType: "application/json; charset=utf-8",
+                   loadError: function (jqXHR, status, error) {
+                       //alert("zoneAdapter failed: " + error);
+                   },
+                   loadComplete: function (data) {
+                       //alert("zoneAdapter is Loaded");
+                   }
+               });
+               // perform Data Binding.
+               //zoneAdapter.dataBind();
+
+               $("#listZone").jqxListBox(
+               {
+                   rtl: true,
+                   source: zoneAdapter,
+                   width: 200,
+                   height: 120,
+                   //promptText: "בחירת אזור",
+                   displayMember: 'ZoneName',
+                   valueMember: 'ZoneId'
+               });
+
+               var areaSource =
+               {
+                   dataType: "json",
+                   dataFields: [
+                       { name: 'AreaId'},
+                       { name: 'ZoneId'},
+                       { name: 'AreaName'}
+                   ],
+                   data: { 'zone': 0 },
+                   type: 'POST',
+                   url: '@Url.Action("GetAreaView", "Building")'
+               };
+
+               var areaAdapter = new $.jqx.dataAdapter(areaSource, {
+                   //contentType: "application/json; charset=utf-8",
+                   loadError: function (jqXHR, status, error) {
+                       //alert("areaAdapter failed: " + error);
+                   },
+                   loadComplete: function (data) {
+                       //alert("areaAdapter is Loaded");
+                   }
+               });
+               // perform Data Binding.
+               //areaAdapter.dataBind();
+
+
+               $("#listArea").jqxListBox(
+               {
+                   rtl: true,
+                   source: areaAdapter,
+                   width: 450,
+                   height: 180,
+                   multiple: true,
+                   //disabled: true,
+                   //promptText: "בחירת אזור",
+                   displayMember: 'AreaName',
+                   valueMember: 'AreaId'
+               });
+
+               $("#listZone").bind('select', function (event) {
+                   if (event.args) {
+
+                       $("#listArea").jqxListBox({ disabled: false, selectedIndex: -1 });
+                       var value = event.args.item.value;
+                       areaSource.data = { 'zone': value };
+                       areaAdapter = new $.jqx.dataAdapter(areaSource);
+                       $("#listArea").jqxListBox({ source: areaAdapter });
+                   }
+               });
+               
+           });
+
+           $('#reset').on('click', function () {
+               location.reload();
+           });
+
+    </script>
+}
+
+<hgroup class="title">
+    <h3 class="rightPan">איתור בניין</h3>
+</hgroup>
+<div class="clear"></div>
+    
+
+<div class="global-view">
+    
+    <div class="container-rtl">
+        
+<ul id="tab-query" class="nav nav-tabs">
+   <li class="active"  style="font-size:150%; font-weight:bold;">
+      <a href="#tab-general" data-toggle="tab">
+         חיפוש כללי
+      </a>
+   </li>
+   <li style="font-size:150%;font-weight:bold;"><a href="#tab-address" data-toggle="tab">חיפוש לפי כתובת</a></li>
+   <li style="font-size:150%;font-weight:bold;"><a href="#tab-natam" data-toggle="tab">בניינים בניהול נת"מ</a></li>
+</ul>
+<div id="tab-content" class="tab-content" dir="rtl">
+   <div class="tab-pane fade in active" id="tab-general">
+      
+             <div>
+                <p>חיפוש כללי</p>
+                <p>באפשרותכם להוסיף הערות לבניינים קייימים ע"י חיפוש במנוע להלן.<br>במידה והבניין אינו קיים במערכת <a href="BuildingDef">לחצו כאן לרישום בניין חדש.</a><br/></p>
+                <form action="BuildingGrid" method="post">
+                    <div>
+                        <table style="direction:rtl;">
+                            <tr>
+                                <th style="width:20%"></th>
+                                <th style="width:50px"></th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td>שם האזור</td>
+                                <td></td>
+                                <td>(גודל השטח (מ"ר</td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <div id="listZone" name="listZone"></div>
+                                    
+                                </td>
+                                <td></td>
+                                <td>
+                                    <span>מ:</span><br />
+                                      <input type="number" name="size-from" /><br />
+                                    <span>עד:</span><br />
+                                      <input type="number" name="size-to" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">(שם העיר (מתעדכן אוטומטית</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <div id="listArea" name="listArea"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3"></td>
+                            </tr>
+                            <tr>
+                                <td>סוג העסקה</td>
+                                <td></td>
+                                <td>ייעוד הנכס</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="listDeal" name="listDeal"></div>
+                                </td>
+                                <td></td>
+                                <td>
+                                    <div id="listPurpose" name="listPurpose"></div>
+                                </td>
+                            </tr>
+                             <tr>
+                                <td colspan="3"><input type="checkbox" name="show_new_only" />&nbsp;<span>הצג רק בניינים חדשים בטיפול</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                   
+            <div>
+                <input type="hidden" name="query_type" value="tab-general" />
+                <input type="submit" value="הצג" class="btn-default btn2"/>
+                <input type="reset" value="נקה"class="btn-default btn2" />
+            </div>
+            </form>
+        </div>
+
+    </div>
+     <div class="tab-pane fade in" id="tab-address">
+          <div>
+                <p>חיפוש לפי כתובת</p>
+                <form action="QueryGrid" method="post">
+                    <div>
+                        <table style="direction:rtl;">
+                            <tr>
+                                <th style="width:20%"></th>
+                                <th style="width:50px"></th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td>שם הבניין</td>
+                                <td></td>
+                                <td>רחוב ומספר בניין</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" name="building_name" /></td>
+                                <td></td>
+                                <td style="display:inline">
+                                    <input type="text" name="building_street" /><span style="width:20px;">&nbsp;</span><input type="text" name="building_num" style="width:40px" /></td>
+                            </tr>
+                      </table>
+                    </div>
+                    <br />
+                    <div>
+                         <input type="hidden" name="query_type" value="tab-address" />
+                        <input type="submit" value="הצג" class="btn-default btn2"/>
+                        <input type="reset" value="נקה" class="btn-default btn2"/>
+                    </div>
+                </form>
+            </div>
+    </div>
+   <div class="tab-pane fade in" id="tab-natam">
+          <div>
+                <p>בניינים בניהול נת"מ</p>
+                <form action="QueryGrid" method="post">
+                    <div>
+                        <select name="Owner" size="24" dir="rtl">
+                            <option value="15">אורולוב 77</option>
+                            <option value="7">בית אופקים ת"א</option>
+                            <option value="9">בית גבר רמת החיל</option>
+                            <option value="16">בית ג.ר.א.פ הרצליה</option>
+                            <option value="2">בית הגרניט פ"ת</option>
+                            <option value="14">בית המרכבה חולון</option>
+                            <option value="4">בית נולטון ה.פיתוח</option>
+                            <option value="10">בית רייכמן רמת החיל</option>
+                            <option value="5">בית שבח ת"א</option>
+                            <option value="11">בית עמנואל ר. החיל</option>
+                            <option value="18">ז'בוטינסקי 12 ב"ב</option>
+                            <option value="19">לב יסמין נתניה</option>
+                            <option value="6">מרכז פרל סאדאב אזור</option>
+                            <option value="1">צומת הסיטי ת"א</option>
+                            <option value="17">ריב"ל 6 ת"א</option>
+                            <option value="13">ריב"ל 18 ת"א</option>
+                            <option value="3">רג'נסי גרנדס הרצליה</option>
+                            <option value="12">שפע טל ת"א</option>
+                            <option value="8">תובל 22 ר"ג</option>
+                        </select>
+                    </div>
+                    <br />
+                    <div>
+                         <input type="hidden" name="query_type" value="tab-natam" />
+                        <input type="submit" value="הצג" class="btn-default btn2"/>
+                        <input type="reset" value="נקה" class="btn-default btn2"/>
+                    </div>
+                </form>
+            </div>
+    </div>
+</div>
+</div>
+    </div>
+
+
+
+

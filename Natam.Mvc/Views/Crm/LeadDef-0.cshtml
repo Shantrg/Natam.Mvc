@@ -1,0 +1,631 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+   <script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
+    @*<script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
+    <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
+    <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />*@
+   <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+   
+    <style type="text/css">
+        .styledTable {
+            direction:rtl; text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;padding-left:20px;text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;text-align:right;
+        }
+        .styledRowKey {padding-left:20px;text-align:right;
+        }
+        .styledRowValue {text-align:right;
+        }
+       
+        #dropdownlistContentAreaType{direction:rtl; text-align:right;float:right;}
+        #dropdownlistArrowAreaType {
+            direction: rtl;
+            text-align: right;
+            float: right;
+        }
+
+        .jqx-button jqx-combobox-multi-item jqx-fill-state-normal jqx-rc-all{direction:rtl; text-align:right;float:right;}
+
+    </style>
+}
+
+@section scripts {
+    <script type="text/javascript">
+
+    function trigger_Prompt(status) {
+        $('#submit').prop('disabled', status == 1);
+        //if (status == 1) {
+        //    $('#submit').attr('disabled','disabled');//.hide();
+        //}
+        window.location.href = '@Url.Action("Leads", "Crm")';
+    }
+
+    $(document).ready(function () {
+        JSON.useDateParser();
+
+        var dealAdapter = createComboCheckAdapter("DealId", "DealName", "DealType", '@Url.Action("GetDealView", "Building")');
+
+        var purposeAdapter = createComboCheckAdapter("PurposeId", "PurposeName", "PurposeType", '@Url.Action("GetPurposeView", "Building")');
+
+        var areaAdapter = createComboAdapter("AreaId", "AreaName", "AreaType", '@Url.Action("GetAreaViewAll", "Building")', 0, 200, false);
+
+        var sizesAdapter = createComboAdapter("SizeId", "SizeTitle", "RequestSize", '@Url.Action("GetRequestSize", "Common")', 0, 200, false);
+
+        $("#AreaType").jqxComboBox({ "multiSelect": true, dropDownHorizontalAlignment: "right", "showArrow": true });
+
+        var srcLeadId;
+        var srcUploadKey;
+        var srcAgentId;
+        var srcTransId;
+
+        CreateDateTimeInput("EntryDate");
+
+        JSON.useDateParser();
+        var theme = 'Arctic';
+        // prepare the data
+        var source =
+        {
+            datatype: "json",
+            datafields: [
+                   { name: 'LeadId', type: 'number' },
+                   { name: 'CustomerName', type: 'string' },
+                   { name: 'Address', type: 'string' },
+                   { name: 'City', type: 'string' },
+                   { name: 'Phone', type: 'string' },
+                   { name: 'Creation', type: 'date' },
+                   { name: 'LastUpdate', type: 'date' },
+                   { name: 'Fax', type: 'string' },
+                   { name: 'Commission', type: 'string' },
+                   { name: 'PurposeType', type: 'string' },
+                   { name: 'DealType', type: 'string' },
+                   { name: 'RequestSize', type: 'number' },
+                   { name: 'AreaType', type: 'string' },
+                   { name: 'EntryDate', type: 'date' },
+                   { name: 'ParkingNum', type: 'number' },
+                   { name: 'ContractDuration', type: 'number' },
+                   { name: 'BadgetForMr', type: 'number' },
+                   { name: 'Status', type: 'number' },
+                   { name: 'AgentId', type: 'number' },
+                   { name: 'ContractCopy', type: 'string' },
+                   { name: 'UploadKey', type: 'string' },
+                   { name: 'Address', type: 'string' },
+                   { name: 'Fax', type: 'string' },
+                   { name: 'TransId', type: 'number' },
+                   { name: 'Phone2', type: 'string' },
+                   { name: 'Memo', type: 'string' }
+            ],
+            id: 'LeadId',
+            type: 'POST',
+            url: '@Url.Action("GetLead", "Crm")'
+
+        };
+        source.data = { 'id': '@id' };
+
+        if ('@id' <= 0) {
+            $("#linkC").hide();
+            $("#linkD").hide();
+        }
+
+
+        var dataAdapter = new $.jqx.dataAdapter(source, {
+            loadComplete: function (record) {
+
+                loadDataForm("form", record);
+
+                if (record.ParkingNum == 0)
+                    $("#ParkingNum").val("");
+                if (record.ContractDuration == 0)
+                    $("#ContractDuration").val("");
+                if (record.BadgetForMr == 0)
+                    $("#BadgetForMr").val("");
+
+                //srcPurposeType = record.PurposeType;
+                //srcDealType = record.DealType;
+                //srcAreaType = record.AreaType;
+
+                srcLeadId = record.LeadId;
+                srcUploadKey = record.UploadKey;
+                srcTransId = record.TransId;
+
+                if (record.LeadId <= 0) {
+                    $("#linkTransaction").hide();
+                    $("#linkTransAdvice").hide();
+                    $("#linkTransfer").hide();
+                    srcAgentId = '@ViewBag.UserId'
+                }
+                else {
+                    srcAgentId = record.AgentId;
+                    $("#hLeadName").html(record.CustomerName);
+                }
+
+                $("#Creation").val(formatJsonShortDate(record.Creation));
+                $("#LastUpdate").val(formatJsonShortDate(record.LastUpdate));
+
+                @*if ('@id' > 0) {
+                      var guid = Math.uuid();
+                      srcUploadKey = guid;
+                      $("#UploadKey").val(srcUploadKey);
+                  }*@
+                //selectComboBoxValue("PurposeType", record.PurposeType);
+                //selectComboBoxValue("DealType", record.DealType);
+
+
+                selectComboBoxValues("AreaType", record.AreaType);
+                selectComboCheckBoxValues("PurposeType", record.PurposeType);
+                selectComboCheckBoxValues("DealType", record.DealType);
+                selectComboBoxValue("RequestSize", record.RequestSize);
+
+                var role = (srcLeadId > 0) ? 3 : 4;
+                var parentId = (srcLeadId > 0) ? srcLeadId : srcAgentId;
+                appendContactIframe("contactsGrid", parentId, role, srcUploadKey);
+                
+                if ('@id' > 0) {
+                    loadLeadPropertyList();
+                    loadLeadTracking();
+                }
+            },
+            loadError: function (jqXHR, status, error) {
+            },
+            beforeLoadComplete: function (records) {
+
+            }
+        });
+        // perform data binding.
+        dataAdapter.dataBind();
+
+        //initialize validator.
+        $('#form').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+                   { input: '#CustomerName', message: 'חובה לציין שם חברה!', action: 'keyup, blur', rule: 'required' },
+  
+            {
+                input: '#Phone', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+            function (input, commit) {
+                var val = input.val();
+                var re = /^([0-9])+$/
+                return val ? re.test(val) : true;
+            }
+            },
+   
+        {
+            input: '#Phone2', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+            function (input, commit) {
+                var val = input.val();
+                var re = /^([0-9])+$/
+                return val ? re.test(val) : true;
+            }
+        },
+            {
+                input: '#Fax', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+            function (input, commit) {
+                var val = input.val();
+                var re = /^([0-9])+$/
+                return val ? re.test(val) : true;
+            }
+            }
+                   //{ input: '#Mobile', message: 'חובה לציין טלפון נייד!', action: 'keyup, blur', rule: 'required' },
+                   //{
+                   //    input: '#AreaType', message: 'חובה לציין אזור!', action: 'select', rule: function (input) {
+                   //        var index = $("#AreaType").jqxComboBox('getSelectedIndex');
+                   //        if (index >= 0) { return true; } return false;
+                   //    }
+                   //},
+                   //{
+                   //    input: '#PurposeType', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
+                   //        var index = $("#PurposeType").jqxComboBox('getSelectedIndex');
+                   //        if (index >= 0) { return true; } return false;
+                   //    }
+                   //},
+                  //{ input: '#Email', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
+                  //{
+                  //    input: '#Mobile', message: 'טלפון נייד אינו תקין!', action: 'valuechanged, blur', rule:
+                  //              function (input, commit) {
+                  //                  var val = input.val();
+                  //                  var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                  //                  return val ? re.test(val) : true;
+                  //              }
+                  //},
+                  //{
+                  //    input: '#Phone', message: 'טלפון אינו תקין!', action: 'valuechanged, blur', rule:
+                  //              function (input, commit) {
+                  //                  var val = input.val();
+                  //                  var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                  //                  return val ? re.test(val) : true;
+                  //              }
+                  //}
+            ]
+        });
+
+
+        $("form").submit(function (e) {
+
+            e.preventDefault();
+
+            var name = $("#CustomerName").val();
+
+            if (name.length > 0) {
+                $("#ValidateResult").val("");
+                validateLeadAccountName(name, "ValidateResult", false);
+                if ($("#ValidateResult").val() == "false")
+                    return;
+            }
+            var actionurl = $('#form').attr('action');
+
+            var validationResult = function (isValid) {
+
+                if (isValid) {
+                    $.ajax({
+                        url: actionurl,
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#form').serialize(),
+                        success: function (data) {
+                            //popMessage("לקוחות", data.Message, "modal");
+
+                            alert(data.Message);
+                            if (data.Status >= 0) {
+                                //window.parent.triggerBuildingComplete(data.OutputId);
+                                //$('#form')[0].reset();
+                                redirectTo('leadsGrid');
+                            }
+
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                }
+                else
+                    $('#linkA').trigger('click');
+            }
+            // Validate the Form.
+            $('#form').jqxValidator('validate', validationResult);
+
+        });
+
+
+        $("#form").on('validationSuccess', function () {
+            // Display the Server's Response which came as result of the Form Submit.
+            $("#form-iframe").fadeIn('fast');
+        });
+
+        $('#reset').on('click', function () {
+            $("#form-iframe").html('').fadeOut('fast');
+            $("#form-next").html('')
+            location.reload();
+        });
+
+        //$('#linkB').click(function (e) {
+        //    var validationResult = function (isValid) {
+        //        if (isValid == false) {
+        //            //alert('not valid')
+        //            //$("#linkA").click();
+        //            //e.preventDefault();
+        //            //e.stopPropagation();
+        //        }
+        //    };
+        //    $('#form').jqxValidator('validate', validationResult);
+        //});
+        $('#checkAccountValidity').click(function (e) {
+            e.preventDefault();
+            var name = $("#CustomerName").val();
+            if (name == "")
+                return;
+            validateLeadAccountName(name);
+
+        });
+        $('#btnPropertySearch').click(function (e) {
+
+            var DealType = getComboCheckedValues("DealType");
+            var PurposeType = getComboCheckedValues("PurposeType");
+            var AreaType = getComboSelectedValues("AreaType");
+            var RequestSize = getSelectedComboValue("RequestSize");
+            var propertyType = 2;
+            var size = RequestSize === undefined ? '' : RequestSize.replace("+", "%");
+            var url = "/Common/_PropertyGrid?id=" + '@id' + "&qt=" + propertyType + "&dt=" + DealType + "&pt=" + PurposeType + "&at=" + AreaType + "&rs=" + size;
+            propertyDialog = dialogIframe(url, "1020", "510", "איתור נכסים");
+        });
+
+        $('#btnPropertyRefresh').click(function (e) {
+            loadLeadPropertyList();
+        });
+        //$('#noti').jqxNotification({
+        //    width: "auto", position: "top-right", opacity: 0.9,
+        //    autoOpen: false, closeOnClick: true, autoClose: false, template: "info", blink: false, padding: 5
+        //});
+
+
+        $('#btnPropertyAdd').click(function (e) {
+
+            var url = "/Common/_PropertyDef?id=0&pid=" + srcLeadId + "&pt=2";
+            propertyDialog = dialogIframe(url, "580", "620", "הגדרת נכס", true);
+        });
+        $('#linkTransaction').click(function (e) {
+            var url = "/Common/_TransWizard4Buyer?id=" + srcLeadId;
+            propertyDialog = dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
+        });
+        $('#linkTransAdvice').click(function (e) {
+            var url = "/Common/_TransWizard4Advice?id=" + srcLeadId;
+            propertyDialog = dialogIframe(url, "1020", "510", "הגדרת  עסקת ייעוץ");
+        });
+
+        $('#linkTransfer').click(function (e) {
+            var url = "/Common/_LeadTransfer?id=" + srcLeadId;
+            propertyDialog = dialogIframe(url, "420", "320", "העברת לקוח");
+        });
+    });
+
+    var propertyDialog;
+    function triggerPopertySearchComplete() {
+        dialogIframClose();
+        loadLeadPropertyList();
+    }
+    function triggerPropertyComplete() {
+        dialogIframClose();
+        loadLeadPropertyList();
+    }
+    function triggerContactComplete(contactId, op) {
+
+        dialogIframClose();
+    }
+    function triggerTransferComplete(id) {
+        dialogIframClose();
+    }
+
+    var loadLeadPropertyList = function () {
+
+        var src = "/Common/_LeadPropertyGrid?id=" + '@id';
+        attachIframe("property-iframe", src, 980, 500, false)
+
+        
+    };
+
+    var loadLeadTracking = function () {
+
+        var src = "/Common/_LeadTrace?id=" + '@id';
+        attachIframe("trace-iframe", src, 980, 500, false)
+    };
+
+    function triggerPopertyTransComplete(unitId, contactId, transType) {
+        dialogIframClose();
+        if (transType == 3) {
+            var url = "/Crm/TransactionAdviceDef?id=" + unitId + "&tt=3&pid=" + '@id' + "&cid=" + contactId;
+            redirectTo(url);
+        }
+        else if (unitId > 0 && contactId > 0) {
+            var url = "/Crm/TransactionBuyerDef?id=" + unitId + "&tt=1&pid=" + '@id' + "&cid=" + contactId;
+            redirectTo(url);
+        }
+    };
+
+        
+        function onNotifyClosed(data) {
+            if (data.Status >= 0) {
+                //window.parent.triggerBuildingComplete(data.OutputId);
+                //$('#form')[0].reset();
+                redirectTo('leadsGrid');
+            }
+        }
+
+</script>
+
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Crm</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+        <div class="rtl">
+            <h3 id="hLeadName">הגדרת לקוח</h3>
+            <div id="notif_container"></div>
+            <ul class="nav nav-tabs" id="tab-form">
+                <li><a id="linkA" data-toggle="tab" href="#tab1">פרטי לקוח</a></li>
+                <li><a id="linkB" data-toggle="tab" href="#tab2">נתונים כללים</a></li>
+                <li><a id="linkC" data-toggle="tab" href="#tab3">רשימת נכסים</a></li>
+                <li><a id="linkD" data-toggle="tab" href="#tab4">מעקב שיחות</a></li>
+            </ul>
+        </div>
+        <div style="height: 50px;">
+        </div>
+        <div id="tag-form">
+            @*@using (Html.BeginForm("UpdateBuilding", "Building", null, FormMethod.Post, new { id = "form", Class = "form" }))
+            {
+                *@<!--Html.AntiForgeryToken(), target = "form-iframe"
+                                Html.ValidationSummary(true)
+                                    -->
+
+
+                <form class="form" id="form" method="post" action="/Crm/UpdateLead" target = "form-iframe">
+                  <input id="LeadId" type="hidden" name="LeadId" class="number" />
+                  <input id="UploadKey" type="hidden" name="UploadKey" />
+                  <input id="ValidateResult" type="hidden"/>
+
+                    <div class="tab-content">
+                        <div id="tab1" class="tab-pane fade in active">
+                            <a id="checkAccountValidity" href="#">בדיקה</a>
+                            <div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        שם חברה<span class="mandatory">(*)</span>:
+                                    </label>
+                                    <input id="CustomerName" type="text" name="CustomerName" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        כתובת:
+                                    </label>
+                                    <input id="Address" name="Address" type="text" class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        עיר:
+                                    </label>
+                                    <input id="City" name="City" type="text" class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        טלפון-1 :
+                                    </label>
+                                    <input id="Phone" type="number" name="Phone" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        טלפון-2 :
+                                    </label>
+                                    <input id="Phone2" type="number" name="Phone2" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מספר פקס :
+                                    </label>
+                                    <input id="Fax" name="Fax" type="number" class="text-mid" />
+                                </div>
+                               <div class="form-group">
+                                    <label class="column">
+                                        תאריך רישום מקורי:
+                                    </label>
+                                    <input id="Creation" readonly="readonly" type="text" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מועד עדכון:
+                                    </label>
+                                    <input id="LastUpdate" readonly="true" type="text" class="text" />
+                                </div>
+                                <div id="contactsGrid"></div>
+
+                            </div>
+                        </div>
+                        <div id="tab2" class="tab-pane fade in">
+                            @*<h4>נתונים כללים</h4>*@
+                            <div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        סוג עסקה:
+                                    </label>
+                                    <div id="DealType" name="DealType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        סוג הנכס/שימוש:
+                                    </label>
+                                    <div id="PurposeType" name="PurposeType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        אזור מבוקש:
+                                    </label>
+                                    <div id="AreaType" name="AreaType">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מועד כניסה:
+                                    </label>
+                                    <div id="EntryDate" name="EntryDate" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        שטח מבוקש:
+                                    </label>
+                                    <div id="RequestSize" name="RequestSize">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        מספר חניות:
+                                    </label>
+                                    <input id="ParkingNum" name="ParkingNum" type="number" class="number" />
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        משך החוזה:
+                                    </label>
+                                    <input id="ContractDuration" name="ContractDuration" type="number" class="number" /><span>שנים</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        תקציב למ"ר:
+                                    </label>
+                                    <input id="BadgetForMr" name="BadgetForMr" type="number" class="number" /><span>שח</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="column">
+                                        הערות:
+                                    </label>
+                                    <textarea id="Memo" name="Memo" class="textarea-mid"></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                                <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                                <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
+                                <input id="linkTransAdvice" type="button" value="דוח עסקת ייעוץ" class="btn-default btn2" />
+                                <input id="linkTransfer" type="button" value="העברה לסוכן" class="btn-default btn2" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            @*}*@
+            <div id="tab3" class="tab-pane fade in">
+                <div>
+                    <a href="#" id="btnPropertySearch">איתור נכסים</a> | <a href="#" id="btnPropertyAdd">הוספת נכס</a>
+                </div>
+                <div>
+                    <h3><span>רשימת נכסים</span>-<a href="#" id="btnPropertyRefresh">רענון</a></h3>
+                    
+                    <div>
+                        <iframe id="property-iframe" style="width: 980px; height: 480px; text-align: right" frameborder="0"></iframe>
+                        @*@Html.Action("_LeadPropertyGrid", "Common", new { id = @id })*@
+                    </div>
+                </div>  
+            </div>
+            <div id="tab4" class="tab-pane fade in">
+                 <div>
+                    @*<h3>מעקב שיחות</h3>*@
+                    <div>
+                        <iframe id="trace-iframe" style="width: 980px; height: 480px; text-align: right" frameborder="0"></iframe>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center">
+                <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
+                <div id="form-next" style="font-size:18px"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->
+<script type="text/javascript">
+    activeLayoutMenu("liLeads");
+</script>
+

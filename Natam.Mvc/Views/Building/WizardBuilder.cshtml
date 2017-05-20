@@ -1,0 +1,324 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+    int id = Nistec.Types.ToInt(Request["id"]);
+}
+
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var purposeSource =
+            {
+                dataType: "json",
+                async: false,
+                dataFields: [
+                    { name: 'PurposeId' },
+                    { name: 'PurposeName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetPurposeView", "Building")'
+            };
+            var purposeAdapter = new $.jqx.dataAdapter(purposeSource);
+            $("#DefaultPurpose").jqxComboBox(
+            {
+                rtl: true,
+                source: purposeAdapter,
+                width: 240,
+                displayMember: 'PurposeName',
+                valueMember: 'PurposeId'
+            });
+
+            $("#BuildingId").val('@id')
+
+            //JSON.useDateParser();
+            var theme = 'Arctic';
+            // prepare the data
+            var source =
+            {
+                datatype: "json",
+                data: { 'id': '@id' },
+                id: 'BuildingId',
+                type: 'POST',
+                url: '@Url.Action("GetBuilderInfo", "Building")'
+
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                beforeLoadComplete: function (records) {
+                    setTimeout(function () {
+                        return records;
+                    }, 2000);
+                },
+                loadComplete: function (record) {
+
+                    srcBuildingId = record.BuildingId;
+                    $("#buildingName").text(record.BuildingName);
+                    $("#hTitle").text("בניית בניין-" + record.BuildingName);
+                    var wk = generateUUIDv4();// Math.uuid();
+                    $("#WizardKey").val(wk);
+
+                    $("#Purp2").attr('checked', record.Purp2);
+                    $("#Purp3").attr('checked', record.Purp3);
+                    $("#Purp4").attr('checked', record.Purp4);
+                    $("#Purp5").attr('checked', record.Purp5);
+                    $("#Purp6").attr('checked', record.Purp6);
+                    $("#Purp7").attr('checked', record.Purp7);
+
+                    if (record.Purp2)
+                        $("#PurpFloor2").val(record.PurpFloor2);
+                    if (record.Purp3)
+                        $("#PurpFloor3").val(record.PurpFloor3);
+                    if (record.Purp4)
+                        $("#PurpFloor4").val(record.PurpFloor4);
+                    if (record.Purp5)
+                        $("#PurpFloor5").val(record.PurpFloor5);
+                    if (record.Purp6)
+                        $("#PurpFloor6").val(record.PurpFloor6);
+                    if (record.Purp7)
+                        $("#PurpFloor7").val(record.PurpFloor7);
+
+                    $("#FloorsUp").val(record.FloorsUp);
+                    $("#FloorsDown").val(record.FloorsDown);
+                    $("#FloorSize").val(record.FloorSize);
+                    $("#FloorSizeUp").val(record.FloorSizeUp);
+                    $("#FloorSizeDown").val(record.FloorSizeDown);
+                   
+                },
+                loadError: function (jqXHR, status, error) {
+                },
+            });
+            // perform data binding.
+            dataAdapter.dataBind();
+
+        });
+
+
+    </script>
+}
+
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+        <div class="box-title">
+            <h3 id="hTitle">בניית בניין</h3>
+        </div>
+
+        <div style="direction: rtl; text-align: right">
+            <a href="BuildingDef?id=@id" title="הצג בניין"><span>בניין:</span><span id="buildingName"></span></a>
+
+            <div class="form-group">
+                <label class="column">
+                    פרטי כלליים:
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="column">
+                    סוג הנכס/שימוש<span class="mandatory"></span>:
+                </label>
+                <div style="border: 1px solid #808080; max-width: 300px; padding: 10px">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>סוג שימוש</th>
+                                <th></th>
+                                <th>מספר קומות לשימוש</th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td><input id="Purp2" name="Purp2" type="checkbox" disabled /></td>
+                            <td><span>משרדים:</span></td>
+                            <td><input id="PurpFloor2" type="number" name="PurpFloor2" class="purpose_num" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td><input id="Purp3" name="Purp3" type="checkbox" disabled /></td>
+                            <td><span>תעשיה:</span></td>
+                            <td><input id="PurpFloor3" type="number" name="PurpFloor3" class="purpose_num" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td><input id="Purp4" name="Purp4" type="checkbox" disabled /></td>
+                            <td><span>מסחר:</span></td>
+                            <td><input id="PurpFloor4" type="number" name="PurpFloor4" class="purpose_num" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td><input id="Purp5" name="Purp5" type="checkbox" disabled /></td>
+                            <td><span>מחסנים:</span></td>
+                            <td><input id="PurpFloor5" type="number" name="PurpFloor5" class="purpose_num" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td><input id="Purp6" name="Purp6" type="checkbox" disabled /></td>
+                            <td><span>מגורים:</span></td>
+                            <td><input id="PurpFloor6" type="number" name="PurpFloor6" class="purpose_num" readonly="readonly" /></td>
+                        </tr>
+                        <tr>
+                            <td><input id="Purp7" name="Purp7" type="checkbox" /></td>
+                            <td><span>חניה:</span></td>
+                            <td><input id="PurpFloor7" type="number" name="PurpFloor7" class="purpose_num" /></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+           
+        </div>
+        
+        <form class="contactForm" id="contactForm" method="post" action="/Building/WizardFloorGrid">
+            <div style="direction: rtl; text-align: right">
+                <input type="hidden" id="BuildingId" name="BuildingId" value="" />
+                <input type="hidden" id="WizardKey" name="WizardKey" value="" />
+                <div class="form-group">
+                    <label class="column">
+                        הגדרות לבניית הבניין:
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <div style="border:1px solid #808080; max-width:300px; padding:10px">
+                        <table>
+                            <tr>
+                                <td>מספר קומות מעל הקרקע<span class="mandatory">(*)</span>:</td>
+                                <td><input id="FloorsUp" type="number" name="FloorsUp" class="purpose_num" /></td>
+                            </tr>
+                            <tr>
+                                <td>שטח קומה טיפוסית<span class="mandatory">(*)</span>:</td>
+                                <td><input id="FloorSize" type="number" name="FloorSize" class="purpose_num" /></td>
+                            </tr>
+                            <tr>
+                                <td>סה"כ שטח מעל הקרקע<span class="mandatory">(*)</span>:</td>
+                                <td><input id="FloorSizeUp" type="number" name="FloorSizeUp" class="purpose_num" /></td>
+                            </tr>
+                            <tr>
+                                <td> מספר קומות מתחת לקרקע:</td>
+                                <td><input id="FloorsDown" type="number" name="FloorsDown" class="purpose_num" /></td>
+                            </tr>
+                            <tr>
+                                <td>שטח קומה תת קרקעית:</td>
+                                <td><input id="FloorSizeDown" type="number" name="FloorSizeDown" class="purpose_num" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                @*<div class="form-group">
+                    <label class="column">
+                        מספר קומות :
+                    </label>
+                    <input id="NumOfFloor" name="NumOfFloor" type="number" class="text-mid" />
+                </div>
+                <div class="form-group">
+                    <label class="column">
+                        החל מ :
+                    </label>
+                    <input id="StartFloor" name="StartFloor" type="number" class="text-mid" />
+                </div>*@
+                <div id="divCategory" class="form-group">
+                    <label class="column">
+                        ייעוד-אופציונאלי :
+                    </label>
+                    <div id="DefaultPurpose" name="DefaultPurpose"></div>
+                </div>
+                <div class="form-group">
+                    <label class="column">
+                        גובה קומה-אופציונאלי :
+                    </label>
+                    <input id="DefaultFloorHeight" name="DefaultFloorHeight" type="number" step="any" class="text-mid" />
+                </div>
+                @*<div class="form-group">
+                    <label class="column">
+                        שטח- מ"ר-אופציונאלי" :
+                    </label>
+                    <input id="DefaultFloorArea" name="DefaultFloorArea" type="number" step="any" class="text-mid" />
+                </div>*@
+                <div style="height: 5px"></div>
+                <div>
+                    <input id="contactSubmit" class="btn-default btn7" type="submit" value="עדכון" />
+                    <input id="contactReset" class="btn-default btn7" type="button" value="ניקוי" />
+                    <input id="contactCancel" class="btn-default btn7" type="button" value="ביטול" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+<!--end of content-wrapper-->
+<script type="text/javascript">
+    //contactount dialog
+    $('#contactForm').jqxValidator({
+        rtl: true,
+        hintType: 'label',
+        animationDuration: 0,
+        rules: [
+             {
+                 input: '#FloorsUp', message: 'חובה לציין מספר קומות מעל הקרקע!', action: 'keyup, blur', rule: function () {
+                     var value = $("#FloorsUp").val();
+                     return value > 0;
+                 }
+             },
+           {
+               input: '#FloorSize', message: 'חובה לציין שטח קומה טיפוסית!', action: 'keyup, blur', rule: function () {
+                   var value = $("#FloorSize").val();
+                   return value.length > 0;
+               }
+           },
+            {
+                input: '#FloorSizeUp', message: 'חובה לציין שטח קומה מעל הקרקע!', action: 'keyup, blur', rule: function () {
+                    var value = $("#FloorSizeUp").val();
+                    return value.length > 0;
+                }
+            },
+          //{
+          //    input: '#NumOfFloor', message: 'חובה לציין מספר קומות!', action: 'keyup, blur', rule: function () {
+          //        var value = $("#NumOfFloor").val();
+          //        return value > 0;
+          //    }
+          //},
+          // {
+          //     input: '#StartFloor', message: 'חובה לציין החל מ קומה!', action: 'keyup, blur', rule: function () {
+          //         var value = $("#StartFloor").val();
+          //         return value.length > 0;
+          //     }
+          // },
+            {
+                input: '#DefaultFloorHeight', message: 'גובה קומה שגוי!', action: 'keyup, blur', rule: function () {
+                    var value = $("#DefaultFloorHeight").val();
+                    return value >= 0;
+                }
+            }
+        ]
+    });
+
+    @*$('#contactSubmit').on('click', function (e) {
+            var validationResult = function (isValid) {
+                if (isValid) {
+                    $.ajax({
+                        url: '@Url.Action("WizardFloorGrid", "Building")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#contactForm').serialize(),
+                        success: function (data) {
+                            //alert(data.Message);
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                }
+                else {
+                    e.preventDefault(); // t
+                }
+            }
+            $('#contactForm').jqxValidator('validate', validationResult);
+
+        });*@
+
+    $('#contactReset').on('click', function (e) {
+        $('#contactForm')[0].reset();
+        $('#contactForm').jqxValidator('hide');
+    });
+</script>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

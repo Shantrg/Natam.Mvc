@@ -1,0 +1,148 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css">
+
+    <style type="text/css">
+        .row_detail {
+            margin: 10px;
+            direction: rtl;
+        }
+
+        .row_link {
+            margin: 10px;
+            direction: rtl;
+            font-size: 16px;
+        }
+    </style>
+}
+
+
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            JSON.useDateParser();
+            var theme = 'Arctic';
+
+            // prepare the data
+            var source =
+            {
+                //sort: customsortfunc,
+                datatype: "json",
+                id: 'BuildingId',
+                type: 'POST',
+                url: '@Url.Action("GetBuildingToActivateGrid", "Building")',
+                //pagenum: 3,
+                pagesize: 20,
+                //root: 'Rows',
+            };
+
+            var dataAdapter = new $.jqx.dataAdapter(source, {
+                loadComplete: function (data) { printObject(data); },
+                loadError: function (xhr, status, error) { alert('error ' + error) }
+            });
+            // create Tree Grid
+            $("#jqxgrid").jqxGrid(
+            {
+                width: '100%',
+                autoheight: true,
+                rtl: true,
+                source: dataAdapter,
+                localization: getLocalization('he'),
+                rendergridrows: function (obj) {
+                    printObject(obj.data);
+                    return obj.data;
+                },
+                pageable: true,
+                pagermode: 'simple',
+                sortable: true,
+                altrows: true,
+                columns: [
+                  {
+                      text: 'הצג הגדרות בניין', dataField: 'BuildingId', width: 100, cellsalign: 'right', align: 'center', cellsrenderer:
+                           function (row, columnfield, value, defaulthtml, columnproperties) {
+                               return '<div style="text-align:center"><a href="BuildingDef?id=' + value + '" >הצג</a> | <a href="javascript:doArchive('+ value +')" >הסרה</a></div>';
+                           }
+                  },
+                  { text: 'שם הבניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center' },
+                  { text: 'עיר', dataField: 'City', cellsalign: 'right', align: 'center' },
+                  { text: 'רחוב', dataField: 'Street', cellsalign: 'right', align: 'center' },
+                  { text: 'מס', dataField: 'StreetNo', cellsalign: 'right', align: 'center' },
+                  { text: 'שטח', dataField: 'BuildingSizeTotal', width: 120, cellsalign: 'right', align: 'center' },
+                  //{ text: 'בעלים עיקריים', dataField: 'OwnerName', width: 150, cellsalign: 'right', align: 'center' },
+                  { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
+                ]
+            });
+
+        });
+
+        function doArchive(id) {
+            if (confirm("פעולה זו תעביר את הבניין לארכיון , האם להמשיך?") == false)
+                return
+            $.ajax({
+                url: '@Url.Action("DoArchive", "Building")',
+                type: 'post',
+                dataType: 'json',
+                data: { 'BuildingId': id },
+                success: function (data) {
+                    //alert(data.Message);
+                    if (data.Status > 0) {
+                        $('#jqxgrid').jqxGrid('source').dataBind();
+                    }
+                },
+                error: function (jqXHR, status, error) {
+                    alert(error);
+                }
+            });
+        }
+
+    </script>
+}
+
+
+@section featured {
+
+
+}
+<!--breadcrumb-->
+<div class="breadcrumbs">
+    @Html.ActionLink("Home", "Index", "Home")>
+    @Html.ActionLink("Main", "Main", "Home")>
+    <a href="javascript:parent.history.back()">Buildings</a> >
+    @ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+@*<hgroup class="title">
+    <h3 class="rightPan">רשימת בניינים לעדכון</h3>
+</hgroup>*@
+
+<div class="clear"></div>
+
+<div class="global">
+    <div class="container">
+
+        <div class="grid-wrap">
+            <div style="display: inline; text-align: right">
+                <h3>רשימת בניינים לעדכון</h3>
+            </div>
+
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                <div style="margin-top: 30px;">
+                    <div id="cellbegineditevent"></div>
+                    <div style="margin-top: 10px;" id="cellendeditevent"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

@@ -1,0 +1,69 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+    
+    int id= Nistec.Types.ToInt(Request["id"]);
+
+    
+}
+
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+<script src="~/Scripts/app/model/plots-grid.js"></script>
+ <style type="text/css">
+    input {
+        direction: rtl;
+        text-align: right;
+    }
+</style>
+}
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var id = '@id';
+            @*var allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;*@
+
+            app_plots_grid.load(id, '@ViewBag.UserRole');
+
+         });
+    </script>
+}
+
+@section featured {
+
+
+}
+
+
+        <!--breadcrumb-->
+        <div class="breadcrumbs">
+            @Html.ActionLink("Home", "Index", "Home")>
+            @Html.ActionLink("Main", "Main", "Home")>
+            <a href="javascript:parent.history.back()">Buildings</a> >
+            @ViewContext.RouteData.Values["action"].ToString()
+        </div>
+
+        <div class="clear"></div>
+
+        <div class="global">
+            <div class="container">
+
+                <div class="grid-wrap">
+                    <div class="box-title">
+                        <h3 id="hTitle">מגרשים</h3>
+                        <a href="~/Building/PlotsDef?id=0">הגדרת מגרש חדש</a>
+                        <div id="Agent"></div>
+                    </div>
+                   
+                    <div id="jqxWidget">
+                        <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            app_menu.activeLayoutMenu("liBuilding");
+    </script>

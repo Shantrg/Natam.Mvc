@@ -1,0 +1,318 @@
+﻿@{
+    Layout = "~/Views/Shared/_ViewAdmin.cshtml";
+    Page.Title = "Building";
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+
+    @Scripts.Render("~/bundles/jqxgrid")
+}
+@section scripts {
+ <script type="text/javascript">
+     $(document).ready(function () {
+         var theme = 'Arctic';
+         JSON.useDateParser();
+
+         // prepare the data
+         var zoneSource =
+         {
+             dataType: "json",
+             dataFields: [
+                 { name: 'ZoneId' },
+                 { name: 'ZoneName' }
+             ],
+             data: {},
+             type: 'POST',
+             url: '@Url.Action("GetZoneView", "Building")'
+               };
+         var zoneAdapter = new $.jqx.dataAdapter(zoneSource, {
+             contentType: "application/json; charset=utf-8",
+             loadError: function (jqXHR, status, error) {
+                 //alert("zoneAdapter failed: " + error);
+             },
+             loadComplete: function (data) {
+                 //alert("zoneAdapter is Loaded");
+             }
+         });
+         // perform Data Binding.
+         zoneAdapter.dataBind();
+         $("#ZoneId").jqxDropDownList(
+               {
+                   rtl: true,
+                   source: zoneAdapter,
+                   width: 100,
+                   //promptText: "בחירת אזור",
+                   displayMember: 'ZoneName',
+                   valueMember: 'ZoneId'
+               });
+         var source =
+         {
+             updaterow: function (rowid, rowdata, commit) {
+                 //alert(rowdata.AreaName);
+                 $.ajax({
+                     dataType: 'json',
+                     type: 'POST',
+                     url: '@Url.Action("AreaDefUpdate", "Admin")',
+                     data: { 'AreaId': rowdata.AreaId, 'AreaName': rowdata.AreaName, 'ZoneId': rowdata.ZoneId, 'command': 1 },
+                     success: function (data, status, xhr) {
+                         if (data == '1') {
+                             //dataAdapter.dataBind();
+                             //alert('עודכן בהצלחה');
+                             $('#jqxgrid').jqxGrid('source').dataBind();
+                         }
+                         else
+                             alert('לא עודכנו נתונים');
+                         commit(true);
+                     },
+                     error: function () {
+                         alert('אירעה שגיאה, לא עודכנו נתונים');
+                         // cancel changes.
+                         commit(false);
+                     }
+                 });
+             },
+             addrow: function (rowid, rowdata, position, commit) {
+                 //alert(rowdata.AreaName);
+                 $.ajax({
+                     dataType: 'json',
+                     type: 'POST',
+                     url: '@Url.Action("AreaDefUpdate", "Admin")',
+                     data: { 'AreaId': -1, 'AreaName': rowdata.AreaName, 'ZoneId': rowdata.ZoneId, 'command': 0 },
+                        success: function (data, status, xhr) {
+                            if (data == '1') {
+                                //alert('עודכן בהצלחה');
+                                dataAdapter.dataBind();
+                            }
+                            else
+                                alert('לא עודכנו נתונים');
+                            commit(true);
+                        },
+                        error: function () {
+                            alert('אירעה שגיאה, לא עודכנו נתונים');
+                            commit(false);
+                        }
+                    });
+                },
+             deleterow: function (rowid, commit) {
+                 //alert(rowid);
+                 $.ajax({
+                     dataType: 'json',
+                     type: 'POST',
+                     url: '@Url.Action("AreaDefUpdate", "Admin")',
+                        data: { 'AreaId': rowid, 'AreaName': null, 'command': 2 },
+                        success: function (data, status, xhr) {
+                            if (data == '1') {
+                                //alert('עודכן בהצלחה');
+                                dataAdapter.dataBind();
+                            }
+                            else
+                                alert('לא עודכנו נתונים');
+                            commit(true);
+                        },
+                        error: function () {
+                            alert('אירעה שגיאה, לא עודכנו נתונים');
+                            commit(false);
+                        }
+                    });
+                },
+             dataType: "json",
+             datafields:
+             [
+                 { name: 'AreaId', type: 'number' },
+                 { name: 'AreaName', type: 'string' },
+                 { name: 'ZoneId', type: 'number' },
+                 { name: 'ZoneName', type: 'string' }
+                 //{ name: 'Zone', value: 'ZoneId', values: { source: zoneAdapter.records, value: 'ZoneId', name: 'ZoneName' } }
+                 //{ name: 'countryCode', type: 'string'}
+
+             ],
+             id: 'AreaId',
+             //data: {},
+             type: 'POST',
+             url: '@Url.Action("GetAreaViewAll", "Building")'
+         };
+         var dataAdapter = new $.jqx.dataAdapter(source, {
+             contentType: "application/json; charset=utf-8",
+             loadError: function (jqXHR, status, error) {
+                 //alert("dealAdapter failed: " + error);
+             },
+             loadComplete: function (data) {
+                 //alert("dealAdapter is Loaded");
+             }
+         });
+
+         var editrow = -1;
+         // initialize jqxGrid
+         $("#jqxgrid").jqxGrid(
+         {
+             rtl: true,
+             width: 500,
+             autoheight: false,
+             source: dataAdapter,
+             localization: getLocalization('he'),
+             pageable: false,
+             sortable: true,
+             showtoolbar: true,
+             rendertoolbar: function (toolbar) {
+                 var me = this;
+                 var container = $("<div style='margin: 5px;text-align:right'></div>");
+                 toolbar.append(container);
+                 container.append('<input id="addrowbutton" type="button" value="הוספה" />');
+                 container.append('<input style="margin-left: 5px;" id="deleterowbutton" type="button" value="מחיקה" title="מחיקת השורה המסומנת"/>');
+                 container.append('<input id="updaterowbutton" type="button" value="עריכה" title="עריכת השורה המסומנת"/>');
+                 container.append('<input id="refreshbutton" type="button" value="רענון" />');
+                 $("#addrowbutton").jqxButton();
+                 $("#deleterowbutton").jqxButton();
+                 $("#updaterowbutton").jqxButton();
+                 $("#refreshbutton").jqxButton();
+                 // update row.
+                 $("#updaterowbutton").on('click', function () {
+
+                     var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                     var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                     if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                         $("#jqxgrid").jqxGrid('ensurerowvisible', selectedrowindex);
+                         $("#insertFlag").val('1');
+                         $("#trcode").show();
+                         // open the popup window when the user clicks a button.
+                         editrow = selectedrowindex;
+                         var offset = $("#jqxgrid").offset();
+                         $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+                         // get the clicked row's data and initialize the input fields.
+                         var dataRecord = $("#jqxgrid").jqxGrid('getrowdata', editrow);
+                         $("#AreaId").val(dataRecord.AreaId);
+                         $("#AreaName").val(dataRecord.AreaName);
+                         $("#ZoneId").val(dataRecord.ZoneId);
+                         //var index = $("#ZoneId").jqxDropDownList('getSelectedIndex');
+                         //$("#ZoneId").jqxDropDownList('selectIndex', index);
+                         //$("#ZoneId").jqxDropDownList('ensureVisible', index);
+
+                         // show the popup window.
+                         $("#popupWindow").jqxWindow('open');
+                     }
+
+                 });
+                 // create new row.
+                 $("#addrowbutton").on('click', function () {
+                     // show the popup window.
+                     var offset = $("#jqxgrid").offset();
+                     $("#popupWindow").jqxWindow({ position: { x: parseInt(offset.left) + 60, y: parseInt(offset.top) + 60 } });
+                     $("#popupWindow").jqxWindow('open');
+                     $("#insertFlag").val('0');
+                     $("#trcode").hide();
+                     $("#AreaName").val('');
+                 });
+                 // delete row.
+                 $("#deleterowbutton").on('click', function () {
+                     var selectedrowindex = $("#jqxgrid").jqxGrid('getselectedrowindex');
+                     var rowscount = $("#jqxgrid").jqxGrid('getdatainformation').rowscount;
+                     if (selectedrowindex >= 0 && selectedrowindex < rowscount) {
+                         var id = $("#jqxgrid").jqxGrid('getrowid', selectedrowindex);
+                         var result = confirm("האם למחוק?");
+                         if (result == true) {
+                             //Logic to delete the item
+                             var commit = $("#jqxgrid").jqxGrid('deleterow', id);
+                         }
+                     }
+                 });
+                 // refresh grid.
+                 $("#refreshbutton").on('click', function () {
+                     dataAdapter.dataBind();
+                 });
+             },
+             columns: [
+               { text: 'קוד אזור', datafield: 'AreaId', width: 60, cellsalign: 'right', align: 'center' },
+               { text: 'שם האזור', datafield: 'AreaName', cellsalign: 'right', align: 'center' },
+               { text: 'תחום', datafield: 'ZoneName', width: 100, cellsalign: 'right', align: 'center' }
+               //{
+               //    text: 'תחום', datafield: 'ZoneId', displayfield: 'Zone', columntype: 'dropdownlist',
+               //    createeditor: function (row, value, editor) {
+               //        editor.jqxDropDownList({ source: zoneAdapter, displayMember: 'ZoneName', valueMember: 'ZoneId' });
+               //    }
+               //}
+             ]
+         });
+         $("#jqxgrid").on('cellselect', function (event) {
+             var column = $("#jqxgrid").jqxGrid('getcolumn', event.args.datafield);
+             var value = $("#jqxgrid").jqxGrid('getcellvalue', event.args.rowindex, column.datafield);
+             var displayValue = $("#jqxgrid").jqxGrid('getcellvalue', event.args.rowindex, column.displayfield);
+             //$("#eventLog").html("<div>Selected Cell<br/>Row: " + event.args.rowindex + ", Column: " + column.text + ", Value: " + value + ", Label: " + displayValue + "</div>");
+         });
+         // initialize the input fields.
+         $("#AreaId").jqxInput({ theme: theme }).width(150);
+         $("#AreaName").jqxInput({ theme: theme }).width(150);
+         $("#ZoneId").jqxDropDownList({ theme: theme }).width(150);
+         // initialize the popup window and buttons.
+         $("#popupWindow").jqxWindow({
+             width: 250, resizable: false, isModal: true, autoOpen: false, cancelButton: $("#Cancel"), modalOpacity: 0.01
+         });
+         $("#popupWindow").on('open', function () {
+             $("#AreaName").jqxInput('selectAll');
+         });
+
+         $("#Cancel").jqxButton({ theme: theme });
+         $("#Save").jqxButton({ theme: theme });
+         // update the edited row when the user clicks the 'Save' button.
+         $("#Save").click(function () {
+             var row = {
+                 AreaId: $("#AreaId").val(), AreaName: $("#AreaName").val(), ZoneId: $("#ZoneId").val()
+             };
+             if ($("#insertFlag").val() == '0') {
+                 $('#jqxgrid').jqxGrid('addrow', null, row);
+             }
+             else if (editrow >= 0) {
+                 var rowID = $('#jqxgrid').jqxGrid('getrowid', editrow);
+                 $('#jqxgrid').jqxGrid('updaterow', rowID, row);
+             }
+             $("#popupWindow").jqxWindow('hide');
+         });
+     });
+    </script>
+}
+<hgroup class="title">
+    <h3 class="rightPan">הגדרות כלליות-<span>סוג אזור</span></h3>
+    
+</hgroup>
+<div class="clear"></div>
+
+<div class="global-view">
+    
+    <div class="container-rtl">
+        <div class="grid-wrap">
+             <div id="jqxWidget">
+                 <!--<input style="margin-right: 5px;" type="button" id="addrowbutton" value="הוספה" />-->
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                 <div style="font-size: 12px; font-family: Verdana, Geneva, 'DejaVu Sans', sans-serif; margin-top: 30px;">
+            <div id="cellbegineditevent"></div>
+            <div style="margin-top: 10px;" id="cellendeditevent"></div>
+            <div id="popupWindow">
+                <input type="hidden" id="insertFlag" value="0" />
+            <div>עריכה</div>
+            <div style="overflow: hidden;direction:rtl">
+                <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
+                    <tr id="trcode">
+                        <td align="right">קוד אזור:</td>
+                        <td align="left"><input id="AreaId" readonly  style="direction:rtl;text-align:right;"/></td>
+                    </tr>
+                    <tr>
+                        <td align="right">שם אזור:</td>
+                        <td align="left"><input id="AreaName" style="direction:rtl;text-align:right;" /></td>
+                    </tr>
+                    <tr>
+                        <td align="right">תחום:</td>
+                        <td align="left"><div id="ZoneId" name="ZoneId"></div></td>
+                    </tr>
+                    <tr>
+                        <td align="right"></td>
+                        <td style="padding-top: 10px;" align="right">
+                            <input style="margin-right: 5px;" type="button" id="Save" value="עדכון" />
+                            <input id="Cancel" type="button" value="ביטול" /></td>
+                    </tr>
+                </table>
+            </div>
+       </div>
+       </div>
+             </div>
+        </div>
+    </div>
+</div>

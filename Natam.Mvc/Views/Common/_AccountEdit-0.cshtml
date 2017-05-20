@@ -1,0 +1,359 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id = Nistec.Types.ToInt(Request["id"]);
+    int acctype = Nistec.Types.ToInt(Request.QueryString["acctype"]);
+
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+
+}
+
+@section scripts {
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        var id = '@id';
+        var contactsLoaded = false;
+        if (id > 0)
+            $('#accContacts').show();
+        else
+            $('#accContacts').hide();
+
+        $('#accContacts').click(function () {
+            
+            if (contactsLoaded == false) {
+                var close = $('<a href="#">סגור</a>').click(function () {
+                    $("#contactsGrid").hide();
+                });
+                $("#contactsGrid").append(close);
+                var role = getContactRole('@acctype');
+                var uploadKey = null;
+                appendIframe("contactsGrid", "/Common/_Contacts?id=" + id + "&role=" + role + "&uk=" + uploadKey, "500", "350");
+                contactsLoaded = true;
+            }
+            else {
+                $('#contactsGrid').show();
+            }
+        });
+
+        var categoryAdapter = createDropDownAdapter("CategoryId", "CategoryName", "AccountCategory", '@Url.Action("GetCategoryView", "Common")', 155);
+
+        var view_source =
+        {
+            datatype: "json",
+            datafields: [
+                    { name: 'AccountId', type: 'number' },
+                    { name: 'AccountName', type: 'string' },
+                    { name: 'AccountType', type: 'string' },
+                    { name: 'AccountCategory', type: 'number' },
+                    //{ name: 'CompanyName', type: 'string' },
+                    //{ name: 'ContactName', type: 'string' },
+                    { name: 'Street', type: 'string' },
+                    { name: 'City', type: 'string' },
+                    { name: 'Phone1', type: 'string' },
+                    { name: 'Phone2', type: 'string' },
+                    //{ name: 'Mobile', type: 'string' },
+                    //{ name: 'Email', type: 'string' },
+                    { name: 'Fax', type: 'string' },
+                    { name: 'WebSite', type: 'string' },
+                    { name: 'ZipCode', type: 'string' },
+                    { name: 'Details', type: 'string' }
+            ],
+            id: 'AccountId',
+            data: { 'id': id, 'acctype': '@acctype' },
+            type: 'POST',
+            url: '@Url.Action("GetAccountEdit", "Common")'
+                };
+
+        var srcAccountType = '@acctype';
+        $('#AccountType').val(srcAccountType);
+
+            var viewAdapter = new $.jqx.dataAdapter(view_source, {
+                loadComplete: function (record) {
+                    if (record) {
+                        //srcAccountType = record.AccountType;
+
+                        loadDataForm("accForm", record);
+
+                       
+                        //var title = "הגדרת חשבון";
+                        if (srcAccountType == 1) {
+                            //title = "הגדרת בעלים";
+                            $("#lblName").text("שם חברה");
+                            var allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;
+                            if (allowEdit == 1) {
+                                $("#divCategory").show();
+                                $("#divContact").hide();
+                                $("#accSubmit").show();
+                                $("#accCancel").show();
+                            }
+                            else {
+                                $("#accSubmit").hide();
+                                $("#accCancel").hide();
+                            }
+                        }
+                        else if (srcAccountType == 2) {
+                            //title = "הגדרת בעלים";
+                            $("#lblName").text("שם בעלים");
+                            $("#divCategory").hide();
+                        }
+                        else if (srcAccountType == 6) {
+                            //title = "הגדרת חברת ניהול";
+                            $("#lblName").text("שם חברת ניהול");
+                            $("#divCategory").hide();
+                        }
+                        else {
+                            $("#lblName").text("שם");
+                            $("#divCategory").show();
+                        }
+                        //onEmailLink();
+                        //onWebsiteLink();
+                        setLinkHref('Email', 'emailLink', true);
+                        setLinkHref('WebSite', 'websiteLink', false);
+                        //$("#accHeader").append("<h4>" + title + "</h4>");
+                        //$("#divCategory")
+
+                        //selectDropDownValue("AccountCategory", record.AccountCategory);
+                    }
+                },
+                loadError: function (jqXHR, status, error) {
+                },
+                beforeLoadComplete: function (records) {
+                }
+            });
+            viewAdapter.dataBind();
+
+
+
+
+            //account dialog
+            $('#accForm').jqxValidator({
+                rtl: true,
+                //hintType: 'label',
+                animationDuration: 0,
+                rules: [
+                      { input: '#AccountName', message: 'חובה לציין שם', action: 'keyup, blur', rule: 'required' },
+                      {
+                          input: '#Phone1', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+                      function (input, commit) {
+                          var val = input.val();
+                          var re = /^([0-9])+$/
+                          return val ? re.test(val) : true;
+                      }
+                      },
+                      {
+                          input: '#Phone2', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+                      function (input, commit) {
+                          var val = input.val();
+                          var re = /^([0-9])+$/
+                          return val ? re.test(val) : true;
+                      }
+                      },
+                      {
+                          input: '#Fax', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
+                      function (input, commit) {
+                          var val = input.val();
+                          var re = /^([0-9])+$/
+                          return val ? re.test(val) : true;
+                      }
+                      }
+                      //{ input: '#ContactName', message: 'חובה לציין איש קשר', action: 'keyup, blur', rule: 'required' },
+                      //{ input: '#Address', message: 'חובה לציין כתובת', action: 'keyup, blur', rule: 'required' },
+                      //{ input: '#City', message: 'חובה לציין עיר', action: 'keyup, blur', rule: 'required' },
+                      //{ input: '#Email', message: 'אימייל לא תקין', action: 'keyup', rule: 'email' },
+                      //{
+                      //    input: '#Phone1', message: 'טלפון 1 אינו תקין', action: 'valuechanged, blur', rule:
+                      //              function (input, commit) {
+                      //                  return validatePhone(input.val());
+                      //              }
+                      //},
+                       //{
+                       //    input: '#Mobile', message: 'טלפון נייד אינו תקין', action: 'valuechanged, blur', rule:
+                       //              function (input, commit) {
+                       //                  return validatePhone(input.val());
+                       //              }
+                       //},
+                      //{
+                      //    input: '#Fax', message: 'פקס אינו תקין', action: 'valuechanged, blur', rule:
+                      //              function (input, commit) {
+                      //                  return validatePhone(input.val());
+                      //              }
+                      //}
+                ]
+            });
+
+            $('#accSubmit').on('click', function (e) {
+
+                e.preventDefault();
+                
+                var actionurl = $('#accForm').attr('action');
+                var validationResult = function (isValid) {
+                    if (isValid) {
+                        //ajaxForm("/Common/UpdateAccount", "accForm", onSuccess);
+
+                        $.ajax({
+                            url: actionurl,
+                            type: 'post',
+                            dataType: 'json',
+                            data: $('#accForm').serialize(),
+                            success: function (data) {
+                                alert(data.Message);
+                                if (data.Status >= 0) {
+
+                                    //$('#accWindow').jqxWindow('close');
+                                    var accType = $('#AccountType').val();
+                                    window.parent.triggerAccComplete(accType, data.OutputId);
+                                }
+                            },
+                            error: function (jqXHR, status, error) {
+                                alert(error);
+                            }
+                        });
+                    }
+                }
+                $('#accForm').jqxValidator('validate', validationResult);
+
+            });
+
+            $('#Email').on('input propertychange paste', function () {
+                //onEmailLink();
+                setLinkHref('Email','emailLink',true);
+            });
+            $('#WebSite').on('input propertychange paste', function() {
+                //onWebsiteLink();
+                setLinkHref('WebSite', 'websiteLink', false);
+            });
+            //var onEmailLink = function () {
+            //    var val = $('#Email').val();
+            //    //alert(val);
+            //    if (val === undefined || val.length < 10) {
+            //        $('a#emailLink').attr('href', '');
+            //        $('a#emailLink').hide();
+            //    }
+            //    else {
+            //        $('a#emailLink').attr('href', 'mailto:' + val);
+            //        $('a#emailLink').show();
+            //    }
+            //    //alert( $('a#emailLink').attr('href'));
+            //};
+            //var onWebsiteLink=function(){
+            //    $('#websiteLink').attr('href', '');
+            //    var val = $('#WebSite').val();
+            //    //alert(val);
+            //    if (val === undefined || val.length < 6) {
+            //        $('a#websiteLink').attr('href', '');
+            //        $('a#websiteLink').hide();
+            //    }
+            //    else {
+            //        $('a#websiteLink').attr('href', val);
+            //        $('a#websiteLink').show();
+            //    }
+            //    //alert($('a#websiteLink').attr('href'));
+            //};
+            //function onSuccess() {
+            //    var accType = $('#AccountType').val();
+            //    window.parent.triggerAccComplete(accType, );
+            //}
+        });
+
+    </script>
+}
+
+<div style="margin: 0px;">
+
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+        <div id="accWindow">
+            <div id="accHeader">
+            </div>
+            <div id="accBody">
+                <form class="accForm" id="accForm" method="post" action="/Common/UpdateAccount">
+                    <div style="direction: rtl; text-align: right">
+                        <input type="hidden" id="AccountType" name="AccountType" value="2" />
+                        <input type="hidden" id="AccountId" name="AccountId" value="" />
+                        <div class="form-group">
+                            <label  class="column">
+                                <span id="lblName">שם</span>: <span class="mandatory">(*)</span></label>
+                            <input id="AccountName" name="AccountName" type="text" class="text-mid" />
+                        </div>
+                        <div id="divCategory" class="form-group">
+                            <label class="column">
+                                קטגוריה :</label>
+                            <div id="AccountCategory" name="AccountCategory" style="display: inline-block; text-align: right"></div>
+                        </div>
+                        @*<div id="divContact" class="form-group">
+                            <label class="column">
+                                איש קשר :</label>
+                            <input id="ContactName" name="ContactName" type="text" class="text-mid" />
+                        </div>*@
+                        <div id="contactsGrid"></div>
+                        <div class="form-group">
+                            <label class="column">
+                                כתובת:</label>
+                            <input id="Address" name="Address" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                עיר:</label>
+                            <input id="City" name="City" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                מיקוד:</label>
+                            <input id="ZipCode" name="ZipCode" type="text" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                טלפון-1 :</label>
+                            <input id="Phone1" name="Phone1" type="number" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                טלפון-2 :
+                            </label>
+                            <input id="Phone2" name="Phone2" type="number" class="text-mid" />
+                        </div>
+                        <div class="form-group">
+                            <label class="column">
+                                מספר פקס :</label>
+                            <input id="Fax" name="Fax" type="number" class="text-mid" />
+                        </div>
+                        @*<div class="form-group">
+                            <label class="column">
+                                דאר אלקטרוני:</label>
+                            <input id="Email" name="Email" type="text" class="text-wide" />
+                            <a id="emailLink" href="" target="_blank">>></a>
+                        </div>*@
+                        <div class="form-group">
+                            <label class="column">
+                                אינטרנט:</label>
+                            <input id="WebSite" name="WebSite" type="text" class="text-wide" />
+                            <a id="websiteLink" href="" target="_blank">>></a>
+                        </div>
+                       <div class="form-group">
+                            <label class="column">
+                                הערות:</label>
+                           <textarea id="Details" name="Details" class="textarea-mid"></textarea>
+                        </div>
+                        <div style="height: 5px"></div>
+                        <div>
+                            <input id="accSubmit" class="btn-default btn7" type="button" value="עדכון" />
+                            <input id="accCancel" class="btn-default btn7" type="button" value="ביטול" />
+                            <input id="accContacts" class="btn-default btn7" type="button" value="אנשי קשר" />
+
+                            <!--<input class="btn-default btn2" type="button" value="הוספת אנשי קשר" />-->
+                        </div>
+                        <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end of content-wrapper-->

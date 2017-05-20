@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "~/Views/Shared/_ViewAdmin.cshtml";
+    Page.Title = "Cms";
+    string sid = "2";// Request.QueryString["sid"];
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <script type="text/javascript" src="~/jqwidgets/jqxdatatable.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/jqxeditor.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/jqxcolorpicker.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/ex/mc-cmsWeb.js"></script>
+     <link rel="stylesheet" href="~/jqwidgets/ex/mc-cmsWeb.css" type="text/css" />
+
+}
+@section scripts {
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var selectedSite = '@sid';
+            @*editCmsMultiSite('@Url.Action("GetCmsPages", "Admin")','@Url.Action("GetSiteView", "Admin")');*@
+            editCmsSingleSite('@Url.Action("GetCmsPages", "Cms")', selectedSite)
+        });
+    </script>
+}
+
+<hgroup class="title">
+
+    <h3 class="rightPan">עריכת תוכן</h3>
+
+</hgroup>
+
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container-rtl">
+        Site:
+        <div style="margin-top: 10px;" id="listSite"></div>
+
+        <div style="margin-top: 20px;position:relative;z-index:1;" id="dataTable"></div>
+    </div>
+</div>

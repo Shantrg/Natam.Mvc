@@ -1,0 +1,130 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+}
+@section head {
+}
+
+<hgroup class="title">
+    <h3 class="rightPan">דוחות</h3>
+</hgroup>
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div class="container">
+
+        <form action="" method="post">
+            <div>
+                <div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג דוח:</label>
+                        <select>
+                            <option>איתור נכסים</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג עסקה:</label>
+                        <select>
+                            <option>מכירה</option>
+                            <option>השכרה</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column"></label>
+                        <div style="display: inline">
+                            <input type="checkbox" /><label>מניב</label>
+                            <input type="checkbox" /><label>השקעה</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="column"></label>
+                            <div style="display: inline">
+                                <input type="checkbox" /><label>מיידי</label>
+                                <input type="checkbox" /><label>מתפנה ב..</label><input type="text" class="text-short" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג נכס:</label>
+                        <select>
+                            <option>סוג נכס 1</option>
+                            <option>סוג נכס 2</option>
+                            <option>סוג נכס 3</option>
+                            <option>סוג נכס 4</option>
+                            <option>סוג נכס 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            אזור:</label>
+                        <select>
+                            <option>מרכז</option>
+                            <option>דרום</option>
+                            <option>צפון</option>
+                            <option>שפלה</option>
+                        </select>
+                        <div>
+                            <label class="column">
+                            </label>
+                            <select>
+                                <option>תל אביב</option>
+                                <option>רמת גן</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="column">
+                            שטח הנכס - מ"ר:</label>
+                        <div style="display: inline">
+                            מ-: 
+                            <input type="text" class="text-short" />
+                            עד:
+                            <input type="text" class="text-short" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מחיר:</label>
+                        <div style="display: inline">
+                            מ-: 
+                            <input type="text" class="text-short" />
+                            עד:
+                            <input type="text" class="text-short" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            שם מבנה:</label>
+                        <input type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            כתובת:</label>
+                        <input type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            נכסים שלי:</label>
+                        <input type="checkbox" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            נכסים בניהול נת"מ:</label>
+                        <input type="checkbox" />
+                    </div>
+                    <div style="height: 5px"></div>
+                    <div>
+                        <input type="button" value="הצג" onclick="location.href = 'ReportGrid'" />
+                        <input type="button" value="נקה" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+

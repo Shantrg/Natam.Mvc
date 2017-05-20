@@ -1,0 +1,718 @@
+﻿@model Natam.Data.Entities.BuildingInfoView
+@{
+    Layout = "~/Views/_View.cshtml";
+    Page.Title = "Building";
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    int bid = Nistec.Types.ToInt(Request.QueryString["bid"]);
+}
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    <script type="text/javascript" src="~/Scripts/jq/plagins/blockUI.js"></script>
+   <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
+   <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />
+
+}
+
+@section scripts {
+  <script type="text/javascript">
+
+      $(document).ready(function () {
+          @if (bid <= 0)
+          {
+              return;
+          }
+          JSON.useDateParser();
+          var theme = 'Arctic';
+
+
+          //$("#FloorNum").jqxNumberInput({ inputMode: 'simple', decimalDigits: 0 });
+          //$("#UnitSize").jqxNumberInput();
+          //$("#Price").jqxNumberInput();
+
+          var dealSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'DealId' },
+                    { name: 'DealName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetDealView", "Building")'
+            };
+          var dealAdapter = new $.jqx.dataAdapter(dealSource);
+          $("#DealType").jqxListBox(
+          {
+              rtl: true,
+              source: dealAdapter,
+              width: 240,
+              height: 80,
+              checkboxes: true,
+              displayMember: 'DealName',
+              valueMember: 'DealId'
+          });
+
+          var ownerSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AccountId' },
+                    { name: 'AccountName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetOwnerView", "Building")'
+            };
+          var ownerAdapter = new $.jqx.dataAdapter(ownerSource);
+          $("#OwnerId").jqxComboBox(
+          {
+              rtl: true,
+              source: ownerAdapter,
+              width: 240,
+              //height: 120,
+              //promptText: "בחירת ייעוד הנכס",
+              displayMember: 'AccountName',
+              valueMember: 'AccountId'
+          });
+
+
+          //var selectCheckListIndex = function (tag, value) {
+          //    var item = $("#" + tag).jqxListBox('getItemByValue', value);
+          //    if (item) {
+          //        $("#" + tag).jqxListBox('checkIndex', item.index);
+          //    }
+          //};
+
+          //var selectCheckList = function (tag, value) {
+          //    if (value) {
+          //        var items = value.split(",");
+          //        for (index = 0; index < items.length; ++index) {
+          //            selectCheckListIndex(tag, items[index]);
+          //        }
+          //    }
+          //};
+
+          // prepare the data
+          var source =
+          {
+              datatype: "json",
+              datafields: [
+
+                    { name: 'UnitId', type: 'number' },
+                    { name: 'BuildingId', type: 'number' },
+                    //{ name: 'BuildingName', type: 'string' },
+                    { name: 'FloorNum', type: 'number' },
+                    { name: 'UnitNum', type: 'number' },
+                    { name: 'UnitSize', type: 'number' },
+                    { name: 'Price', type: 'number' },
+                    { name: 'ContactName', type: 'string' },
+                    { name: 'ContactPhone', type: 'string' },
+                    { name: 'ContactMobile', type: 'string' },
+                    { name: 'ContactMail', type: 'string' },
+                    { name: 'Populate', type: 'bool' },
+                    { name: 'Memo', type: 'string' },
+                    { name: 'LastUpdate', type: 'date' },
+                    //{ name: 'Pic1', type: 'string' },
+                    //{ name: 'Pic2', type: 'string' },
+                    //{ name: 'Pic3', type: 'string' },
+                    { name: 'AgentId', type: 'number' },
+                    { name: 'DealType', type: 'string' },
+                    { name: 'DealId', type: 'number' },
+                    { name: 'PurposeId', type: 'number' },
+                    { name: 'OwnerId', type: 'number' }
+
+
+
+              ],
+              id: 'UnitId',
+              type: 'POST',
+              url: '@Url.Action("GetUnit", "Building")'
+
+          };
+          source.data = { 'id': '@id' };
+
+          var srcDealType;
+          var srcOwnerId;
+          var srcBuildingId;
+          var srcPurposeId;
+          var srcUnitId;
+
+          var dataAdapter = new $.jqx.dataAdapter(source, {
+              loadComplete: function (record) {
+                  // get data records.
+                  //var length = records.length;
+                  //var record = records[i];
+
+                  $("#BuildingName").val('@Model.BuildingName');
+
+                  if (record.UnitId <= 0) {
+                      $("#BuildingId").val('@Model.BuildingId');
+                  }
+                  else {
+                      $("#UnitId").val(record.UnitId);
+                      $("#BuildingId").val(record.BuildingId);
+                      //$("#BuildingName").val(record.BuildingName);
+                      $("#FloorNum").val(record.FloorNum);
+                      $("#UnitNum").val(record.UnitNum);
+                      $("#UnitSize").val(record.UnitSize);
+                      $("#Price").val(record.Price);
+                      //$("#ContactName").val(record.ContactName);
+                      //$("#ContactPhone").val(record.ContactPhone);
+                      //$("#ContactMobile").val(record.ContactMobile);
+                      //$("#ContactMail").val(record.ContactMail);
+                      $("#Populate").val(record.Populate);
+                      $("#Memo").val(record.Memo);
+                      //$("#LastUpdate").val(record.LastUpdate);
+                      //$("#Pic1").val(record.Pic1);
+                      //$("#Pic2").val(record.Pic2);
+                      //$("#Pic3").val(record.Pic3);
+                      $("#AgentId").val(record.AgentId);
+                  }
+
+                  srcUnitId = record.UnitId;
+
+                  srcPurposeId = record.PurposeId;
+                  selectComboBoxValue("PurposeId", srcPurposeId);
+
+                  srcOwnerId = record.OwnerId;
+                  selectComboBoxValue("OwnerId", srcOwnerId);
+
+                  srcDealType = record.DealType;
+                  selectCheckList("DealType", srcDealType);
+
+                  srcBuildingId = record.BuildingId
+                  $("#divImages").css('display', srcBuildingId > 0 ? 'inline' : 'none');
+
+
+              },
+              loadError: function (jqXHR, status, error) {
+              },
+              beforeLoadComplete: function (records) {
+
+              }
+          });
+          // perform data binding.
+          dataAdapter.dataBind();
+
+          $('#btnImages').click(function (e) {
+              e.preventDefault();
+              //popupIframe("_Media?bid=" + srcBuildingId + "&pid=" + srcUnitId + "&pt=u", "900", "520");
+              mediaEditor(srcBuildingId, srcUnitId, "u");
+          });
+
+          $('#accWindow').jqxWindow({
+              rtl: true,
+              resizable: true,
+              isModal: true,
+              autoOpen: false,
+              width: 400,
+              height: 500,
+              cancelButton: $('#accCancel'),
+          });
+          //var getSelectedOwner = function () {
+          //    var item = $("#OwnerId").jqxComboBox('getSelectedItem');
+          //    if (!item)
+          //        return 0;
+          //    return item.value;
+          //};
+
+          $('#showOwner').click(function (e) {
+              e.preventDefault();
+              //var item = $("#OwnerId").jqxComboBox('getSelectedItem');
+              //if (!item)
+              //    return;
+              var val = getSelectedComboValue("OwnerId",0);//item.value;
+              if (val != 0)
+                  accountDisplay(val, "בעלים");
+          });
+          $('#refreshOwner').click(function () {
+              ownerAdapter.dataBind();
+              selectComboBoxValue("OwnerId", srcOwnerId);
+          });
+          //$('#addOwner').click(function (e) {
+          //    e.preventDefault();
+          //    $('#accHeader').html("הגדרת בעלים");
+          //    $('#AccountType').val("2");
+          //    $('#accWindow').jqxWindow('open');
+          //});
+          $('#editOwner').click(function (e) {
+              e.preventDefault();
+              var val = getSelectedComboValue("OwnerId", 0);
+              //popupIframe("_AccountEdit?id=" + val + "&acctype=2", "400", "550");
+              accountEdit(val,2);
+          });
+
+          var accSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AccountId' },
+                    { name: 'AccountName' }
+                ],
+                type: 'POST',
+                url: '@Url.Action("GetDealView", "Building")'
+            };
+          var dealAdapter = new $.jqx.dataAdapter(dealSource);
+
+          //account dialog
+          $('#accForm').jqxValidator({
+              rtl: true,
+              hintType: 'label',
+              animationDuration: 0,
+              rules: [
+                    { input: '#AccountName', message: 'חובה לציין שם!', action: 'keyup, blur', rule: 'required' },
+                    //{ input: '#ContactName', message: 'חובה לציין איש קשר!', action: 'keyup, blur', rule: 'required' },
+                    { input: '#accStreet', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
+                    { input: '#accCity', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' },
+                    { input: '#AccountEmail', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
+                    {
+                        input: '#AccountPhone1', message: 'טלפון 1 אינו תקין!', action: 'valuechanged, blur', rule:
+                                  function (input, commit) {
+                                      var val = input.val();
+                                      var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                                      return val ? re.test(val) : true;
+                                  }
+                    },
+                    {
+                        input: '#Fax', message: 'פקס אינו תקין!', action: 'valuechanged, blur', rule:
+                                  function (input, commit) {
+                                      var val = input.val();
+                                      var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+                                      return val ? re.test(val) : true;
+                                  }
+                    }
+              ]
+          });
+
+          $('#accSubmit').on('click', function (e) {
+              var validationResult = function (isValid) {
+                  if (isValid) {
+                      $.ajax({
+                          url: '@Url.Action("UpdateAccount", "Building")',
+                        type: 'post',
+                        dataType: 'json',
+                        data: $('#accForm').serialize(),
+                        success: function (data) {
+                            alert(data.Message);
+                            if (data.Status >= 0) {
+                                $('#accWindow').jqxWindow('close');
+                                var accType = $('#AccountType').val();
+                                if (accType == "2")
+                                    ownerAdapter.dataBind();
+                                else if (accType == "6")
+                                    managementAdapter.dataBind();
+                            }
+                        },
+                        error: function (jqXHR, status, error) {
+                            alert(error);
+                        }
+                    });
+                }
+                else {
+                    e.preventDefault(); // t
+                }
+            }
+            $('#accForm').jqxValidator('validate', validationResult);
+
+        });
+
+
+      });
+
+  </script>
+ 
+    
+    <script type="text/javascript">
+    //$(document).ready(function () {
+
+    //    $("#tab-building li:eq(0) a").tab('show');
+
+    //    clickLink('linkA');
+
+        //});
+
+        function triggerAccComplete(accType) {
+            //$(document).trigger('complete');
+            $('#accWindow').jqxWindow('close');
+            //var accType = $('#AccountType').val();
+            if (accType == "2")
+                ownerAdapter.dataBind();
+            else if (accType == "6")
+                managementAdapter.dataBind();
+        }
+
+
+    function clickLink(elementName) {
+        $('#' + elementName).click();
+        $('#form').jqxValidator('validate');
+    }
+
+    //initialize validator.
+    $('#form').jqxValidator({
+        rtl: true,
+        hintType: 'label',
+        animationDuration: 0,
+        rules: [
+               { input: '#FloorNum', message: 'חובה לציין קומה!', action: 'keyup, blur', rule: function (){ 
+                   var value = $("#FloorNum").val();
+                   //!isNaN(value) && value > 0;;
+                   return value >0;
+                    }
+               },
+               { input: '#UnitSize', message: 'חובה לציין שטח!', action: 'keyup, blur', rule:  function (){ 
+                   var value = $("#UnitSize").val();
+                   return value >0;
+                    }
+               },
+               {
+                   input: '#Price', message: 'חובה לציין מחיר!', action: 'keyup, blur', rule: function () {
+                       var value = $("#Price").val();
+                       return value > 0;
+                   }
+               },
+               {
+                   input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
+                       var items = $("#DealType").jqxListBox('getCheckedItems');
+                       //var index = $("#PurposeType").jqxListBox('getSelectedIndex');
+                       if (items && items.length > 0)
+                           return true;
+                       return false;
+                       //if (index >= 0) { return true; } return false;
+                   }
+               },
+            {
+                input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
+                    var index = $("#OwnerId").jqxComboBox('getSelectedIndex');
+                    if (index >= 0) { return true; } return false;
+                }
+            },
+            {
+                input: '#PurposeId', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
+                    var index = $("#PurposeId").jqxComboBox('getSelectedIndex');
+                    if (index >= 0) { return true; } return false;
+                }
+            },
+               //{ input: '#ContactName', message: 'חובה לציין שם איש קשר!', action: 'keyup, blur', rule: 'required' },
+               //{ input: '#ContactMobile', message: 'חובה לציין טלפון נייד!', action: 'keyup, blur', rule: 'required' },
+               //{ input: '#ContactMail', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
+               //{
+               //    input: '#ContactPhone', message: 'טלפון אינו תקין!', action: 'valuechanged, blur', rule:
+               //        function (input, commit) {
+               //            var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+               //            return re.test(input.val());
+               //        }
+               //},
+               //{
+               //    input: '#ContactMobile', message: 'טלפון נייד אינו תקין!', action: 'valuechanged, blur', rule:
+               //           function (input, commit) {
+               //               var re = /^(|\()(0|972)(\d{1}|\d{2})(|[\)\/\.-])([0-9]{7})$/
+               //               return re.test(input.val());
+               //           }
+               //},
+
+        ]
+    });
+
+    $("form").submit(function (e) {
+
+        var validationResult = function (isValid) {
+            if (isValid) {
+                $.blockUI({ timeout: 4000 });
+                $("#form-iframe").load(function () {
+                    $.unblockUI();
+                    $("#form-next").html('<a href="Home/Main">המשך</a>')
+                });
+
+            }
+            else {
+                e.preventDefault(); // t
+            }
+        }
+        // Validate the Form.
+        $('#form').jqxValidator('validate', validationResult);
+
+    });
+    //$("#form").on('submit', function () {
+
+    //    $.blockUI({ timeout: 4000 });
+
+    //    $("#form-iframe").load(function () {
+    //        $.unblockUI();
+    //    });
+
+    //    var validationResult = function (isValid) {
+    //        if (isValid) {
+    //            //alert("isValid");
+    //            // Submit the Form.
+    //            //$("#form").submit();
+    //            return true;
+    //        }
+    //        return false;
+    //    }
+    //    // Validate the Form.
+    //    $('#form').jqxValidator('validate', validationResult);
+    //});
+
+    $("#form").on('validationSuccess', function () {
+        //alert('validationSuccess');
+        // Display the Server's Response which came as result of the Form Submit.
+        $("#form-iframe").fadeIn('fast');
+    });
+
+    $('#reset').on('click', function () {
+        //alert("reset");
+        $("#form-iframe").html('').fadeOut('fast');
+        $("#form-next").html('')
+        location.reload();
+    });
+
+</script>
+
+}
+<!--breadcrumb-->
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="@System.Web.HttpContext.Current.Request.UrlReferrer">BuildingQuery</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+
+<hgroup class="title">
+    <h3 class="rightPan">טופס עדכון יחידה.</h3>
+</hgroup>
+<div class="clear"></div>
+   <div class="global-view">
+    <div class="container">
+        <div style="text-align:right">
+                  <div style="display: inline; text-align: right;font-size:18px;direction:rtl;">
+                <div><a href="BuildingDef?id=@Model.BuildingId" title="הצג בניין"><span>בניין:</span>@Model.BuildingName</a></div>
+                <div><span>כתובת: </span>@Model.Address</div>
+            </div>
+
+        </div>
+        <!--
+        <div>
+            <ul class="nav nav-tabs" id="tab-building">
+                <li><a id="linkA" data-toggle="tab" href="#sectionA">כללי</a></li>
+                <li><a id="linkC" data-toggle="tab" href="#sectionB">תמונות</a></li>
+            </ul>
+        </div>
+        -->
+        <div>
+             @using (Html.BeginForm("UpdateUnit", "Building", null, FormMethod.Post, new { id = "form", target = "form-iframe", Class = "form" }))
+             {
+                                <!--Html.AntiForgeryToken() 
+                                Html.ValidationSummary(true)
+                                    -->
+
+                <input type="hidden" id="AgentId" name="AgentId"/>
+                <input type="hidden" id="UnitId" name="UnitId"/>
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <!--<h4>כללי</h4>-->
+                        <div>
+                            <!--
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד יחידה:</label>
+                                <input id="UnitId" type="number" name="UnitId" readonly="true" class="number"/>
+                            </div>-->
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד בניין:</label>
+                                <input id="BuildingId" type="number" name="BuildingId" readonly="true" class="number"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שם בניין:</label>
+                                <input id="BuildingName" type="text" readonly="true" class="number"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    קומה:</label>
+                                <input id="FloorNum" type="number" name="FloorNum" step="any" class="number"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                     שטח:</label>
+                                <input id="UnitSize" type="number" name="UnitSize" step="any" class="number"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר:</label>
+                                <input id="Price" type="number" name="Price" step="any" class="number"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג הנכס/שימוש:</label>
+                                <div id="PurposeId" name="PurposeId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג עסקה:</label>
+                                <div id="DealType" name="DealType" style="padding: 10px">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    פנוי?:</label>
+                                <input id="Populate" name="Populate" type="checkbox" value="כן" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    בעלים:</label>
+                                <a id="showOwner" href="#">הצג</a>|
+                                <a id="refreshOwner" href="#">רענן</a>|
+                                <a id="editOwner" href="#">עריכה</a>
+                                <div id="OwnerId" name="OwnerId">
+                                </div>
+                            </div>
+                            <!--
+                            <span>איש קשר:</span>
+                             <div class="form-group">
+                                <label class="column">
+                                      שם:</label>
+                                <input id="ContactName" type="text" name="ContactName" class="text" />
+                            </div>
+                              <div class="form-group">
+                                <label class="column">
+                                     טלפון:</label>
+                                <input id="ContactPhone" type="text" name="ContactPhone" class="text" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                     סלולאר:</label>
+                                <input id="ContactMobile" type="text" name="ContactMobile" class="text" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                     דואל:</label>
+                                <input id="ContactMail" type="text" name="ContactMail" class="text" />
+                            </div>
+                                -->
+                            <div class="form-group">
+                                <label class="column">
+                                    הערות:</label><br />
+                                <textarea id="Memo" name="Memo" rows="4" cols="60"></textarea>
+                            </div>
+                            <div id="divImages" class="form-group">
+                                <label class="column">
+                                    תמונות:</label>
+                                <input id="btnImages" type="button" value="הצג תמונות" />
+                            </div>
+                             <div class="form-group">
+                                <label class="column">
+                                    </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                     מועד עדכון:</label>
+                                <input id="LastUpdate" disabled="disabled" type="text" name="LastUpdate" class="text" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--
+                    <div id="sectionB" class="tab-pane fade in">
+                        <h4>תמונות</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    </label>
+                                <div id="Pic1"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    </label>
+                                <div id="Pic2"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    </label>
+                                <div id="Pic3"></div>
+                            </div>
+                        </div>
+                     </div>
+                    -->
+                     <div>
+                          <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                          <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                     </div>
+
+                </div>
+             }
+            <div style="text-align:center">
+            <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 200px;text-align:right" frameborder="0"></iframe>
+             <div id="form-next" style="font-size:18px"></div>
+             </div>
+
+            <!--window-wrapper-->
+            <div id="accWindow">
+                <div id="accHeader">
+                 </div>
+                 <div id="accBody">
+                     <form class="accForm" id="accForm" method="post" action="/Building/UpdateAccount" target = "acc-iframe">
+                     <div style="direction:rtl;text-align:right">
+                         <input type="hidden" id="AccountType" name="AccountType" value="2" />
+                     <div class="form-group">
+                        <label class="column">
+                            שם הלקוח:</label>
+                        <input id="AccountName" name="AccountName" type="text" class="text-mid" />
+                    </div>
+                   <div class="form-group">
+                        <label class="column">
+                            שם חברה:</label>
+                        <input id="CompanyName" name="CompanyName" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            כתובת:</label>
+                        <input id="accStreet" name="Street"  type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            עיר:</label>
+                        <input id="accCity" name="City" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מיקוד:</label>
+                        <input id="accZipCode" name="ZipCode" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מספר טלפון:</label>
+                        <input id="AccountPhone1" name="AccountPhone1" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            מספר פקס:</label>
+                        <input id="Fax" name="Fax" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            דאר אלקטרוני:</label>
+                        <input id="AccountEmail" name="AccountEmail" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            אינטרנט:</label>
+                        <input id="WebSite" name="WebSite" type="text" class="text-mid" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            הערות:</label>
+                        <input id="AccountDetails" name="AccountDetails"  type="text" class="text-mid" />
+                    </div>
+                    <div style="height: 5px"></div>
+                    <div>
+                        <input id="accSubmit" class="btn-default btn2" type="button" value="עדכון" />
+                        <input id="accCancel" class="btn-default btn2" type="button" value="ביטול" />
+                        <!--<input class="btn-default btn2" type="button" value="הוספת אנשי קשר" />-->
+                    </div>
+                 </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->
+

@@ -1,0 +1,82 @@
+﻿@{
+
+    ViewBag.Title = "Buildings";
+    Layout = "~/Views/Shared/_ViewIframe.cshtml";
+    int id=Nistec.Types.ToInt(Request["id"]);
+
+}
+
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <script src="~/jqwidgets/jqxsplitter.js"></script>
+     <style type="text/css">
+        .styledTable {
+            direction:rtl; text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;padding-left:20px;text-align:right;
+        }
+        .styledTableHeader {background-color:#0094ff;color:#fff;text-align:right;
+        }
+        .styledRowKey {padding-left:20px;text-align:right;
+        }
+        .styledRowValue {text-align:right;
+        }
+    </style>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadCms(@id);
+        });
+
+        function loadCms(id) {
+            var view_source =
+            {
+                datatype: "json",
+                datafields: [
+                        { name: 'Id', type: 'number' },
+                        { name: 'Value', type: 'string' },
+                        { name: 'Title', type: 'string' }
+                ],
+                id: 'Id',
+                data: { 'id': id },
+                type: 'POST',
+                url: '@Url.Action("GetAccountInfo", "Building")'
+            };
+            var viewAdapter = new $.jqx.dataAdapter(view_source, {
+                loadComplete: function (record) {
+                        if (record) {
+                            $('#infoContent').html(htmlDecode(record.Value));
+                            $('#infoHead').html(record.Title);
+                        }
+                },
+                loadError: function (jqXHR, status, error) {
+                },
+                beforeLoadComplete: function (records) {
+                }
+            });
+            viewAdapter.dataBind();
+        }
+
+        var htmlDecode = function (val) {
+            if (!val) return "";
+            return val.replace(/&gt;/g, ">").replace(/&lt;/g, "<");
+        };
+
+        var htmlEncode = function (val) {
+            if (!val) return "";
+            return val.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+        </script>
+}
+
+ <div style="margin:20px;">
+
+        <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+            <h3 id="infoHead" class="rightPan"></h3>
+            <div id="infoContent"></div>
+        </div>
+</div>
+<!--end of content-wrapper-->
