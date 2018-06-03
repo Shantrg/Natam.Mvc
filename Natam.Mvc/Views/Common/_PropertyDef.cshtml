@@ -7,8 +7,8 @@
 }
 @section head {
     @Scripts.Render("~/bundles/jqx")
-    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
-    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    @*<script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>*@
+    @*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
 }
 
 @section scripts {
@@ -31,8 +31,8 @@
             JSON.useDateParser();
             var theme = 'Arctic';
 
-            var dealAdapter = app_jqxcombos.createComboAdapter("DealId", "DealName", "DealType", '@Url.Action("GetDealView", "Building")', 240, 0, false);
-            var purposeAdapter = app_jqxcombos.createComboAdapter("PurposeId", "PurposeName", "PurposeId", '@Url.Action("GetPurposeView", "Building")', 240, 0, false);
+            var dealAdapter = app_jqxcombos.createDropDownAdapter("DealId", "DealName", "DealType", '@Url.Action("GetDealView", "Building")', 240, 0, false);
+            var purposeAdapter = app_jqxcombos.createDropDownAdapter("PurposeId", "PurposeName", "PurposeId", '@Url.Action("GetPurposeView", "Building")', 240, 0, false);
             var ownerAdapter = app_jqxcombos.createComboAdapter("AccountId", "AccountName", "OwnerId", '@Url.Action("GetOwnerView", "Building")', 240, 200, false);
             @*var tenantAdapter = createComboAdapter("AccountId", "AccountName", "TenantId", '@Url.Action("GetTenantView", "Building")', 240, 200, false);*@
 
@@ -160,7 +160,8 @@
             $('#editOwner').click(function (e) {
                 e.preventDefault();
                 var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);
-                app_accounts.accountEdit(val, 2);
+                //app_accounts.accountEdit(val, 2);
+                app_accounts.accountPanel(val, 2, "OwnerId");
             });
 
             //$('#showTenant').click(function (e) {
@@ -183,24 +184,7 @@
         });
 
 
-    function triggerInvestmentComplete(id, bid, uid) {
-        app_dialog.dialogIframClose();
-    }
 
-    function triggerAccComplete(accType, accId) {
-
-        if (accType == "2") {
-            $("#OwnerId").jqxComboBox("source").dataBind();
-            if (accId)
-                $("#OwnerId").val(accId);
-        }
-        else if (accType == "4") {
-            $("#TenantId").jqxComboBox("source").dataBind();
-            if (accId)
-                $("#TenantId").val(accId);
-        }
-        app_dialog.dialogIframClose();
-    }
 
     function clickLink(elementName) {
         $('#' + elementName).click();
@@ -226,7 +210,7 @@
                 {
                        input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
  
-                           return app_jqxform.validateCombo("DealType");
+                           return app_jqxform.validateDropDown("DealType");
                        }
                    },
                 {
@@ -236,7 +220,7 @@
                 },
                 {
                     input: '#PurposeId', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
-                        return app_jqxform.validateCombo("PurposeId");
+                        return app_jqxform.validateDropDown("PurposeId");
                     }
                 }
             ]
@@ -254,7 +238,7 @@
                         url: actionurl,
                         type: 'post',
                         dataType: 'json',
-                        data: $('#form').serialize(),
+                        data: app.serialize('#form'),
                         success: function (data) {
 
                             //popMessage("נכסים", data.Message, "modal");
@@ -266,7 +250,8 @@
                                     if ('@id' == 0) {
                                         $('#UnitId').val(data.OutputId);
                                     }
-                                    window.parent.triggerPropertyComplete();
+                                    if (window.parent.app_trigger && window.parent.app_trigger.triggerPropertyComplete)
+                                        window.parent.app_trigger.triggerPropertyComplete();
                                 }
                             
                         },
@@ -301,7 +286,8 @@
             if ('@id' == 0) {
                 $('#UnitId').val(data.OutputId);
             }
-            window.parent.triggerPropertyComplete();
+            if (window.parent.app_trigger && window.parent.app_trigger.triggerPropertyComplete)
+                window.parent.app_trigger.triggerPropertyComplete();
         }
     }
     </script>
@@ -311,7 +297,7 @@
 
 <div class="clear"></div>
 <div class="global-view">
-    <div class="container">
+    <div class="container-box">
         <div style="text-align:right">
             <div style="display: inline; text-align: right;font-size:18px;direction:rtl;">
                 <h3 id="hTitle">טופס הגדרת נכס</h3>
@@ -319,13 +305,6 @@
         </div>
         <div id="notif_container"></div>
         <div>
-
-            @*@using (Html.BeginForm("UpdateUnit", "Building", null, FormMethod.Post, new { id = "form",  Class = "form" }))
-                {*@
-            <!--Html.AntiForgeryToken()
-            Html.ValidationSummary(true)
-                target = "form-iframe",
-                -->
             <form class="form" id="form" method="post" action="/Common/UpdateProperty">
 
                 <input type="hidden" id="AgentId" name="AgentId" />
@@ -386,10 +365,10 @@
                             <div class="form-group">
                                 <label class="column">
                                     בעלים:
+                                    <a id="showOwner" href="#">הצג</a>|
+                                    <a id="refreshOwner" href="#">רענן</a>|
+                                    <a id="editOwner" href="#">עריכה</a>
                                 </label>
-                                <a id="showOwner" href="#">הצג</a>|
-                                <a id="refreshOwner" href="#">רענן</a>|
-                                <a id="editOwner" href="#">עריכה</a>
                                 <div id="OwnerId" name="OwnerId">
                                 </div>
                             </div>
@@ -458,3 +437,36 @@
     </div>
 </div>
 <!--end of content-wrapper-->
+<script type="text/javascript">
+
+    app_trigger = {
+
+        triggerInvestmentComplete: function (id, bid, uid) {
+            app_dialog.dialogIframClose();
+        },
+
+        triggerAccComplete: function (accType, accId) {
+
+            if (accType == "2") {
+                $("#OwnerId").jqxComboBox("source").dataBind();
+                if (accId)
+                    $("#OwnerId").val(accId);
+                app_iframe.panelSwitchClose("OwnerId");
+            }
+            else if (accType == "4") {
+                $("#TenantId").jqxComboBox("source").dataBind();
+                if (accId)
+                    $("#TenantId").val(accId);
+                app_iframe.panelSwitchClose("TenantId");
+            }
+            //app_dialog.dialogIframClose();
+        },
+        triggerAccCancel: function (accType) {
+            if (accType == "2")
+                app_iframe.panelSwitchClose("OwnerId");
+            else if (accType == "4")
+                app_iframe.panelSwitchClose("TenantId");
+            //app_iframe.panelClose();
+        }
+    }
+</script>

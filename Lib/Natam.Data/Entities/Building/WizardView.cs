@@ -52,7 +52,7 @@ namespace Pro.Data.Entities
         {
             var parameters = DataParameter.GetSqlList("BuildingId", BuildingId, "Activate", Activate);
             DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            DbNatam.Instance.ExecuteNonQuery("sp_Building_Wizard_Complete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            DbNatam.Instance.ExecuteCommandNonQuery("sp_Building_Wizard_Complete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             var res = Types.ToInt(parameters[2].Value);
             return res;
         }

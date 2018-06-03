@@ -272,7 +272,7 @@ function editCmsSection(pid, sections_url, update_url) {
                 dataAdapter.dataBind();
             },
             error: function () {
-                alert('אירעה שגיאה, לא עודכנו נתונים');
+               app_dialog.alert('אירעה שגיאה, לא עודכנו נתונים');
             }
         });
     };
@@ -311,7 +311,7 @@ function editCmsSection(pid, sections_url, update_url) {
         selectionMode: 'none',
 
         rendered: function () {
-            //$(".section_button").jqxButton();
+            $(".section_button").jqxButton();
             $(".section_button").click(function () {
 
                 var i = 1;

@@ -156,7 +156,7 @@ namespace Pro.Data.Entities
             };
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Transaction_Save", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Transaction_Save", parameters, System.Data.CommandType.StoredProcedure);
             v.TransId = Types.ToInt(parameters[0].Value);
             return v.TransId;
         }
@@ -164,7 +164,7 @@ namespace Pro.Data.Entities
         public static int DoCancel(int TransId,int UserId)
         {
             var parameters = DataParameter.GetSql("TransId", TransId, "UserId", UserId);
-            return DbNatam.Instance.ExecuteNonQuery("sp_Transaction_Cancel", parameters, System.Data.CommandType.StoredProcedure);
+            return DbNatam.Instance.ExecuteCommandNonQuery("sp_Transaction_Cancel", parameters, System.Data.CommandType.StoredProcedure);
         }
 
         #endregion
@@ -216,7 +216,7 @@ namespace Pro.Data.Entities
                 BuildingName = unit.BuildingName,
                 Property_Type = unit.PurposeId,
                 Property_Address = unit.Address,
-                Property_City=unit.City,
+                Property_City=unit.CityName,
                 Property_Comment = "",
                 Property_Floor = unit.FloorNum,
                 Property_Size = unit.UnitSize,
@@ -273,7 +273,7 @@ namespace Pro.Data.Entities
                 BuildingName = unit.BuildingName,
                 Property_Type = unit.PurposeId,
                 Property_Address = unit.Address,
-                Property_City = unit.City,
+                Property_City = unit.CityName,
                 Property_Comment = "",
                 Property_Floor = unit.FloorNum,
                 Property_Size = unit.UnitSize,
@@ -335,7 +335,7 @@ namespace Pro.Data.Entities
                 v.BuildingName = unit.BuildingName;
                 v.Property_Type = unit.PurposeId;
                 v.Property_Address = unit.Address;
-                v.Property_City = unit.City;
+                v.Property_City = unit.CityName;
                 v.Property_Floor = unit.FloorNum;
                 v.Property_Size = unit.UnitSize;
                 v.PropertyId = unit.UnitId;

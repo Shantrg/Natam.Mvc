@@ -754,7 +754,7 @@ input[type=text].jqx-input-mobile, input[type=password].jqx-input-mobile, .jqx-i
     width: 16px; height: 16px;
 }
 .jqx-tree-grid-expand-button-mobile {
-    margin-top: 3px;
+    margin-top: 0px;
 }
 .jqx-editor-toolbar-button-mobile {
     border-radius: 0px;
@@ -763,3 +763,18 @@ input[type=text].jqx-input-mobile, input[type=password].jqx-input-mobile, .jqx-i
 }
 .jqx-file-upload-file-name-mobile{padding:3px;}
 .jqx-file-upload-file-row-mobile{ height: 40px;}
+.jqx-layout-mobile
+{
+    background-color: #b2b2b2;
+}
+.jqx-layout-pseudo-window-pin-icon-mobile
+{
+    background-image: url("images/pin-blue.png");
+}
+.jqx-layout-pseudo-window-pinned-icon-mobile
+{
+    background-image: url("images/pinned-blue.png");
+}
+.jqx-grid-pager-number-mobile.jqx-fill-state-pressed-mobile {
+    color: #fff !important;
+}

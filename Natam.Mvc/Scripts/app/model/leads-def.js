@@ -14,6 +14,17 @@ function app_leads_def(leadId, userId, userRule) {
 
     var slf = this;
 
+    this.loadLeadPropertyList = function () {
+
+        var src = "/Common/_LeadPropertyGrid?id=" + slf.srcLeadId;
+        app_iframe.attachIframe("property-iframe", src, 980, 500, false)
+    };
+
+    this.loadLeadTracking = function () {
+        var src = "/Common/_LeadTrace?id=" + slf.srcLeadId;
+        app_iframe.attachIframe("trace-iframe", src, 980, 500, false)
+    };
+
     if (leadId <= 0) {
         $("#linkC").hide();
         $("#linkD").hide();
@@ -33,6 +44,44 @@ function app_leads_def(leadId, userId, userRule) {
         //$("#form-next").html('')
         location.reload();
     });
+
+    $("#accordion").jcxTabs({
+        rotate: false,
+        startCollapsed: 'accordion',
+        collapsible: 'accordion',
+        //setHash: true,
+        //disabled: [3, 4],
+        click: function (e, tab) {
+            //$('.info').html('Tab <strong>' + tab.id + '</strong> clicked!');
+        },
+        activate: function (e, tab) {
+            //$('.info').html('Tab <strong>' + tab.id + '</strong> activated!');
+            switch (tab.id) {
+                case 2:
+                    if (slf.LeadId > 0) {
+                        if ($("#property-iframe").length == 0 || $("#property-iframe")[0].src == "") {
+                            slf.loadLeadPropertyList();
+                            //slf.loadLeadTracking();
+
+                        }
+                    }
+                    break;
+                case 3:
+                    if (slf.LeadId > 0) {
+                        if ($("#trace-iframe").length == 0 || $("#trace-iframe")[0].src == "") {
+                            //slf.loadLeadPropertyList();
+                            slf.loadLeadTracking();
+                        }
+                    }
+                    break;
+            }
+        },
+        activateState: function (e, state) {
+            //console.log(state);
+            //$('.info').html('Switched from <strong>' + state.oldState + '</strong> state to <strong>' + state.newState + '</strong> state!');
+        }
+    });
+   
 
     this.loadControls();
 
@@ -117,11 +166,11 @@ function app_leads_def(leadId, userId, userRule) {
                     url: actionurl,
                     type: 'post',
                     dataType: 'json',
-                    data: $('#form').serialize(),
+                    data: app.serialize('#form'),
                     success: function (data) {
                         //popMessage("לקוחות", data.Message, "modal");
-
-                        alert(data.Message);
+                        app_messenger.Post(data);
+                        //app_jqxnotify.notify(data.Message);
                         if (data.Status >= 0) {
                             //window.parent.triggerBuildingComplete(data.OutputId);
                             //$('#form')[0].reset();
@@ -185,11 +234,12 @@ function app_leads_def(leadId, userId, userRule) {
         var DealType = app_jqxcombos.getComboCheckedValues("DealType");
         var PurposeType = app_jqxcombos.getComboCheckedValues("PurposeType");
         var AreaType = app_jqxcombos.getComboSelectedValues("AreaType");
-        var RequestSize = app_jqxcombos.getSelectedComboValue("RequestSize");
+        var RequestSize = $("#RequestSize").val();
         var propertyType = 2;
         var size = RequestSize === undefined ? '' : RequestSize.replace("+", "%");
         var url = "/Common/_PropertyGrid?id=" + slf.LeadId + "&qt=" + propertyType + "&dt=" + DealType + "&pt=" + PurposeType + "&at=" + AreaType + "&rs=" + size;
-        return app_dialog.dialogIframe(url, "1020", "510", "איתור נכסים");
+        //return app_dialog.dialogIframe(url, "1020", "510", "איתור נכסים");
+        return app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 420, true, "איתור נכסים");
     };
 
     $('#checkAccountValidity').click(function (e) {
@@ -207,32 +257,28 @@ function app_leads_def(leadId, userId, userRule) {
     $('#btnPropertyAdd').click(function (e) {
 
         var url = "/Common/_PropertyDef?id=0&pid=" + slf.srcLeadId + "&pt=2";
-        slf.propertyDialog = app_dialog.dialogIframe(url, "580", "620", "הגדרת נכס", true);
+        app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 620, true, "הגדרת נכס");
+
+        //slf.propertyDialog = app_dialog.dialogIframe(url, "580", "620", "הגדרת נכס", true);
     });
     $('#linkTransaction').click(function (e) {
         var url = "/Common/_TransWizard4Buyer?id=" + slf.srcLeadId;
-        slf.propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
+        app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 420, true, "הגדרת דוח עסקה");
+        //slf.propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
     });
     $('#linkTransAdvice').click(function (e) {
         var url = "/Common/_TransWizard4Advice?id=" + slf.srcLeadId;
-        slf.propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  עסקת ייעוץ");
+        app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 510, true, "הגדרת עסקת ייעוץ");
+        //slf.propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  עסקת ייעוץ");
     });
 
     $('#linkTransfer').click(function (e) {
         var url = "/Common/_LeadTransfer?id=" + slf.srcLeadId;
-        slf.propertyDialog = app_dialog.dialogIframe(url, "420", "320", "העברת לקוח");
+        app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 320, true, "העברת לקוח");
+        //slf.propertyDialog = app_dialog.dialogIframe(url, "420", "320", "העברת לקוח");
     });
 
-    this.loadLeadPropertyList = function () {
 
-        var src = "/Common/_LeadPropertyGrid?id=" + slf.srcLeadId;
-        app_iframe.attachIframe("property-iframe", src, 980, 500, false)
-    };
-
-    this.loadLeadTracking = function () {
-        var src = "/Common/_LeadTrace?id=" + slf.srcLeadId;
-        app_iframe.attachIframe("trace-iframe", src, 980, 500, false)
-    };
 
     this.loadDataAdapter();
 
@@ -243,7 +289,7 @@ app_leads_def.prototype.syncData = function (record) {
 
     var slf = this;
 
-    app_jqxform.loadDataForm("form", record);
+    app_jqxform.loadDataForm("form", record, ["AreaType", "PurposeType","DealType"]);
 
     if (record.ParkingNum == 0)
         $("#ParkingNum").val("");
@@ -278,16 +324,16 @@ app_leads_def.prototype.syncData = function (record) {
     app_jqxcombos.selectComboBoxValues("AreaType", record.AreaType);
     app_jqxcombos.selectComboCheckBoxValues("PurposeType", record.PurposeType);
     app_jqxcombos.selectComboCheckBoxValues("DealType", record.DealType);
-    app_jqxcombos.selectComboBoxValue("RequestSize", record.RequestSize);
+    //app_jqxcombos.selectComboBoxValue("RequestSize", record.RequestSize);
 
     var role = (slf.srcLeadId > 0) ? 3 : 4;
     var parentId = (slf.srcLeadId > 0) ? slf.srcLeadId : slf.srcAgentId;
     app_contacts.appendContactIframe("contactsGrid", parentId, role, slf.srcUploadKey);
                 
-    if (slf.LeadId > 0) {
-        slf.loadLeadPropertyList();
-        slf.loadLeadTracking();
-    }
+    //if (slf.LeadId > 0) {
+    //    slf.loadLeadPropertyList();
+    //    slf.loadLeadTracking();
+    //}
 };
 
 app_leads_def.prototype.loadControls = function () {
@@ -366,4 +412,57 @@ app_leads_def.prototype.loadControls = function () {
                  //}
         ]
     });
+};
+
+
+
+
+app_leads_def_public = {
+
+    onNotifyClosed: function (data) {
+        if (data.Status >= 0) {
+            //window.parent.triggerBuildingComplete(data.OutputId);
+            //$('#form')[0].reset();
+            app.redirectTo('leadsGrid');
+        }
+    }
+};
+app_trigger = {
+
+    triggerPopertySearchComplete: function () {
+        //app_dialog.dialogIframClose();
+        def.loadLeadPropertyList();
+
+        app_iframe.panelSwitchClose("wiz-parent", true);
+    },
+    triggerPropertyComplete: function () {
+        //app_dialog.dialogIframClose();
+        def.loadLeadPropertyList();
+        app_iframe.panelSwitchClose("wiz-parent", true);
+    },
+    triggerContactComplete: function (contactId, op) {
+        app_dialog.dialogIframClose();
+    },
+    triggerTransferComplete: function (id) {
+        app_dialog.dialogIframClose();
+    },
+    triggerPopertyTransComplete: function (unitId, contactId, transType) {
+        var id= def.LeadId;
+        //app_dialog.dialogIframClose();
+        if (transType == 3) {
+            var url = "/Crm/TransactionAdviceDef?id=" + unitId + "&tt=3&pid=" + id + "&cid=" + contactId;
+            app.redirectTo(url);
+        }
+        else if (unitId > 0 && contactId > 0) {
+            var url = "/Crm/TransactionBuyerDef?id=" + unitId + "&tt=1&pid=" + id + "&cid=" + contactId;
+            app.redirectTo(url);
+        }
+    },
+    trigger_Prompt: function (status) {
+        $('#submit').prop('disabled', status == 1);
+        //if (status == 1) {
+        //    $('#submit').attr('disabled','disabled');//.hide();
+        //}
+        window.location.href = '/Crm/Leads';
+    }
 };

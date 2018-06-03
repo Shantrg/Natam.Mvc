@@ -7,11 +7,19 @@
 }
 @section head {
     @Scripts.Render("~/bundles/jqx")
-    <script type="text/javascript" src="~/Scripts/app/model/unit-def.js"></script>
-    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
-    @*<script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
-    <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />*@
-  @*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
+    <script type="text/javascript" src="~/Scripts/app/model/unit-def.js?ver=2018004"></script>
+
+<!--uploader===========================================-->
+<script src="~/Scripts/app/app-media-2.0.js"></script>
+<script src="~/jqwidgets/jqxsplitter.js"></script>
+<script src="~/Scripts/plagins/colorbox/jquery.colorbox-min.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/colorbox/colorbox.css" />
+
+<script src="~/Scripts/plagins/uploader/js/vendor/jquery.ui.widget.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.iframe-transport.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.fileupload.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/uploader/css/jquery.fileupload.css">
+
 }
 
 @section scripts {
@@ -20,37 +28,35 @@
         var allowEdit = 0;
         var srcOrigSize = 0;
         var srcFloorNum;
-
+        var unitdef;
         $(document).ready(function () {
 
             allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;
-            
-            $("#form-model").html("שטח פנוי: "+'@Model.SumFloorFree'+"<br/> שטח לא מוגדר: "+'@Model.SumFloorRemain');
 
-          @*@if (id <= 0)
-          {
-              return;
-          }*@
+            $("#form-model").html("שטח פנוי: "+'@Model.SumFloorFree'+"<br/> שטח לא מוגדר: "+'@Model.SumFloorRemain');
 
             JSON.useDateParser();
             var theme = 'Arctic';
-            
+           
             //$("#divImages").css('display', 'none');
 
-            var entity= new app_unit_def(parseInt('@id'), parseInt('@bid'), '@Model.PropertyType', '@Model.BuildingName', '@Model.FloorNum','@Model.SumFloorRemain', parseInt('@ViewBag.UserRole'), parseInt('@ViewBag.UserID'));
-            entity.loadDataAdapter();
+            unitdef = new app_unit_def(parseInt('@id'), parseInt('@bid'), '@Model.PropertyType', '@Model.BuildingName', '@Model.FloorNum', '@Model.SumFloorRemain', parseInt('@ViewBag.UserRole'), parseInt('@ViewBag.UserID'));
+            //entity.loadDataAdapter();
 
-           
+
             $('#linkTransaction').click(function (e) {
-                var url = "/Common/_TransWizard4Seller?id=" + entity.UnitId;
-                propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
+
+                var url = "/Common/_TransWizard4Seller?id=" + unitdef.UnitId;
+                app_iframe.appendPanelSwitch("wiz-parent", url, "100%", 420, true, "הגדרת דוח עסקה");
+
+                //propertyDialog = app_dialog.dialogIframe(url, "1020", "510", "הגדרת  דוח עסקה");
             });
 
-            $('#btnReloadImages').click(function (e) {
-                var id = $("#UnitId").val();
-                if (id > 0)
-                    app_media.loadImages(id);
-            });
+            //$('#btnReloadImages').click(function (e) {
+            //    var id = $("#UnitId").val();
+            //    if (id > 0)
+            //        app_media.loadImages(id);
+            //});
             $('#btnAds').click(function (e) {
                 var id = $("#UnitId").val();
                 if (id > 0)
@@ -69,43 +75,12 @@
 
 
         var propertyDialog;
-
-        function triggerPopertyTransComplete(unitId,leadId, contactId) {
-            app_dialog.dialogIframClose();
-            if (unitId > 0 && contactId > 0) {
-                var url = "/Crm/TransactionSellerDef?id=" + unitId + "&tt=2&pid=" + leadId + "&cid=" + contactId;
-                app.redirectTo(url);
-            }
-            //else
-            //{
-            //    alert("");
-            //}
-        };
-
-    function triggerInvestmentComplete(id, bid, uid) {
-        app_dialog.dialogIframClose();
-    }
-
-    function triggerAccComplete(accType, accId) {
-
-        if (accType == "2") {
-            $("#OwnerId").jqxComboBox("source").dataBind();
-            if (accId)
-                $("#OwnerId").val(accId);
+        function clickLink(elementName) {
+            $('#' + elementName).click();
+            $('#form').jqxValidator('validate');
         }
-        else if (accType == "4") {
-            $("#TenantId").jqxComboBox("source").dataBind();
-            if (accId)
-                $("#TenantId").val(accId);
-        }
-        app_dialog.dialogIframClose();
-    }
 
-    function clickLink(elementName) {
-        $('#' + elementName).click();
-        $('#form').jqxValidator('validate');
-    }
-
+ 
     </script>
 
 }
@@ -117,171 +92,223 @@
     @ViewContext.RouteData.Values["action"].ToString()
 </div>
 
-
 <div class="clear"></div>
 
 <div class="global-view">
-    <div class="box-center">
-        <div class="container">
-            <div class="box-row">
-                <div class="box-title">
-                    <h3 id="hTitle">טופס עדכון יחידה</h3>
-                    <div><span>כתובת: </span>@Model.Address</div>
-                </div>
-                
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                    <h4 id="hImages" class="rtl"><a id="btnImages" href="#">תמונות</a> <span> | </span><a id="btnReloadImages" href="#">רענון</a></h4>
-                    <div class="rtl">
-                        <div id="media_image0" class="media-image"></div>
-                        <div id="media_image1" class="media-image"></div>
-                        <div id="media_image2" class="media-image"></div>
-                    </div>
-                </div>
+    
+    <div class="container-box">
 
-                <div class="col-lg-6 col-md-6 col-sm-6 box-choose">
- 
-                        <form class="form" id="form" method="post" action="/Building/UpdateUnit">
-
-                            <!--<input type="hidden" id="AgentId" name="AgentId" />-->
-                            <!--<input type="hidden" id="DealType" name="DealType" />-->
-                            <input type="hidden" id="PropertyType" name="PropertyType" />
-                            <input type="hidden" id="UnitSizeOrig" value="0" />
-
-
-                            <div class="tab-content">
-                                <div id="sectionA" class="tab-pane fade in active">
-                                    <div id="divUnitId" class="form-group">
-                                        <label class="column">
-                                            קוד יחידה:
-                                        </label>
-                                        <input id="UnitId" type="number" name="UnitId" readonly="readonly" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            קוד בניין:
-                                        </label>
-                                        <input id="BuildingId" type="number" name="BuildingId" readonly="readonly" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            שם בניין:
-                                        </label>
-                                        <input id="BuildingName" type="text" readonly="readonly" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            קומה:
-                                        </label>
-                                        <input id="FloorNum" type="number" name="FloorNum" step="any" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            שטח:
-                                        </label>
-                                        <input id="UnitSize" type="number" name="UnitSize" step="any" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            מחיר למ"ר:
-                                        </label>
-                                        <input id="Price" type="number" name="Price" step="any" class="number" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            סוג הנכס/שימוש:
-                                        </label>
-                                        <div id="PurposeId" name="PurposeId">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            סוג עסקה:
-                                        </label>
-                                        <div id="DealType" name="DealType">
-                                            <!-- style="padding: 10px">-->
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            מאוכלס?:
-                                        </label>
-                                        <input id="Populate" name="Populate" type="checkbox" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            בעלים:
-                                        </label>
-                                        <a id="showOwner" href="#">הצג</a>|
-                                        <a id="refreshOwner" href="#">רענן</a>|
-                                        <a id="queryOwner" href="#">איתור</a>|
-                                        <a id="editOwner" href="#">עריכה</a>
-                                        <div id="OwnerId" name="OwnerId">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            דייר:
-                                        </label>
-                                        <a id="showTenant" href="#">הצג</a>|
-                                        <a id="refreshTenant" href="#">רענן</a>|
-                                        <a id="editTenant" href="#">עריכה</a>
-                                        <div id="TenantId" name="TenantId">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            תאריך סיום חוזה:
-                                        </label>
-                                        <div id="DateEndContract" name="DateEndContract"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            תאריך סיום אופציה 1:
-                                        </label>
-                                        <div id="DateEndOption1" name="DateEndOption1"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            תאריך סיום אופציה 2:
-                                        </label>
-                                        <div id="DateEndOption2" name="DateEndOption2"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            הערות:
-                                        </label><br />
-                                        <textarea id="Memo" name="Memo" style="width:100%;height:100px" class="textarea-mid22"></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            סוכן:
-                                        </label>
-                                        <div id="AgentId" name="AgentId"></div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            מועד עדכון:
-                                        </label>
-                                        <input id="LastUpdate" disabled="disabled" type="text" name="LastUpdate" class="text" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
-                                    <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
-                                    <input id="btnAds" type="button" value="פרסום" class="btn-default btn2" />
-                                    <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
-                                    <input id="tbProp2Admin" type="button" value="עדכון למאגר הנכסים" class="btn-default btn2" style="display:none" />
-                               </div>
-                             </div>
-                        </form>
-                </div>
-
-                @*<div style="clear:both"></div>*@
-
-            </div>
-
+        <div class="box-title">
+            <h3 id="hTitle">טופס עדכון יחידה</h3>
+            <div><span>כתובת: </span>@Model.Address</div>
         </div>
-    </div>
+       
+            <div id="wiz-parent" class="section-table">
+
+                <div class="panel-area">
+                    <div class="panel-area-title"><h4 id="hImages" class="rtl right"><a id="btnImages" href="#">תמונות</a></h4></div>
+                        <div id="media-files"></div>
+                    </div>
+
+                <div class="section-cell1">
+                        <div style="direction:rtl">
+                            <form class="form" id="form" method="post" action="/Building/UpdateUnit">
+
+                                <input type="hidden" id="PropertyType" name="PropertyType" />
+                                <input type="hidden" id="UnitSizeOrig" value="0" />
+
+                                <div class="tab-content">
+                                        <div class="panel-area">
+                                            <div class="panel-area-title">פרטי בניין</div>
+
+                                            <div id="divUnitId" class="form-group">
+                                                <label class="column">
+                                                    קוד יחידה: <input id="UnitId" type="number" name="UnitId" readonly="readonly" class="number label" />
+                                                </label>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    קוד בניין: <input id="BuildingId" type="number" name="BuildingId" readonly="readonly" class="number label" style="width:50px !important" />
+                                                    <span id="BuildingLink" class="rtl"></span>
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    שם בניין: <input id="BuildingName" type="text" readonly="readonly" class="label" />
+                                                </label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    קומה:<span class="mandatory">(*)</span>
+                                                </label>
+                                                <input id="FloorNum" type="number" name="FloorNum" step="any" class="number" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    שטח:<span class="mandatory">(*)</span>
+                                                </label>
+                                                <input id="UnitSize" type="number" name="UnitSize" step="any" class="number" />
+                                            </div>
+                                        </div>
+                                        <div class="panel-area">
+                                            <div class="panel-area-title">סוג נכס\עסקה</div>
+                                            <div class="section-table">
+                                                <div class="section-cell">
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            מחיר למ"ר:
+                                                        </label>
+                                                        <input id="Price" type="number" name="Price" step="any" class="number" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            תאור מחיר:
+                                                        </label>
+                                                        <select id="PriceType" name="PriceType"></select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            סוג דמי ניהול:
+                                                        </label>
+                                                        <select id="ManagementFeeType" name="ManagementFeeType"></select>
+                                                    </div>
+                                                    <div id="ManagementFee-div" class="form-group" style="display:none">
+                                                        <label class="column">
+                                                            מחיר דמי ניהול:<span class="mandatory">(*)</span>
+                                                        </label>
+                                                        <input id="ManagementFee" type="number" name="ManagementFee" step="any" class="number" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            מספר חניות:<span class="mandatory">(*)</span>
+                                                        </label>
+                                                        <input id="ParkNum" type="number" name="ParkNum" class="number" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            מחיר לחניה:<span class="mandatory">(*)</span>
+                                                        </label>
+                                                        <input id="ParkPrice" type="number" name="ParkPrice" step="any" class="number" />
+                                                    </div>
+                                                </div>
+                                                <div class="section-cell">
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            סוג הנכס/שימוש:<span class="mandatory">(*)</span>
+                                                        </label>
+                                                        <div id="PurposeId" name="PurposeId">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            סוג עסקה:<span class="mandatory">(*)</span>
+                                                        </label>
+                                                        <div id="DealType" name="DealType">
+                                                            <!-- style="padding: 10px">-->
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="column">
+                                                            מאוכלס?:
+                                                        </label>
+                                                        <input id="Populate" name="Populate" type="checkbox" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="panel-area">
+                                            <div class="panel-area-title">בעלים\דייר</div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    בעלים:<span class="mandatory">(*)</span>
+                                                    <a id="showOwner" href="#">הצג</a>|
+                                                    <a id="refreshOwner" href="#">רענן</a>|
+                                                    <a id="queryOwner" href="#">איתור</a>|
+                                                    <a id="editOwner" href="#">עריכה</a>
+                                                </label>
+                                                <input type="text" id="OwnerId" name="OwnerId" /><i class="fa fa-search"></i>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    דייר:
+                                                    <a id="showTenant" href="#">הצג</a>|
+                                                    <a id="refreshTenant" href="#">רענן</a>|
+                                                    <a id="editTenant" href="#">עריכה</a>
+                                                </label>
+                                                <input type="text" id="TenantId" name="TenantId" /><i class="fa fa-search"></i>
+                                            </div>
+                                        </div>
+                                    <div class="panel-area">
+                                        <div class="panel-area-title">תאריכים</div>
+                                        <div class="section-table">
+                                            <div class="section-cell">
+
+                                                <div class="form-group">
+                                                    <label class="column">
+                                                        תאריך סיום חוזה:
+                                                    </label>
+                                                    <div id="DateEndContract" name="DateEndContract"></div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="column">
+                                                        תאריך סיום אופציה 1:
+                                                    </label>
+                                                    <div id="DateEndOption1" name="DateEndOption1"></div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="column">
+                                                        תאריך סיום אופציה 2:
+                                                    </label>
+                                                    <div id="DateEndOption2" name="DateEndOption2"></div>
+                                                </div>
+                                            </div>
+                                            <div class="section-cell">
+
+                                                <div class="form-group">
+                                                    <label class="column">
+                                                        סוכן:
+                                                    </label>
+                                                    <input type="hidden" name="AgentId" data-type="lookup" />
+                                                    <input id="AgentId" type="text" readonly="readonly"/>
+                                                    @*<div id="AgentId" name="AgentId"></div>*@
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="column">
+                                                        מועד עדכון:
+                                                    </label>
+                                                    <input id="LastUpdate" disabled="disabled" type="text" name="LastUpdate" class="text" />
+                                                </div>
+                                                </div>
+                                            </div>
+
+                                        <div class="form-group">
+                                            <label class="column">
+                                                הערות:
+                                            </label><br />
+                                            <textarea id="Memo" name="Memo" style="width:99%;height:100px"></textarea>
+                                        </div>
+                                            </div>
+
+                                            <div class="panel-area">
+                                                <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                                                <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                                                <input id="btnAds" type="button" value="פרסום" class="btn-default btn2" />
+                                                <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
+                                                <input id="tbProp2Admin" type="button" value="עדכון למאגר הנכסים" class="btn-default btn2" style="display:none" />
+                                            </div>
+                                        </div>
+</form>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            @*<div style="clear:both"></div>*@
+
+       </div>
 </div>
 
 <script type="text/javascript">

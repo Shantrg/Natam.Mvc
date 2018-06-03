@@ -45,7 +45,7 @@ namespace Pro.Data.Entities
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
             parameters[1].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
             v.UnitId = Types.ToInt(parameters[0].Value);
             var status = Types.ToInt(parameters[1].Value);
             return status;

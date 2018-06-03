@@ -10,6 +10,9 @@ namespace ConsoleTest
     {
         static void Main(string[] args)
         {
+            int num= Nistec.GenericTypes.Convert<int>("1234");
+            Console.WriteLine(num);
+
 
             //var o= Nistec.Types.ToDateTimeExact("2016-02-26");
             //Console.WriteLine(o);

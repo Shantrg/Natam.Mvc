@@ -21,6 +21,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -183,8 +184,22 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Content Include="Content\css\reset.css" />
+    <Content Include="Content\css\style-rtl.css" />
     <Content Include="Content\css\view-dialog.css" />
+    <Content Include="Images\doc-small.jpg" />
+    <Content Include="Images\doc.jpg" />
     <Content Include="Images\doc.png" />
+    <Content Include="Images\link-small.jpg" />
+    <Content Include="Images\link.jpg" />
+    <Content Include="Images\none-small.jpg" />
+    <Content Include="Images\none.jpg" />
+    <Content Include="Images\unknown-small.jpg" />
+    <Content Include="Images\unknown.jpg" />
+    <Content Include="Images\video-small.jpg" />
+    <Content Include="Images\video.jpg" />
+    <Content Include="Scripts\app\app-media-uploader.js" />
+    <Content Include="Scripts\app\app-wizard.js" />
+    <Content Include="Scripts\app\app-control-2.0.js" />
     <Content Include="Scripts\app\images\add.gif" />
     <Content Include="Scripts\app\images\all.gif" />
     <Content Include="Scripts\app\images\delete.gif" />
@@ -460,8 +475,6 @@
     <Content Include="jqwidgets\styles\images\rangebar_darkblue.png" />
     <Content Include="jqwidgets\styles\images\rangebar_shinyblack.png" />
     <Content Include="jqwidgets\styles\images\rangebar_summer.png" />
-    <Content Include="jqwidgets\styles\images\recurrence-exception.png" />
-    <Content Include="jqwidgets\styles\images\recurrence.png" />
     <Content Include="jqwidgets\styles\images\redmond\icon-first.png" />
     <Content Include="jqwidgets\styles\images\redmond\icon-last.png" />
     <Content Include="jqwidgets\styles\images\redmond\ReadMe.txt" />
@@ -587,13 +600,24 @@
     <Content Include="jqwidgets\styles\jqx.ui-sunny.css" />
     <Content Include="jqwidgets\styles\jqx.web.css" />
     <Content Include="jqwidgets\styles\jqx.windowsphone.css" />
-    <Content Include="Scripts\app\app-jqx-grid.js" />
-    <Content Include="Scripts\app\app-jqx-1.0.js" />
-    <Content Include="Scripts\app\app-model-1.0.js" />
+    <Content Include="Scripts\app\app-jqx-grid-2.0.js" />
+    <Content Include="Scripts\app\app-jqx-2.0.js" />
+    <Content Include="Scripts\app\app-model-2.0.js" />
     <Content Include="Scripts\app\appAlert.css" />
     <Content Include="Scripts\app\dateFormat.js" />
     <Content Include="Scripts\app\app-global.js" />
     <Content Include="Scripts\app\app-form.css" />
+    <Content Include="Scripts\app\app-media-2.0.js" />
+    <Content Include="Scripts\app\model\address_model.js" />
+    <Content Include="Scripts\app\model\report-grid.js" />
+    <Content Include="Scripts\app\model\unit-def-sync.js" />
+    <Content Include="Scripts\app\model\units-query.js" />
+    <Content Include="Scripts\app\system\ad-department-def.js" />
+    <Content Include="Scripts\app\system\ad-group-def-members.js" />
+    <Content Include="Scripts\app\system\ad-group-def.js" />
+    <Content Include="Scripts\app\system\ad-team-def.js" />
+    <Content Include="Scripts\app\system\ad-users-def.js" />
+    <Content Include="Scripts\app\upload\mediaUploader.js" />
     <Content Include="Scripts\app\model\ads-def.js" />
     <Content Include="Scripts\app\model\accounts-def.js" />
     <Content Include="Scripts\app\model\leads-def-new.js" />
@@ -607,6 +631,21 @@
     <Content Include="Scripts\app\model\unit-def.js" />
     <Content Include="Scripts\app\model\units-grid.js" />
     <Content Include="Scripts\app\model\accounts-grid.js" />
+    <Content Include="Scripts\app\upload\Compress Demo.html" />
+    <Content Include="Scripts\app\upload\compress.js" />
+    <Content Include="Scripts\app\upload\index.js" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-rtl.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-spinner.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-theme-air.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-theme-block.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-theme-flat.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-theme-future.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger-theme-ice.css" />
+    <Content Include="Scripts\HubSpot\messenger\css\messenger.css" />
+    <Content Include="Scripts\HubSpot\messenger\js\messenger-theme-flat.js" />
+    <Content Include="Scripts\HubSpot\messenger\js\messenger-theme-future.js" />
+    <Content Include="Scripts\HubSpot\messenger\js\messenger.js" />
+    <Content Include="Scripts\HubSpot\messenger\js\messenger.min.js" />
     <Content Include="Scripts\jq\jquery-2.1.4.js" />
     <Content Include="Scripts\jq\mobile\images\ajax-loader.gif" />
     <Content Include="Scripts\jq\mobile\images\icons-png\action-black.png" />
@@ -1225,6 +1264,15 @@
     <Content Include="Scripts\jq\jquery-ui-themes-1.12.0\themes\vader\jquery-ui.css" />
     <Content Include="Scripts\jq\jquery-ui-themes-1.12.0\themes\vader\jquery-ui.min.css" />
     <Content Include="Scripts\jq\jquery-ui-themes-1.12.0\themes\vader\theme.css" />
+    <Content Include="Scripts\plagins\combo\jqcombo-sprite%402x.png" />
+    <Content Include="Scripts\plagins\combo\jqcombo-sprite.png" />
+    <Content Include="Scripts\plagins\combo\jqcombo.css" />
+    <Content Include="Scripts\plagins\combo\jqcombo.js" />
+    <Content Include="Scripts\plagins\combo\jqcombo.min.js" />
+    <Content Include="Scripts\plagins\combo\jqcombo.min.css" />
+    <Content Include="Scripts\plagins\combo\_demo\docs.html" />
+    <Content Include="Scripts\plagins\combo\_demo\index.html" />
+    <Content Include="Scripts\plagins\combo\_demo\options.html" />
     <Content Include="Scripts\plagins\popbox\bpopup.js" />
     <Content Include="Scripts\plagins\popbox\bpopup-0.css" />
     <Content Include="Scripts\plagins\popbox\demo\basic_bpopup.htm" />
@@ -1421,6 +1469,10 @@
     <Content Include="Scripts\jq\ui\1.9.2\css\jquery-ui.css" />
     <Content Include="Scripts\jq\ui\1.9.2\jquery-ui.min.js" />
     <Content Include="Scripts\mc\mc-all.js" />
+    <Content Include="Scripts\plagins\tabs\jcxtabs-light.css" />
+    <Content Include="Scripts\plagins\tabs\responsive-tabs-dark.css" />
+    <Content Include="Scripts\plagins\tabs\jcxtabs.js" />
+    <Content Include="Scripts\plagins\tabs\jcxtabs.min.js" />
     <Content Include="Scripts\plagins\vex\build-test-amd.html" />
     <Content Include="Scripts\plagins\vex\build-test.html" />
     <Content Include="Scripts\plagins\vex\css\vex-theme-bottom-right-corner.css" />
@@ -1512,11 +1564,19 @@
     <Content Include="Scripts\jq\jquery-ui-1.12.0\images\Thumbs.db" />
     <Content Include="Scripts\jq\jquery-ui-1.12.0\package.json" />
     <Content Include="Views\Crm\LeadNew.cshtml" />
+    <Content Include="Views\Building\ReportGrid.cshtml" />
+    <Content Include="Views\Crm\AccountsGrid-pop.cshtml" />
+    <Content Include="Views\Admin\AdGroupDef.cshtml" />
+    <Content Include="Views\Admin\AdTeamDef.cshtml" />
+    <Content Include="Views\Admin\AdDepartmentDef.cshtml" />
+    <Content Include="Views\Crm\AgentBroadcast.cshtml" />
     <None Include="Views\_demo\demoform.cshtml" />
     <Content Include="Scripts\plagins\popbox\api.html" />
+    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CacheKeys.cs" />
     <Compile Include="Controllers\ExcelResult.cs" />
     <Compile Include="Controllers\CsvActionResult.cs" />
+    <Compile Include="Controllers\Filters\InitializeSimpleMembershipAttribute.cs" />
     <Compile Include="Controllers\MediaController.cs" />
     <Compile Include="Controllers\CmsController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
@@ -1724,14 +1784,12 @@
     <Content Include="Scripts\plagins\_obsolte\maskedinput.js" />
     <Content Include="Content\css\view-form.css" />
     <Content Include="Content\css\style.css" />
-    <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BuildingController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\CrmController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\Filters\InitializeSimpleMembershipAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -1890,7 +1948,12 @@
     <Folder Include="Content\_obsolete\" />
     <Folder Include="Images\_obsolete\" />
     <Folder Include="Scripts\app\model\_exclude\" />
+    <Folder Include="Scripts\app\_1.0\model\_exclude\" />
+    <Folder Include="Scripts\HubSpot\drop\" />
+    <Folder Include="Scripts\HubSpot\tether\" />
     <Folder Include="Scripts\jq\plagins\" />
+    <Folder Include="Scripts\plagins\tabs\_ex\" />
+    <Folder Include="Scripts\plagins\tabs\_src\" />
     <Folder Include="Scripts\_exclude\" />
     <Folder Include="Uploads\" />
     <Folder Include="Views\Building\_exclude\" />

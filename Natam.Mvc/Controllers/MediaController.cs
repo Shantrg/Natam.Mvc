@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using WebMatrix.WebData;
+//using WebMatrix.WebData;
 using Nistec.Web.Cms;
 using Nistec.Data;
 using Nistec;
 using Pro.Data.Entities;
 using System.IO;
 using Natam.Mvc.Models;
+using Nistec.Drawing;
 
 namespace Natam.Mvc.Controllers
 {
@@ -20,6 +21,29 @@ namespace Natam.Mvc.Controllers
     public class MediaController : BaseController
     {
         bool EnableCache = false;
+  
+        private int GetMaxImageResize()
+        {
+            int size = NetConfig.AppSettings.Get<int>("ImageMaxResizeKb", 500);
+            return size * 1024;
+        }
+        private int GetMaxSize(string mediaType)
+        {
+            int size = 0;
+            switch(mediaType)
+            {
+                case "image":
+                    size = NetConfig.AppSettings.Get<int>("ImageMaxSizeKb", 10200);break;
+                case "video":
+                    size = NetConfig.AppSettings.Get<int>("VideoMaxSizeKb", 1024); break;
+                case "doc":
+                    size = NetConfig.AppSettings.Get<int>("DocMaxSizeKb", 1024); break;
+                default:
+                    throw new Exception ("Media type not supported "+ mediaType);
+
+            }
+            return size * 1024;
+        }
 
         public JsonResult MediaPropertyExists(int id)
         {
@@ -155,14 +179,31 @@ namespace Natam.Mvc.Controllers
             }
         }
 
-        public ResultModel MediaUpload()
+        private bool IsImage(string extension)
+        {
+            if (extension == null)
+                return false;
+            switch (extension.ToLower())
+            {
+                case ".jpg":
+                case ".jpeg":
+                case ".png":
+                case ".gif":
+                case ".tif":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public JsonResult MediaUpload()
         {
             //string appid = HttpContext.Current.Session["appid"].ToString();
 
             int BuildingId = 0;
             int UnitId = 0;
             string itemType = "";
-
+            ResultModel model = null;
             try
             {
 
@@ -178,7 +219,7 @@ namespace Natam.Mvc.Controllers
                 itemType = itemType.ToLower();
 
                 HttpFileCollectionBase uploadedFiles = Request.Files;
-
+                int maxImageResize = GetMaxImageResize();
                 int fileUploaded = 0;
                 int fileNone = 0;
                 for (int i = 0; i < uploadedFiles.Count; i++)
@@ -207,7 +248,19 @@ namespace Natam.Mvc.Controllers
                         string filename = newfilename + extension;
                         string fullname = serverpath + "\\" + filename;
 
-                        userPostedFile.SaveAs(fullname);
+                        if (IsImage(extension))
+                        {
+                            ImageResizer.Save(userPostedFile.InputStream, userPostedFile.FileName, fullname, maxImageResize, true);
+                        }
+                        else
+                        {
+                            int maxSizeAllowed = GetMaxSize(mediaType);
+                            if (ImageResizer.GetImageSize(userPostedFile.InputStream) > maxSizeAllowed)
+                            {
+                                throw new Exception("File size not allowed!");
+                            }
+                            userPostedFile.SaveAs(fullname);
+                        }
 
                         MediaView view = new MediaView()
                         {
@@ -223,14 +276,24 @@ namespace Natam.Mvc.Controllers
                     }
 
                 }
-                string returnTxt = string.Format("Added {0} files,Not allowed {1} files", fileUploaded, fileNone);
-                return new ResultModel() { Status = fileUploaded, Message = returnTxt, Title = "media added" };
+                string returnTxt = "";
+                if (fileUploaded > 0)
+                    returnTxt += string.Format("Added {0} files, ", fileUploaded);
+                if(fileNone>0)
+                    returnTxt += string.Format("Not allowed {1} files", fileNone);
+
+                //returnTxt = string.Format("Added {0} files,Not allowed {1} files", fileUploaded, fileNone);
+
+                //return new ResultModel() { Status = fileUploaded, Message = returnTxt, Title = "media added" };
+
+                model = new ResultModel() { Status = fileUploaded, Message = returnTxt, Title = "media upload" };
             }
             catch (Exception ex)
             {
-                return new ResultModel() { Status = -1, Message = ex.Message, Title = "file upload error" };
+                model = new ResultModel() { Status = -1, Message = ex.Message, Title = "file upload error" };
 
             }
+            return Json(model, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult MediaRemove(string id, string mediaType, string filename)

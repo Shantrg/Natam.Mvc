@@ -5,6 +5,10 @@ width: auto;
 margin-right:20px; margin-left:20px;
 text-align:right;
 }
+.navbar-img
+  {
+      height:46px;
+  }
 #cssmenu {direction:rtl;
   /*background: #4cddf3;*/  
   margin: 0;
@@ -279,7 +283,7 @@ text-align:right;
   #cssmenu.align-center > ul > li {
     display: block;
   }
-  #cssmenu > ul.open {
+  #cssmenu > ul.open {width:100%;
     max-height: 1000px;
     border-top: 1px solid rgba(110, 110, 110, 0.25);
   }
@@ -375,4 +379,9 @@ text-align:right;
     right: 20px;
     top: 26px;
   }
+  .navbar-img
+  {
+      height:30px;
+  }
+ 
 }

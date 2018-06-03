@@ -101,7 +101,7 @@ namespace Pro.Data.Entities
 
             var parameters = DataParameter.GetSqlList("FloorId", FloorId, "UserId", UserId);
             DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Floor_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Floor_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             return Types.ToInt(parameters[2].Value);
 
         }
@@ -110,7 +110,7 @@ namespace Pro.Data.Entities
         {
             var parameters=DataParameter.GetSqlList("BuildingId", BuildingId, "FloorNo", FloorNo, "FloorSize", FloorSize, "Purpose", Purpose, "UserId", UserId);
             DataParameter.AddOutputParameter(parameters,"Status", System.Data.SqlDbType.Int,4);
-            int res= DbNatam.Instance.ExecuteNonQuery("sp_Floor_Add", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Floor_Add", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             return Types.ToInt(parameters[5].Value);
         }
 

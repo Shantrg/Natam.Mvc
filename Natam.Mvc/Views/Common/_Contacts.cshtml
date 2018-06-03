@@ -12,13 +12,13 @@
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
 
-    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    @*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
  
 }
 
 @section scripts {
     <script type="text/javascript">
-
+        var isprimary = true;
         var NSaccountcontacts = {};
         var isMobile = app.IsMobile();
         $(document).ready(function () {
@@ -27,9 +27,12 @@
             var role = '@role';
             var uk = '@uk';
 
+            isprimary = (parent.triggerPrimaryContactCompleted);
+
                 //contacts
             var nastedsource = {
                 datafields: [
+                      { name: 'IsPrimary', type: 'boolean' },
                       { name: 'ContactId', type: 'number' },
                       { name: 'AccountId', type: 'number' },
                       { name: 'ContactName', type: 'string' },
@@ -49,56 +52,70 @@
                 $("#jqxgrid").jqxGrid({
                     source: nastedAdapter, width: '90%', height: 180,
                     autoheight: true,
+                    autorowheight:true,
                     scrollmode: 'logical',
                     rtl: true,
                     columns: [
-                      { text: 'שם איש קשר', datafield: 'ContactName', width: 120, cellsalign: 'right', align: 'center' },
                       {
-                          text: 'טלפון נייד', datafield: 'Mobile', width: 100, align: 'center', cellsrenderer: function (row, datafield, value) {
+                          text: '*', datafield: 'ContactId', width: '10%', cellsalign: 'right', align: 'center',  //threestatecheckbox: true, columntype: 'checkbox', width: 70,
+                          cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
+
+                              return '<div style="margin:4px 4px;direction:rtl"><a title="עריכת איש קשר" href="javascript:app_contacts_global.accountContacts_contactEdit(' + value + ')" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;"></i></a><span style="padding-left:5px"></span><a href="#" title="מחיקת איש קשר" onclick="app_contacts_global.accountContacts_contactDelete(' + value + ');"><i class="fa fa-remove" style="font-size:14px;color:red;"></i></a></div>';
+
+
+                             // return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="return triggerPrimaryContact(' + row + ');">ראשי</a></div>';
+                              //cellvaluechanging: function (row, datafield, columntype, oldvalue, newvalue) {
+                              //if (oldvalue != newvalue)
+                              //{
+                              //    triggerPrimaryContact(row, newvalue);
+                              //}
+                              //return newvalue;
+                          }
+                      },
+                      {
+                          text: 'ראשי', datafield: 'IsPrimary', width: '10%', cellsalign: 'right', align: 'center', hidden: !isprimary, //threestatecheckbox: true, columntype: 'checkbox', width: 70,
+                          cellsrenderer: function (row, datafield, columntype, oldvalue, newvalue) {
+
+                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="return app_trigger.triggerPrimaryContact(' + row + ');">ראשי</a></div>';
+
+                              //cellvaluechanging: function (row, datafield, columntype, oldvalue, newvalue) {
+                              //if (oldvalue != newvalue)
+                              //{
+                              //    triggerPrimaryContact(row, newvalue);
+                              //}
+                              //return newvalue;
+                          }
+                      },
+                      { text: 'שם איש קשר', datafield: 'ContactName', width: '25%', cellsalign: 'right', align: 'center' },
+                      {
+                          text: 'טלפון נייד', datafield: 'Mobile', width: '20%', align: 'center', cellsrenderer: function (row, datafield, value) {
                               return isMobile ? '<a style="float:right;"  href="tel:' + value + '">' + value + '</a>' : '<span style="float:right">' + value + '</span>';
                           }
                       },
                       {
-                          text: 'דואל', datafield: 'Email', width: 120, align: 'center', cellsrenderer: function (row, datafield, value) {
+                          text: 'דואל', datafield: 'Email', width: '20%', align: 'center', cellsrenderer: function (row, datafield, value) {
                               return '<a href="mailto:' + value + '">' + value + '</a>';
                           }
                       },
-                      { text: 'תפקיד', datafield: 'Title', width: 100, cellsalign: 'right', align: 'center', hidden: isMobile },
-                      {
-                        text: 'פעולות', dataField: 'ContactId', width: 90, cellsalign: 'right', align: 'center',
-                            cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
-                                return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="accountContacts_contactEdit(' + value + ');">עריכה</a> | <a href="#" onclick="accountContacts_contactDelete(' + value + ');">הסרה</a></div>'
-                            }
-                       }
+                      { text: 'תפקיד', datafield: 'Title', width: '15%', cellsalign: 'right', align: 'center', hidden: isMobile }
+                      //{
+                      //  text: 'פעולות', dataField: 'ContactId', width: 90, cellsalign: 'right', align: 'center',
+                      //      cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
+                      //          return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="accountContacts_contactEdit(' + value + ');">עריכה</a> | <a href="#" onclick="accountContacts_contactDelete(' + value + ');">הסרה</a></div>'
+                      //      }
+                      // }
                 ]
                 });
 
                 $('#btnAddItem').click(function () {
-                    NSaccountcontacts.contactdialog = app_contacts.contactEdit(0, id, role, uk);// "d");
+                    NSaccountcontacts.contactdialog = app_contacts.contactPanel(0, id, role, uk, "contacts-box");// "d");
                 });
                 $('#btnRefresh').click(function () {
                     nastedAdapter.dataBind();
                 });
         });
 
-        function triggerContactComplete(accid) {
-            try {
-                var adapter = $("#jqxgrid").jqxGrid('source');
-                adapter.dataBind();
-                app_dialog.dialogClose(NSaccountcontacts.contactdialog);
-            }
-            catch (e) {
-
-            }
-        }
-        function accountContacts_contactDelete(id) {
-            app_contacts.contactDelete(id, false);
-            $("#jqxgrid").jqxGrid('source').dataBind();
-        }
-
-        function accountContacts_contactEdit(id) {
-            NSaccountcontacts.contactdialog = app_contacts.contactEdit(id, 0, 0);
-        }
+        
 
      </script>
 }
@@ -109,7 +126,7 @@
         <div id="accWindow">
             <div id="accHeader">
             </div>
-            <div id="accBody">
+            <div id="contacts-box">
                <input value="הוספת איש קשר" id="btnAddItem" type="button" />
                <input value="רענון" id="btnRefresh" type="button" />
                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
@@ -119,3 +136,71 @@
     </div>
 </div>
 <!--end of content-wrapper-->
+
+<script type="text/javascript">
+
+    app_contacts_global = {
+
+        accountContacts_contactDelete: function (id) {
+            app_contacts.contactDelete(id, true, function () {
+                $("#jqxgrid").jqxGrid('source').dataBind();
+            });
+        },
+        accountContacts_contactEdit: function (id) {
+            //NSaccountcontacts.contactdialog = app_contacts.contactEdit(id, 0, 0);
+            NSaccountcontacts.contactdialog = app_contacts.contactPanel(id, 0, 0, null, "jqxgrid");
+        }
+    };
+
+    app_trigger = {
+
+        triggerPrimaryContact:function(row) {
+
+            var id = $('#jqxgrid').jqxGrid('getrowid', row);
+            var rcd = $('#jqxgrid').jqxGrid('getrowdata', row);
+            var value = true;
+            
+            if (window.parent) {
+                if (window.parent.app_trigger && window.parent.app_trigger.triggerPrimaryContactCompleted)
+                    window.parent.app_trigger.triggerPrimaryContactCompleted(id, value, rcd);
+            }
+            return false;
+        },
+
+        triggerContactComplete:function(accid) {
+            try {
+                var adapter = $("#jqxgrid").jqxGrid('source');
+                adapter.dataBind();
+                app_iframe.panelSwitchClose("contacts-box");
+                //app_dialog.dialogClose(NSaccountcontacts.contactdialog);
+            }
+            catch (e) {
+
+            }
+        },
+        triggerContactClose: function () {
+            app_iframe.panelSwitchClose("contacts-box", false);
+            //app_iframe.panelSwitchClose("jqxgrid", false);
+        }
+
+
+        //triggerContactComplete: function (accid) {
+        //    app_accounts_public.customers_contactRefresh();
+        //    app_dialog.dialogClose(slf.NScustomers.contactDialog);
+        //},
+        //triggerAccComplete: function (accType, accid) {
+        //    app_accounts_public.customers_accounsRefresh();
+        //    app_iframe.panelSwitchClose("wiz-parent", true);
+        //    app_dialog.dialogClose(slf.NScustomers.accountDialog);
+        //    return false;
+        //},
+        //triggerNewsComplete: function (accid) {
+        //    app_accounts_public.customers_newsRefresh();
+        //    app_dialog.dialogClose(slf.NScustomers.newsDialog);
+        //},
+        //triggerAccCancel: function () {
+        //    app_iframe.panelSwitchClose("wiz-parent", true);
+        //}
+    };
+
+</script>

@@ -58,8 +58,12 @@
         margin-right: 10px;
         width: 115px;
     }
-    #contacts {
-        border: none;
+    /*#contacts {
+       border: none;
+    }*/
+    #jqxTabs{ float:right}
+    .panel-window {
+        max-width: 900px !important;
     }
 </style>
 
@@ -193,7 +197,7 @@
             $("#jqxgrid").jqxGrid(
             {
                 width: '100%',
-                height:'300px',
+                height:300,
                 //selectionmode: 'checkbox',
                 autoheight: false,
                 rtl: true,
@@ -215,17 +219,17 @@
                 initrowdetails: initrowdetails,
                 columns: [
                        {
-                           text: 'פעולות', dataField: 'UnitId', width: 80, cellsalign: 'right', align: 'center',
+                           text: 'פעולות', dataField: 'UnitId', width: 60, cellsalign: 'right', align: 'center',
                            cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
                                return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="leads_property4Trans(' + value + ');">בחירה</a></div>'
                            }
                        },
                   //{ text: 'סוג יחידה', dataField: 'PropertyName', width: 100, cellsalign: 'right', align: 'center' },
-                  { text: 'כתובת', dataField: 'Address', width: 150, cellsalign: 'right', align: 'center' },
-                  { text: 'שטח', dataField: 'UnitSize', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'מחיר', dataField: 'Price', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'סוג עסקה', dataField: 'DealName', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'מטרה', dataField: 'PurposeName', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'כתובת', dataField: 'Address', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'שטח', dataField: 'UnitSize', width: 60, cellsalign: 'right', align: 'center' },
+                  { text: 'מחיר', dataField: 'Price', width: 60, cellsalign: 'right', align: 'center' },
+                  { text: 'סוג עסקה', dataField: 'DealName', width: 80, cellsalign: 'right', align: 'center' },
+                  { text: 'מטרה', dataField: 'PurposeName', width: 80, cellsalign: 'right', align: 'center' },
                   { text: 'מאוכלס', datafield: 'Populate', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center' },
                   { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
                 ]
@@ -245,7 +249,7 @@
                 alert("לא סומן איש קשר!");
                 return;
             }
-            window.parent.triggerPopertyTransComplete(unitId, contactId,1);
+            window.parent.app_trigger.triggerPopertyTransComplete(unitId, contactId, 1);
 
         });
 
@@ -283,7 +287,8 @@
             //Listbox's source
             //Initializing the wizzard - creating all elements, adding event handlers and starting the validation
             init: function () {
-                $('#jqxTabs').jqxTabs({ height: 490, width: 980, keyboardNavigation: false, rtl:true });
+                //$("#jqxTabs").jcxTabs({ rotate: false, startCollapsed: 'accordion', collapsible: 'accordion' });
+                $('#jqxTabs').jqxTabs({ width: '100%', keyboardNavigation: false, rtl:true });
                 $('#nextButton1').jqxButton({ width: 50 });
                 $('#nextButton2').jqxButton({ width: 50 });
                 $('#backButton2').jqxButton({ width: 50 });
@@ -415,13 +420,13 @@
             </div>
             <div id="jqxWidget">
 
-                <div id='jqxTabs'>
+                <div id='jqxTabs' class="jcx-tabs rtl">
                     <ul>
-                        <li>בחירת איש קשר</li>
-                        <li style="margin-left: 30px;">בחירת נכס</li>
-                        <li>סיום</li>
+                        <li class="active" data-toggle="tab">בחירת איש קשר</li>
+                        <li style="margin-left: 30px;" data-toggle="tab">בחירת נכס</li>
+                        <li data-toggle="tab">סיום</li>
                     </ul>
-                    <div class="section">
+                    <div class="section jcxtab-panel active">
                         <p>
                             חובה למלא בכרטיס לקוח: שם חברה, שם איש קשר, כתובת,עיר, טלפון ומייל כדי להתקדם לשלב הבא
                         </p>              
@@ -435,7 +440,7 @@
                         </div>
            
                     </div>
-                    <div class="section">
+                    <div class="section jcxtab-panel">
                         <div id="jqxgrid" style="position:relative;z-index:1;"></div>
                         <div class="hint" id="hintTab2">
                         </div>
@@ -444,7 +449,7 @@
                             <input type="button" value="הבא" class="nextButton" id="nextButton2" />
                         </div>
                     </div>
-                     <div class="section">
+                    <div class="section jcxtab-panel">
                         <div id="transaction">
                             <div class="form-group">
                                 <label class="column">

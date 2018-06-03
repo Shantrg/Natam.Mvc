@@ -31,6 +31,7 @@ namespace Natam.Mvc
             var code = (error is HttpException) ? (error as HttpException).GetHttpCode() : 500;
             string msg = error.Message;
             string errpath = "~/Home/Error";
+
             if (code == 404)
             {
                 errpath = "~/Home/ErrorNotFound";
@@ -40,11 +41,20 @@ namespace Natam.Mvc
             {
                 msg = string.Concat(msg, error.StackTrace ?? "");
             }
+            if (msg.Contains("The file '/login.aspx' does not exist.;FilePath:/login.aspx"))
+            {
+                Response.Clear();
+                Server.ClearError();
+                Response.Redirect("~/Home/Index");
+                return;
+            }
             Response.Clear();
             Server.ClearError();
             TraceHelper.Log("Application", "Error", msg, Request, 100);
 
-            Response.Redirect(String.Format("{0}/?message={1}", errpath, error.Message));
+            //Response.Redirect(String.Format("{0}/?message={1}", errpath, error.Message));
+        
+            HttpContext.Current.Response.RedirectToRoute("RouteError", new { Id = code, message= error.Message });
 
         }
     }

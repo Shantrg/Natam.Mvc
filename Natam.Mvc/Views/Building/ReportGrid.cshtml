@@ -1,0 +1,64 @@
+﻿@model Pro.Models.ReportQuery
+@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    ViewBag.Title = "Buildings";
+
+    //int id= Nistec.Types.ToInt(Request["id"]);
+    var dataModel = @Html.Raw(Json.Encode(Model));
+    //var userInfo = @Html.Raw(Json.Encode(ViewBag.UserInfo));
+
+}
+
+@section head {
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+<script src="~/Scripts/app/app-jqx-grid-2.0.js"></script>
+<script src="~/Scripts/app/model/report-grid.js?ver=2018004"></script>
+ <style type="text/css">
+    input {
+        direction: rtl;
+        text-align: right;
+    }
+      .jqx-grid-cell {
+            border: none;
+        }
+</style>
+}
+@section scripts {
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            app_report_grid.load(JSON.parse('@dataModel'));
+        });
+    </script>
+}
+
+        <!--breadcrumb-->
+        <div class="breadcrumbs">
+            @Html.ActionLink("Home", "Index", "Home")>
+            @Html.ActionLink("Main", "Main", "Home")>
+            <a href="javascript:parent.history.back()">Buildings</a> >
+            @ViewContext.RouteData.Values["action"].ToString()
+        </div>
+
+        <div class="clear"></div>
+
+        <div class="global">
+            <div class="container-box">
+
+                <div class="grid-wrap">
+                    <div class="box-title">
+                        <h3 id="hTitle">דוחות</h3>
+                        <div id="Agent"></div>
+                    </div>
+                    <div id="jqxWidget">
+                        <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                    </div>
+                    <div id="jqxGridColumns"></div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            app_menu.activeLayoutMenu("liBuilding");
+    </script>

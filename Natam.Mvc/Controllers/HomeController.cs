@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using WebMatrix.WebData;
+//using WebMatrix.WebData;
 
 namespace Natam.Mvc.Controllers
 {
@@ -65,7 +65,13 @@ namespace Natam.Mvc.Controllers
             FormsAuth.Instance.SignOut();
             return View();
         }
-        
+
+        [AllowAnonymous]
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View("Index");
+        }
 
         //[HttpPost]
         //public ActionResult Login()
@@ -131,66 +137,66 @@ namespace Natam.Mvc.Controllers
 
       
 
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public ActionResult ForgotPassword(string Email)
-        {
-            var user = UserProfile.GetByEmail(Email);
-            //check user existance
-            //var user = Membership.GetUser(UserName);
-            if (user == null)
-            {
-                TempData["Message"] = "User Not exist.";
-            }
-            else
-            {
-                string UserName = user.UserName;
-                //generate password token
-                var token = WebSecurity.GeneratePasswordResetToken(UserName);
-                //create url with above token
-                //var resetLink = "<a href='" + Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http") + "'>Reset Password</a>";
-                var resetLink = Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http");
+        //[HttpPost]
+        //[AllowAnonymous]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult ForgotPassword(string Email)
+        //{
+        //    var user = UserProfile.GetByEmail(Email);
+        //    //check user existance
+        //    //var user = Membership.GetUser(UserName);
+        //    if (user == null)
+        //    {
+        //        TempData["Message"] = "User Not exist.";
+        //    }
+        //    else
+        //    {
+        //        string UserName = user.UserName;
+        //        //generate password token
+        //        var token = WebSecurity.GeneratePasswordResetToken(UserName);
+        //        //create url with above token
+        //        //var resetLink = "<a href='" + Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http") + "'>Reset Password</a>";
+        //        var resetLink = Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http");
                 
-                string result = "";
-                try
-                {
-                    result = UserMembership.ForgotPassword(user, resetLink, token);
-                }
-                catch (Exception ex)
-                {
-                    result = ex.Message;
-                }
-                TempData["Message"] = result;
+        //        string result = "";
+        //        try
+        //        {
+        //            result = UserMembership.ForgotPassword(user, resetLink, token);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            result = ex.Message;
+        //        }
+        //        TempData["Message"] = result;
 
                 
-                //get user emailid
+        //        //get user emailid
 
-                //UsersContext db = new UsersContext();
-                //var emailid = (from i in db.UserProfiles
-                //               where i.UserName == UserName
-                //               select i.EmailId).FirstOrDefault();
-                //send mail
+        //        //UsersContext db = new UsersContext();
+        //        //var emailid = (from i in db.UserProfiles
+        //        //               where i.UserName == UserName
+        //        //               select i.EmailId).FirstOrDefault();
+        //        //send mail
                 
-                //string subject = "Password Reset Token";
-                //string body = "<b>Please find the Password Reset Token</b><br/>" + resetLink; 
-                //try
-                //{
+        //        //string subject = "Password Reset Token";
+        //        //string body = "<b>Please find the Password Reset Token</b><br/>" + resetLink; 
+        //        //try
+        //        //{
 
                     
-                //    SendEMail(emailid, subject, body);
-                //    TempData["Message"] = "Mail Sent.";
-                //}
-                //catch (Exception ex)
-                //{
-                //    TempData["Message"] = "Error occured while sending email." + ex.Message;
-                //}
-                ////only for testing
-                //TempData["Message"] = resetLink;
-            }
+        //        //    SendEMail(emailid, subject, body);
+        //        //    TempData["Message"] = "Mail Sent.";
+        //        //}
+        //        //catch (Exception ex)
+        //        //{
+        //        //    TempData["Message"] = "Error occured while sending email." + ex.Message;
+        //        //}
+        //        ////only for testing
+        //        //TempData["Message"] = resetLink;
+        //    }
 
-            return View();
-        }
+        //    return View();
+        //}
 
         [AllowAnonymous]
         public ActionResult ResetPassword(string email,string resetToken)

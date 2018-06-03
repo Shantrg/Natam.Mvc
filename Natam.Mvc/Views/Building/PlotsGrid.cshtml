@@ -1,33 +1,59 @@
 ﻿@{
     Layout = "~/Views/Shared/_View.cshtml";
     ViewBag.Title = "Buildings";
-    
-    int id= Nistec.Types.ToInt(Request["id"]);
 
-    
+    int id= Nistec.Types.ToInt(Request["id"]);
+    var userInfo = @Html.Raw(Json.Encode(ViewBag.UserInfo));
 }
 
 @section head {
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
-<script src="~/Scripts/app/model/plots-grid.js"></script>
+<script type="text/javascript" src="~/jqwidgets/jqxmenu.js"></script>
+<script src="~/Scripts/app/app-jqx-grid-2.0.js?ver=2018004"></script>
+<script src="~/Scripts/app/model/plots-grid.js?ver=2018004"></script>
+
+<!--plots-def begin-->
+<script src="~/Scripts/app/app-wizard.js"></script>
+<script src="~/Scripts/app/model/plots-def.js"></script>
+<script type="text/javascript" src="~/Scripts/app/model/address_model.js"></script>
+<!--uploader===========================================-->
+<script src="~/Scripts/app/app-media-2.0.js"></script>
+<script src="~/jqwidgets/jqxsplitter.js"></script>
+<script src="~/Scripts/plagins/colorbox/jquery.colorbox-min.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/colorbox/colorbox.css" />
+
+<script src="~/Scripts/plagins/uploader/js/vendor/jquery.ui.widget.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.iframe-transport.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.fileupload.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/uploader/css/jquery.fileupload.css">
+<!--plots-def end-->
+
  <style type="text/css">
     input {
         direction: rtl;
         text-align: right;
     }
+      .jqx-grid-cell {
+            border: none;
+        }
 </style>
 }
 @section scripts {
 
     <script type="text/javascript">
+
+        var plotsGrid;
+        var wizard;
+        var currentDef;
+
         $(document).ready(function () {
             var id = '@id';
-            @*var allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;*@
+            wizard = new app_wiztabs();
+            wizard.displayStep(1);
+            plotsGrid = app_plots_grid.load(id,JSON.parse('@userInfo'));// 'ViewBag.UserRole');
 
-            app_plots_grid.load(id, '@ViewBag.UserRole');
-
-         });
+        });
     </script>
 }
 
@@ -48,22 +74,43 @@
         <div class="clear"></div>
 
         <div class="global">
-            <div class="container">
+    <div class="container-box">
 
+        <div id="wiz-container" class="container rtl">
+            <div id="wiz-1" class="wiz-tab active">
                 <div class="grid-wrap">
                     <div class="box-title">
                         <h3 id="hTitle">מגרשים</h3>
-                        <a href="~/Building/PlotsDef?id=0">הגדרת מגרש חדש</a>
+                        <a id="plots-new" href="#">הגדרת מגרש חדש</a> @*~/Building/PlotsDef?id=0*@
                         <div id="Agent"></div>
                     </div>
-                   
                     <div id="jqxWidget">
                         <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                        <div id='jqxgrid-rowMenu' class="rtl">
+                            <ul>
+                                <li id="rmEdit">הצג מגרש <i class="fa fa-edit" style="font-size:14px;color:dodgerblue;"></i></li>
+                                <li id="rmDel">הסרת מגרש <i class="fa fa-remove" style="font-size:14px;color:red;"></i></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div id="wiz-2" class="wiz-tab">
+                <h3 id="wiz-2-title" class="rtl"></h3>
+                <div id="plots-def-window" class="wiz-partial"></div>
+                <div class="rtl">
+                    @*<a id="plots-def-update" class="btn-default btn7 w-60" href="#">עדכון</a>
+                    <a id="plots-def-cancel" class="btn-default btn7 w-60" href="#">ביטול</a>*@
+                </div>
+            </div>
 
-        <script type="text/javascript">
-            app_menu.activeLayoutMenu("liBuilding");
-    </script>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //var contextMenu = $("#Menu").jqxMenu({ width: 100, height: 58, autoOpenPopup: false, mode: 'popup', rtl: true });
+
+
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

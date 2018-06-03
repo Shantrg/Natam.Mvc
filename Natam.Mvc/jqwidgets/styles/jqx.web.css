@@ -267,9 +267,6 @@
   box-shadow: none;
 }
 .jqx-radiobutton-web {
-    -moz-border-radius: 100%;
-    -webkit-border-radius: 100%;
-    border-radius: 100%;
     background-repeat: no-repeat;
     background: none;
 }
@@ -310,4 +307,8 @@
     -moz-border-radius: 100%;
     -webkit-border-radius: 100%;
     border-radius: 100%; 
+}
+.jqx-layout-web
+{
+    background-color: #b2b2b2;
 }

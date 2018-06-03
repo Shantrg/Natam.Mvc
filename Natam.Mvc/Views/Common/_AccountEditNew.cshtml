@@ -9,7 +9,7 @@
 @section head {
 
     @Scripts.Render("~/bundles/jqx")
-<script type="text/javascript" src="~/Scripts/app/model/accounts-def.js"></script>
+<script type="text/javascript" src="~/Scripts/app/model/accounts-def.js?ver=2018004"></script>
     <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
 
 }
@@ -72,35 +72,28 @@
                                 </label>
                                 <input id="ContactName" name="ContactName" type="text" class="text-mid" />
                             </div>
-                            @*<div class="form-group">
-                <label class="column">
-                    תפקיד:
-                </label>
-                <input id="ContactTitle" name="ContactTitle" type="text" class="text-mid" />
-            </div>*@
-
+                            <div class="form-group">
+                                <label class="column">
+                                    תפקיד:<span class="mandatory">(*)</span>
+                                </label>
+                                <input id="ContactTitle" name="ContactTitle" type="text" class="text-mid" />
+                            </div>
                             <div class="form-group">
                                 <label class="column">
                                     טלפון נייד : <span class="mandatory">(*)</span>
                                 </label>
-                                <input id="ContactMobile" name="ContactMobile" type="text" class="text-mid" />
+                                <input id="Mobile" name="Mobile" type="text" class="text-mid" />
                             </div>
 
                             <div class="form-group">
                                 <label class="column">
                                     דאר אלקטרוני:<span class="mandatory">(*)</span>
                                 </label>
-                                <input id="ContactEmail" name="ContactEmail" type="text" class="text-mid" />
+                                <input id="Email" name="Email" type="text" class="text-mid" />
                             </div>
 
                         </div>
                         <div style="height: 5px"></div>
-                        @*<div id="divContact" class="form-group">
-                    <label class="column">
-                        איש קשר :</label>
-                    <input id="ContactName" name="ContactName" type="text" class="text-mid" />
-                </div>*@
-                        @*<div id="contactsGrid"></div>*@
                         <div class="form-group">
                             <label class="column">
                                 כתובת:

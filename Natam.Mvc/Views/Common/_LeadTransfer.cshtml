@@ -51,7 +51,7 @@
                             url: actionurl,
                             type: 'post',
                             dataType: 'json',
-                            data: $('#accForm').serialize(),
+                            data: app.serialize('#accForm'),
                             success: function (data) {
                                 alert(data.Message);
                                 if (data.Status > 0) {

@@ -52,11 +52,11 @@ namespace Pro.Data
         #region static
 
         public const bool EnableCache = true;
-        private static readonly DbNatam _instance = new DbNatam();
+        //private static readonly DbNatam _instance = new DbNatam();
 
         public static DbNatam Instance
         {
-            get { return _instance; }
+            get { return new DbNatam(); }// _instance; }
         }
 
         public static string Cnn
@@ -131,9 +131,6 @@ namespace Pro.Data
            )
         {
             return base.ExecuteList<BuildingQueryView>("sp_BuildingInfo_General","ReportType", ReportType, "AgentId", AgentId, "Area", Area, "AreaSizeMin", AreaSizeMin, "AreaSizeMax", AreaSizeMax, "Cities", Cities, "DealType", DealType, "PurposeType", PurposeType, "ShowNewOnly", ShowNewOnly);
-
-            //return base.Query<BuildingQueryView>("sp_BuildingInfo_General",
-            //    DataParameter.GetSql("ReportType", ReportType, "AgentId", AgentId, "Area", Area, "AreaSizeMin", AreaSizeMin, "AreaSizeMax", AreaSizeMax, "Cities", Cities, "DealType", DealType, "PurposeType", PurposeType, "ShowNewOnly", ShowNewOnly), System.Data.CommandType.StoredProcedure);
         }
 
         public DataTable GetBuildingQueryTable(int ReportType,
@@ -151,11 +148,8 @@ namespace Pro.Data
             {
                 return cmd.ExecuteCommand<DataTable>("sp_BuildingInfo_General", DataParameter.GetSql("ReportType", ReportType, "AgentId", AgentId, "Area", Area, "AreaSizeMin", AreaSizeMin, "AreaSizeMax", AreaSizeMax, "Cities", Cities, "DealType", DealType, "PurposeType", PurposeType, "ShowNewOnly", ShowNewOnly), System.Data.CommandType.StoredProcedure);
             }
-
-
-            //return base.Query<DataTable>("sp_BuildingInfo_General",
-            //    DataParameter.GetSql("ReportType", ReportType, "AgentId", AgentId, "Area", Area, "AreaSizeMin", AreaSizeMin, "AreaSizeMax", AreaSizeMax, "Cities", Cities, "DealType", DealType, "PurposeType", PurposeType, "ShowNewOnly", ShowNewOnly), System.Data.CommandType.StoredProcedure);
         }
+
         #endregion
       
         #region Properties

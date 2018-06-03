@@ -14,6 +14,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Pro.Lib;
+using Nistec.Web.Controls;
 
 namespace Natam.Mvc.Controllers
 {
@@ -78,7 +79,6 @@ namespace Natam.Mvc.Controllers
 
 
         #endregion
-
  
         #region properties
 
@@ -420,42 +420,522 @@ namespace Natam.Mvc.Controllers
         }
         #endregion
 
-        //[HttpPost]
-        //[AllowAnonymous]
-        //[ValidateAntiForgeryToken]
-        //public JsonResult CreatePassword(int UserId, bool sendMail)
-        //{
-        //    var user = UserProfile.Get(UserId);
-        //    if (user == null)
-        //    {
-        //        TempData["Message"] = "User Not exist.";
-        //    }
-        //    else
-        //    {
-        //        string UserName = user.UserName;
-        //        //generate password token
-        //        var token = WebSecurity.GeneratePasswordResetToken(UserName);
+        #region AdTeam
 
-        //        //create url with above token
+        [HttpGet]
+        public ActionResult AdTeamDef()
+        {
+            return View(true);
+        }
 
-        //        //var resetLink = "<a href='" + Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http") + "'>Reset Password</a>";
-        //        //var resetLink = Url.Action("ResetPassword", "Home", new { un = UserName, rt = token }, "http");
+        [HttpPost]
+        public ActionResult AdTeamDefList()
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdTeamItem>(accountId);
+            var list = db.GetList(accountId);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
 
-        //        string result = "";
-        //        try
-        //        {
-        //            result = UserMembership.CreatePassword(user, sendMail, token);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            result = ex.Message;
-        //        }
+        [HttpPost]
+        public ActionResult AdTeamShowMembers(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdTeamItem>(accountId);
+            var list = db.GetList(accountId);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
 
-        //        TempData["Message"] = result;
+        [HttpPost]
+        public ActionResult AdTeamDefUpdate()
+        {
+            string action = "עדכון צוותים";
+            AdContext<AdTeamItem> context = null;
+            try
+            {
+                ValidateUpdate(GetUser(), "AdTeamDefUpdate");
 
-        //    }
-        //}
+                int accountId = GetAccountId();
+                context = new AdContext<AdTeamItem>(accountId);
+                context.Set(Request.Form);
+                context.Current.AccountId = accountId;
+                var res = context.SaveChanges();
+                return Json(context.GetFormResult(res, null), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdTeamDefDelete(int TeamId)
+        {
+            string action = "מחיקת צוות";
+            AdContext<AdTeamItem> context = null;
+            try
+            {
+                ValidateDelete(GetUser(), "AdTeamDefDelete");
 
+                int accountId = GetAccountId();
+                context = new AdContext<AdTeamItem>(accountId);
+                var res = context.Delete("TeamId", TeamId, "AccountId", accountId);
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AdTeamDefRel(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdTeamItemRel>(accountId);
+            var list = db.ExecOrViewList("AccountId", accountId, "TeamId", id);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdTeamDefRelAll(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdTeamItemRelAll>(accountId);
+            var list = db.ExecOrViewList("TeamId", id, "AccountId", accountId, "IsAll", 2);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdTeamDefRelToAdd(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdTeamItemRelAll>(accountId);
+            var list = db.ExecOrViewList("TeamId", id, "AccountId", accountId, "IsAll", 1);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdTeamDefRelUpdate()
+        {
+            string action = "הגדרת צוותים";
+            AdContext<AdTeamItemRel> context = null;
+            try
+            {
+                ValidateUpdate(GetUser(), "AdTeamDefRelUpdate");
+
+                int accountId = GetAccountId();
+                int groupid = Types.ToInt(Request["TeamId"]);
+                string users = Request["Users"];
+                if (groupid > 0 && !string.IsNullOrEmpty(users))
+                {
+                    context = new AdContext<AdTeamItemRel>(accountId);
+                    //@Mode tinyint=0--0= insert,1=upsert,2=delete
+                    var model = context.Upsert(UpsertType.Update, ReturnValueType.ReturnValue, "TeamId", groupid, "AccountId", accountId, "Users", users, "Mode", 0);//Update
+                    return Json(context.GetFormResult(model, null), JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(FormResult.Get(0, action, null), JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdTeamDefRelDelete()
+        {
+            string action = "מחיקת משתמשים מצוות";
+            AdContext<AdTeamItemRel> context = null;
+            int res = 0;
+            try
+            {
+                ValidateDelete(GetUser(), "AdTeamDefRelDelete");
+                int groupid = Types.ToInt(Request["TeamId"]);
+                int userid = Types.ToInt(Request["UserId"]);
+                if (groupid > 0 && userid > 0)
+                {
+                    int accountId = GetAccountId();
+                    context = new AdContext<AdTeamItemRel>(accountId);
+                    res = context.Delete("TeamId", groupid, "AccountId", accountId, "UserId", userid);
+                }
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AdTeamDefLeadUpdate()
+        {
+            string action = "הגדרת ראש צוות";
+            try
+            {
+                var su = GetSignedUser(true);
+                var userId = su.UserId;
+                int accountId = su.AccountId;
+                ValidateUpdate(su, "AdTeamDefRelUpdate");
+                
+                int TeamId = Types.ToInt(Request["TeamId"]);
+                int TeamLead = Types.ToInt(Request["TeamLead"]);
+
+                //string users = Request["Users"];
+                if (TeamId > 0 && TeamLead > 0)
+                {
+                    var res=AdContext.UpdateTeamLeader(accountId, TeamId, TeamLead);
+                    return Json(FormResult.Get(res, action, null), JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(FormResult.Get(0, action, null), JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        
+
+        #endregion
+
+        #region AdGroup
+
+        [HttpGet]
+        public ActionResult AdGroupDef()
+        {
+            return View(true);
+        }
+
+        [HttpPost]
+        public ActionResult AdGroupDefList()
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdGroupItem>(accountId);
+            return Json(db.GetList(accountId), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdGroupShowMembers()
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdGroupItem>(accountId);
+            return Json(db.GetList(accountId), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdGroupDefUpdate()
+        {
+            string action = "עדכון קבוצה";
+            AdContext<AdGroupItem> context = null;
+            try
+            {
+                ValidateUpdate(GetUser(), "AdGroupDefUpdate");
+
+                int accountId = GetAccountId();
+                context = new AdContext<AdGroupItem>(accountId);
+                context.Set(Request.Form);
+                context.Current.AccountId = accountId;
+                var res = context.SaveChanges();
+                return Json(context.GetFormResult(res, null), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdGroupDefDelete(int GroupId)
+        {
+            string action = "מחיקת קבוצה";
+            AdContext<AdGroupItem> context = null;
+            try
+            {
+                ValidateDelete(GetUser(), "AdGroupDefDelete");
+
+                int accountId = GetAccountId();
+                context = new AdContext<AdGroupItem>(accountId);
+                var res = context.Delete("GroupId", GroupId, "AccountId", accountId);
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AdGroupDefRel(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdGroupItemRel>(accountId);
+            return Json(db.ExecOrViewList("AccountId", accountId, "GroupId", id), JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdGroupDefRelAll(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdGroupItemRelAll>(accountId);
+            return Json(db.ExecOrViewList("GroupId", id, "AccountId", accountId, "IsAll", 2), JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdGroupDefRelToAdd(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdGroupItemRelAll>(accountId);
+            return Json(db.ExecOrViewList("GroupId", id, "AccountId", accountId, "IsAll", 1), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdGroupDefRelUpdate()
+        {
+            AdContext<AdGroupItemRel> context = null;
+            string action = "הגדרת קבוצות";
+            try
+            {
+                ValidateUpdate(GetUser(), "AdGroupDefRelUpdate");
+
+                int accountId = GetAccountId();
+                int groupid = Types.ToInt(Request["GroupId"]);
+                string users = Request["Users"];
+                if (groupid > 0 && !string.IsNullOrEmpty(users))
+                {
+                    context = new AdContext<AdGroupItemRel>(accountId);
+                    //@Mode tinyint=0--0= insert,1=upsert,2=delete
+                    var model = context.Upsert(UpsertType.Update, ReturnValueType.ReturnValue, "GroupId", groupid, "AccountId", accountId, "Users", users, "Mode", 0);//.Update
+                    return Json(context.GetFormResult(model, null), JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(FormResult.Get(0, action, null, 0), JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdGroupDefRelDelete()
+        {
+            string action = "הסרת משתמש מקבוצה";
+            AdContext<AdGroupItemRel> context = null;
+            int res = 0;
+            try
+            {
+                ValidateDelete(GetUser(), "AdGroupDefRelDelete");
+                int groupid = Types.ToInt(Request["GroupId"]);
+                int userid = Types.ToInt(Request["UserId"]);
+                if (groupid > 0 && userid > 0)
+                {
+                    int accountId = GetAccountId();
+                    context = new AdContext<AdGroupItemRel>(accountId);
+                    res = context.Delete("GroupId", groupid, "AccountId", accountId, "UserId", userid);
+                }
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetError(action, ex.Message), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #endregion
+
+        #region AdDepartment
+
+        [HttpGet]
+        public ActionResult AdDepartmentDef()
+        {
+            return View(true);
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentDefList()
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentItem>(accountId);
+            return Json(db.GetList(accountId), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentShowMembers()
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentItem>(accountId);
+            return Json(db.GetList(accountId), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentDefUpdate()
+        {
+            string action = "עדכון מחלקה";
+            AdContext<AdDepartmentItem> context = null;
+            try
+            {
+                ValidateUpdate(GetUser(), "AdDepartmentDefUpdate");
+
+                int accountId = GetAccountId();
+                context = new AdContext<AdDepartmentItem>(accountId);
+                context.Set(Request.Form);
+                context.Current.AccountId = accountId;
+                var res = context.SaveChanges();
+                return Json(context.GetFormResult(res, null), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdDepartmentDefDelete(int DepartmentId)
+        {
+            string action = "מחיקת מחלקה";
+            AdContext<AdDepartmentItem> context = null;
+            try
+            {
+                ValidateDelete(GetUser(), "AdDepartmentDefDelete");
+
+                int accountId = GetAccountId();
+                context = new AdContext<AdDepartmentItem>(accountId);
+                var res = context.Delete("DepartmentId", DepartmentId, "AccountId", accountId);
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentDefRel(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentItemRel>(accountId);
+            var list = db.ExecOrViewList("AccountId", accountId, "DepartmentId", id);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdDepartmentDefRelAll(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentItemRelAll>(accountId);
+            var list = db.ExecOrViewList("DepartmentId", id, "AccountId", accountId, "IsAll", 2);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdDepartmentDefRelToAdd(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentItemRelAll>(accountId);
+            var list = db.ExecOrViewList("DepartmentId", id, "AccountId", accountId, "IsAll", 1);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentDefRelUpdate()
+        {
+            AdContext<AdDepartmentItemRel> context = null;
+            string action = "הגדרת מחלקות";
+            try
+            {
+                ValidateUpdate(GetUser(), "AdDepartmentDefRelUpdate");
+
+                int accountId = GetAccountId();
+                int Departmentid = Types.ToInt(Request["DepartmentId"]);
+                string users = Request["Users"];
+                if (Departmentid > 0 && !string.IsNullOrEmpty(users))
+                {
+                    context = new AdContext<AdDepartmentItemRel>(accountId);
+                    //@Mode tinyint=0--0= insert,1=upsert,2=delete
+                    var model = context.Upsert(UpsertType.Update, ReturnValueType.ReturnValue, "DepartmentId", Departmentid, "AccountId", accountId, "Users", users, "Mode", 0);//.Update
+                    return Json(context.GetFormResult(model, null), JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(FormResult.Get(0, action, null, 0), JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult AdDepartmentDefRelDelete()
+        {
+            string action = "הסרת משתמש ממחלקה";
+            AdContext<AdDepartmentItemRel> context = null;
+            int res = 0;
+            try
+            {
+                ValidateDelete(GetUser(), "AdDepartmentDefRelDelete");
+                int Departmentid = Types.ToInt(Request["DepartmentId"]);
+                int userid = Types.ToInt(Request["UserId"]);
+                if (Departmentid > 0 && userid > 0)
+                {
+                    int accountId = GetAccountId();
+                    context = new AdContext<AdDepartmentItemRel>(accountId);
+                    res = context.Delete("DepartmentId", Departmentid, "AccountId", accountId, "UserId", userid);
+                }
+                return Json(FormResult.Get(res, context.EntityName, "ok"), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetError(action, ex.Message), JsonRequestBehavior.AllowGet);
+            }
+        }
+
+         [HttpPost]
+        public ActionResult AdDepartmentUsersRel(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentUsersRel>(accountId);
+            var list = db.ExecOrViewList("DepartmentId", id, "AccountId", accountId, "IsAll", 4);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public ActionResult AdDepartmentUsersToLeadRel(int id)
+        {
+            int accountId = GetAccountId();
+            var db = new AdContext<AdDepartmentUsersRel>(accountId);
+            var list = db.ExecOrViewList("DepartmentId", id, "AccountId", accountId, "IsAll", 3);
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AdDepartmentLeadUpdate()
+        {
+            string action = "הגדרת מנהל מחלקה";
+            try
+            {
+                var su = GetSignedUser(true);
+                var userId = su.UserId;
+                int accountId = su.AccountId;
+                ValidateUpdate(su, "AdDepartmentLeadUpdate");
+
+                int DepartmentId = Types.ToInt(Request["DepartmentId"]);
+                int Manager = Types.ToInt(Request["Manager"]);
+
+                //string users = Request["Users"];
+                if (DepartmentId > 0 && Manager > 0)
+                {
+                    var res = AdContext.UpdateDepartmentLeader(accountId, DepartmentId, Manager);
+                    return Json(FormResult.Get(res, action, null), JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(FormResult.Get(0, action, null), JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(FormResult.GetTrace<DbNatam>(ex, action, Request), JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
 
         [HttpPost]
         [AllowAnonymous]

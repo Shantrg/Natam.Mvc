@@ -4,99 +4,33 @@
 function app_plots_def(plotsId, userInfo) {
 
     this.PlotsId = plotsId;
+    this.UserId = userInfo.UserId;
     this.UserRole = userInfo.UserRole;
     this.allowEdit = 0;
     this.srcDesignation;
     this.srcOwnerId;
     this.srcAreaId;
-
+    this.srcStreetId;
+    this.srcCityCode;
     this.allowEdit = (this.UserRole == 9) ? 1 : 0;
     this.isMobile = app.IsMobile();
-
+    this.mediaUploader = new media_model('#media-files', { 'buildingId': this.PlotsId, 'propertyId': this.PlotsId, 'propertyType': "p" }, this.allowEdit == 0).mediaFiles();
     var slf = this;
 
+    
+
     //$('#btnImages').attr("disabled", this.isMobile || plotsId <= 0);
-
     $("#hImages").css('display', this.PlotsId > 0 ? 'block' : 'none');
-
     if (plotsId==0)
     {
         $("#ads").hide();
-        $("#AgentId").val(userInfo.UserId);
-        $("#AgentName").val(userInfo.UserName);
+        app_lookups.setInput("form", "AgentId", slf.UserId);
+        //$("#AgentId").val(userInfo.UserId);
+        //$("#AgentName").val(userInfo.UserName);
     }
-    
-    // prepare the data
-    this.ownerAdapter = app_jqx_list.ownerPlotsComboAdapter();
-    app_jqx_list.areaComboAdapter();
 
-
-
-        //var source =
-        //    {
-        //        dataType: "json",
-        //        //async: async,
-        //        dataFields: [
-        //            { name: "AreaId" },
-        //            { name: "AreaName" }
-        //        ],
-        //        type: 'POST',
-        //        url: '/Building/GetAreaViewAll'
-        //    };
-        //var srcAdapter = new $.jqx.dataAdapter(source,
-        //{
-        //    formatData: function (data) {
-        //        if ($("#AreaId").jqxComboBox('searchString') != undefined) {
-        //            data.AreaName_startsWith = $("#AreaId").jqxComboBox('searchString');
-        //            return data;
-        //        }
-        //    }
-        //});
-
-    //$("#AreaId").jqxComboBox(
-    // {
-    //     rtl: true,
-    //     source: srcAdapter,
-    //     width: 200,
-    //     remoteAutoComplete: true,
-    //     autoDropDownHeight: true,
-    //     selectedIndex: 0,
-    //     displayMember: "AreaName",
-    //     valueMember: "AreaId",
-    //     renderer: function (index, label, value) {
-    //         var item = srcAdapter.records[index];
-    //        if (item != null) {
-    //            var label = item.AreaName;
-    //            return label;
-    //        }
-    //        return "";
-    //    },
-    //    renderSelectedItem: function(index, item)
-    //    {
-    //        var item = srcAdapter.records[index];
-    //        if (item != null) {
-    //            var label = item.AreaName;
-    //            return label;
-    //        }
-    //        return "";   
-    //    },
-    //    search: function (searchString) {
-    //        srcAdapter.dataBind();
-    //}
-    // });
-
-    app_jqx_list.ownerTypeComboAdapter();
-    //app_jqx_list.designationComboAdapter();
-
-    //$("#LastUpdate").jqxDateTimeInput({ formatString: 'dd/MM/yyyy' });
-    //$("#Creation").val('');
-
-
-    //$("#form").on('validationSuccess', function () {
-    //    //alert('validationSuccess');
-    //    // Display the Server's Response which came as result of the Form Submit.
-    //    $("#form-iframe").fadeIn('fast');
-    //});
+    //app_jqx_list.ownerTypeComboAdapter();
+    app_select.OwnerType();
 
     $('#reset').on('click', function () {
         //$("#form-iframe").html('').fadeOut('fast');
@@ -104,20 +38,47 @@ function app_plots_def(plotsId, userInfo) {
         location.reload();
     });
 
-    $('#btnImages').click(function (e) {
-        e.preventDefault();
-        //var unitId = $("#PlotsId").val();
-        app_popup.mediaEditor(0, slf.PlotsId, "p");
-    });
-    $('#btnReloadImages').click(function (e) {
-        var id = $("#PlotsId").val();
-        if (id > 0)
-            app_media.loadImages(id);
-    });
+
     $('#ads').click(function (e) {
         app_rout.redirectToAdsDef(slf.PlotsId, "p");
     });
-    this.loadControls();
+   
+    //======================== events
+
+
+    $('#queryOwner').click(function (e) {
+        e.preventDefault();
+        app_popup.ownerGrid();
+    });
+
+    $('#showOwner').click(function (e) {
+        e.preventDefault();
+        var item = $("#OwnerId").val();
+        if (item && item.value != 0)
+            app_accounts.accountDisplay(item.value, "בעלים");
+    });
+
+    $('#refreshOwner').click(function () {
+        var item = $("#OwnerId").val();
+        app_jqx_combo_async.ownerInputAdapter("#OwnerId", item.value);
+    });
+
+    $('#editOwner').click(function (e) {
+        e.preventDefault();
+        var item = $("#OwnerId").val();
+        var val = (item && item.value != 0) ? item.value : 0;
+        app_accounts.accountPanel(item.value, 2, "OwnerId");
+    });
+
+    // prepare the data
+    $("form").submit(function (e) {
+        e.preventDefault();
+        slf.doSubmit();
+
+    });
+    //==============================
+
+    this.addresssModel = new app_addres_model();
 
     this.loadDataAdapter = function () {
 
@@ -142,6 +103,7 @@ function app_plots_def(plotsId, userInfo) {
                 loadComplete: function (record) {
 
                     slf.syncData(record);
+                    slf.loadControls(record);
 
                 },
                 loadError: function (jqXHR, status, error) {
@@ -151,6 +113,13 @@ function app_plots_def(plotsId, userInfo) {
             this.dataAdapter.dataBind();
         }
     };
+
+    if (this.PlotsId > 0) {
+        this.loadDataAdapter();
+    }
+    else {
+        this.loadControls();
+    }
 
     this.doSubmit = function () {
         //e.preventDefault();
@@ -169,21 +138,27 @@ function app_plots_def(plotsId, userInfo) {
                     url: actionurl,
                     type: 'post',
                     dataType: 'json',
-                    data: $('#form').serialize(),
+                    data: app.serialize('#form'),
                     success: function (data) {
+
+                        app_messenger.Post(data);
 
                         if (data.Status >= 0) {
                             //window.parent.triggerBuildingComplete(data.OutputId);
                             //$('#form')[0].reset();
                             $('#PlotsId').val(data.OutputId);
+                            //app_messenger.Post(data);
+
+                            //app_jqxnotify.notify(data);
+
                             //redirectToFinal("building-ok");
                             app.redirectTo("/Building/PlotsGrid");
                         }
-                        else
-                            alert(data.Message);
+                        //else
+                        //    alert(data.Message);
                     },
                     error: function (jqXHR, status, error) {
-                        alert(error);
+                        app_dialog.alert(error);
                     }
                 });
 
@@ -193,20 +168,7 @@ function app_plots_def(plotsId, userInfo) {
         $('#form').jqxValidator('validate', validationResult);
     };
 
-    //this.loadPic = function (tag, value) {
-    //    if (value) {
-    //        var img = $('<img height="60" src="' + value + '"/>');
-    //        $("#" + tag).html(img);
-    //    }
-    //};
-
-    this.reloadImages = function () {
-
-        app_media.loadImages(this.PlotsId,'p');
-    };
-
-    app_media.loadImages(this.PlotsId,'p');
-
+  
 };
 
 app_plots_def.prototype.syncData = function (record) {
@@ -215,14 +177,16 @@ app_plots_def.prototype.syncData = function (record) {
 
     if (record.PlotsId > 0) {
 
-        app_jqxform.loadDataForm("form", record);
+        app_form.loadDataForm("form", record,["OwnerId", "CityCode", "StreetId"]);
 
         this.srcDesignation = record.Designation;
         this.srcOwnerId = record.OwnerId;
         this.srcAreaId = record.AreaId;
+        this.srcStreetId = record.StreetId;
+        this.srcCityCode = record.CityCode;
         //srcPlotsId = record.PlotsId;
 
-        app_query.getAgentName(record.AgentId, 'AgentName');
+        //app_accounts.getAgentName(record.AgentId, 'AgentName');
 
         app_jqxcombos.selectCheckList("DesignationList", record.Designation);
 
@@ -248,7 +212,24 @@ app_plots_def.prototype.syncData = function (record) {
     //}
 };
 
-app_plots_def.prototype.loadControls = function () {
+app_plots_def.prototype.loadControls = function (record) {
+
+
+    if (record) {
+        if (record.CityCode > 0)
+            this.addresssModel.SetCityValue(record.CityCode);// app_jqx_adapter.setInputAdapterValue("#CityCode", record.CityCode);
+        if (record.StreetId > 0)
+            this.addresssModel.SetStreetValue(record.CityCode, record.StreetId);
+        //app_jqx_adapter.setInptValue("#StreetId", record.StreetId, record.StreetName,true);
+
+        app_jqx_combo_async.ownerInputAdapter("#OwnerId", record.OwnerId);
+    }
+    else
+    {
+        app_jqx_combo_async.ownerInputAdapter("#OwnerId");
+    }
+    
+
 
     this.designationSource =
    {
@@ -261,14 +242,21 @@ app_plots_def.prototype.loadControls = function () {
        type: 'POST',
        url: '/Building/GetDesignationView'
    };
-    this.designationAdapter = new $.jqx.dataAdapter(this.designationSource);
+    this.designationAdapter = new $.jqx.dataAdapter(this.designationSource, {
+        loadComplete: function (data) {
+            if (record)
+                app_jqxcombos.selectCheckList("DesignationList", record.Designation, "Designation");
+        },
+        loadError: function (jqXHR, status, error) {
+        },
+    });
 
     $("#DesignationList").jqxListBox(
     {
         rtl: true,
         source: this.designationAdapter,
         width: 240,
-        height: 160,
+        height: 180,
         checkboxes: true,
         displayMember: 'DesignationName',
         valueMember: 'DesignationId'
@@ -294,15 +282,267 @@ app_plots_def.prototype.loadControls = function () {
                        return false;
                    }
                },
-               {
-                   input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
-                       var index = $("#OwnerId").jqxComboBox('getSelectedIndex');
-                       if (index >= 0) { return true; } return false;
-                   }
-               },
+               { input: '#OwnerId', message: 'חובה לציין בעלים עיקריים!', action: 'keyup, blur', rule: 'required' },
+               { input: '#CityCode', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' },
+               { input: '#StreetId', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
+
+               //{
+               //    input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
+               //        var index = $("#OwnerId").jqxComboBox('getSelectedIndex');
+               //        if (index >= 0) { return true; } return false;
+               //    }
+               //},
               //{ input: '#Street', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
               //{ input: '#StreetNo', message: 'חובה לציין מספר בית!', action: 'keyup, blur', rule: 'required' },
-              { input: '#City', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' }
+              //{ input: '#City', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' }
+                //{
+                //    input: '#StreetId', message: 'חובה לציין רחוב!', action: 'select', rule: function (input) {
+                //        var index = $("#StreetId").jqxComboBox('getSelectedIndex');
+                //        if (index >= 0) { return true; } return false;
+                //    }
+                //},
+                //{
+                //         input: '#CityCode', message: 'חובה לציין עיר!', action: 'select', rule: function (input) {
+                //             var index = $("#CityCode").jqxComboBox('getSelectedIndex');
+                //             if (index >= 0) { return true; } return false;
+                //         }
+                //}
         ]
     });
 };
+
+
+app_trigger = {
+
+    triggerAccComplete: function (accType, accId) {
+        app_jqx_combo_async.ownerInputAdapter("#OwnerId", accId);
+
+        //$("#OwnerId").jqxComboBox("source").dataBind();
+        //if (accId)
+        //    $("#OwnerId").val(accId);
+
+        app_iframe.panelSwitchClose("OwnerId");
+        //app_dialog.dialogIframClose();
+    },
+    triggerAccCancel: function () {
+        app_iframe.panelSwitchClose("OwnerId", false);
+    },
+    triggerImageChanged: function () {
+        var id = currentDef.PlotsId;
+        app_media.loadImages(id, 'p');
+    }
+};
+
+
+
+app_plots_control = function (tagDiv) {
+
+    //this.entityDef;
+    this.Model;
+    this.tagDiv = tagDiv;
+
+    this.init = function (model, userInfo) {//id, acctype,role
+
+        //if (currentDef == null) {
+
+        var slf = this;
+
+        this.Model = model;
+        this.load();
+        currentDef = new app_plots_def(model.Id, model.UserInfo);
+        //this.entityDef.loadDataAdapter();
+    };
+
+    this.load = function () {
+
+        var html = (function () {/*
+               <div class="global-view">
+    <div id="wizard" class="row_link"></div>
+    <div class="container-box">
+        <div class="box-title">
+            <h3 id="hBuildingName">הגדרת מגרש</h3>
+        </div>
+        <div class="section-table">
+            <div class="panel-area">
+                <div class="panel-area-title"><h3 id="hImages" class="rtl right"><a id="btnImages" href="#">תמונות</a></h3></div>
+                <div id="media-files"></div>
+            </div>
+            <form class="form" id="form" method="post" action="/Building/UpdatePlots">
+                <input type="hidden" id="Designation" name="Designation" />
+                <input type="hidden" id="Creation" name="Creation" />
+                <div class="panel-area">
+                    <div class="panel-area-title">פרטי מגרש</div>
+                    <div class="section-table">
+                        <div class="section-cell">
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד מגרש:
+                                </label>
+                                <input id="PlotsId" type="number" name="PlotsId" class="number" readonly="true" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    ייעוד<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="DesignationList" name="DesignationList" style="padding: 10px" data-type="checklist">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="section-cell">
+                            <div class="form-group">
+                                <label class="column">
+                                    שם האזור<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="AreaId" name="AreaId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עיר<span class="mandatory">(*)</span>:
+                                </label>
+                                <input type="text" id="CityCode" name="CityCode" /><i class="fa fa-search"></i>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    רחוב<span class="mandatory">(*)</span>:
+                                </label>
+                                <input type="text" id="StreetId" name="StreetId" /><i class="fa fa-search"></i>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מס' בית:
+                                </label>
+                                <input id="StreetNo" name="StreetNo" type="text" maxlength="10" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <div class="panel-area-title">פרטי בעלים</div>
+                    <div class="form-group">
+                        <label class="column">
+                            בעלים<span class="mandatory">(*)</span>:
+                            <a id="showOwner" href="#">הצג</a>|
+                            <a id="refreshOwner" href="#">רענן</a>|
+                            <a id="queryOwner" href="#">איתור</a>|
+                            <a id="editOwner" href="#">עריכה</a>
+                        </label>
+                        <input type="text" id="OwnerId" name="OwnerId" /><i class="fa fa-search"></i>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג בעלות<span class="mandatory">(*)</span>:
+                        </label>
+                        <select id="OwnerType" name="OwnerType"></select>
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <div class="panel-area-title">פרטי חלקה</div>
+                    <div class="section-table">
+                        <div class="section-cell">
+                            <div class="form-group">
+                                <label class="column">
+                                    גוש:
+                                </label>
+                                <input id="Bloc" name="Bloc" type="text" maxlength="250" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    חלקה:
+                                </label>
+                                <input id="Lot" name="Lot" type="text" maxlength="250" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    זכויות בניה:
+                                </label>
+                                <input id="Rights" name="Rights" type="text" maxlength="250" />
+                            </div>
+                        </div>
+                        <div class="section-cell">
+                            <div class="form-group">
+                                <label class="column">
+                                    תב"ע:
+                                </label>
+                                <input id="Taba" name="Taba" type="text" maxlength="250" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שטח במ"ר":
+                                </label>
+                                <input id="Size" name="Size" type="number" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר לדונם:
+                                </label>
+                                <input id="Price" name="Price" type="number" step="any" class="number" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <div class="panel-area-title">הערות</div>
+                    <div class="form-group">
+                        <label class="column">
+                            מועד עדכון:
+                        </label>
+                        <input id="LastUpdate" name="LastUpdate" readonly type="text" class="text" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוכן:
+                        </label>
+                        <input type="hidden" name="AgentId" data-type="lookup" />
+                        <input id="AgentId" type="text" readonly="readonly" />
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            הערות:
+                        </label>
+                        <textarea id="Memo" name="Memo" style="width:99%;height:60px"></textarea>
+                    </div>
+                    <div style="height: 10px"></div>
+                </div>
+                <div class="panel-area">
+                    <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                    <input id="control-cancel" type="button" value="x" class="btn-default btn2" />
+                    <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                    <input id="ads" type="button" value="פרסום" class="btn-default btn2" />
+                </div>
+
+                <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+            </form>
+        </div>
+    </div>    
+ </div>*/}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+
+        var container = $(html);
+        $(this.tagDiv).empty();
+        $(this.tagDiv).append(container);
+
+        $('#control-cancel').click(function () {
+            wizard.wizHome();
+        });
+    };
+    this.display = function () {
+        $(this.tagDiv).show();
+    };
+    this.hide = function () {
+        $(this.tagDiv).hide();
+    };
+    this.update = function (callback) {
+        if (this.accDef != null) {
+            currentDef.doSubmit(callback);
+        }
+        return false;
+    };
+
+};
+
+//============================================================================================ app_scheduler_def
+
+
+
+
+

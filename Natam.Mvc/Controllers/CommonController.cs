@@ -9,7 +9,7 @@ using System.Web;
 using System.Web.Mvc;
 using Nistec;
 using Pro.Models;
-
+using Nistec.Web.Controls;
 
 namespace Natam.Mvc.Controllers
 {
@@ -146,8 +146,7 @@ namespace Natam.Mvc.Controllers
 
                 res = AccountContext.DoSave(aid, uploadKey, a);
 
-                
-                return Json(GetFormResult(res, action, null, a.AccountId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, a.AccountId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -208,7 +207,7 @@ namespace Natam.Mvc.Controllers
                 }
 
                 res = AccountContext.DoSaveNew(a);
-                return Json(GetFormResult(res, action, null, a.AccountId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, a.AccountId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -413,7 +412,7 @@ namespace Natam.Mvc.Controllers
                     return Json(model, JsonRequestBehavior.AllowGet);
                 }
 
-                return Json(GetFormResult(res, action, null, v.UnitId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, v.UnitId), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -772,7 +771,7 @@ namespace Natam.Mvc.Controllers
                 }
 
                 res = AccountNewsView.UpdateNews(accid, newstype);
-                return Json(GetFormResult(res, action, null,accid), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, accid), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {

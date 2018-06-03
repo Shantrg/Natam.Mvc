@@ -58,8 +58,12 @@
         margin-right: 10px;
         width: 115px;
     }
-    #contacts {
+    /*#contacts {
         border: none;
+    }*/
+     #jqxTabs{ float:right}
+    .panel-window {
+        max-width: 900px !important;
     }
 </style>
 
@@ -193,7 +197,7 @@
             $("#jqxgrid").jqxGrid(
             {
                 width: '100%',
-                height:'300px',
+                height:300,
                 //selectionmode: 'checkbox',
                 autoheight: false,
                 rtl: true,
@@ -222,10 +226,10 @@
                        },
                   //{ text: 'סוג יחידה', dataField: 'PropertyName', width: 100, cellsalign: 'right', align: 'center' },
                   { text: 'כתובת', dataField: 'Address', width: 150, cellsalign: 'right', align: 'center' },
-                  { text: 'שטח', dataField: 'UnitSize', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'מחיר', dataField: 'Price', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'סוג עסקה', dataField: 'DealName', width: 120, cellsalign: 'right', align: 'center' },
-                  { text: 'מטרה', dataField: 'PurposeName', width: 120, cellsalign: 'right', align: 'center' },
+                  { text: 'שטח', dataField: 'UnitSize', width: 80, cellsalign: 'right', align: 'center' },
+                  { text: 'מחיר', dataField: 'Price', width: 80, cellsalign: 'right', align: 'center' },
+                  { text: 'סוג עסקה', dataField: 'DealName', width: 80, cellsalign: 'right', align: 'center' },
+                  { text: 'מטרה', dataField: 'PurposeName', width: 80, cellsalign: 'right', align: 'center' },
                   { text: 'מאוכלס', datafield: 'Populate', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center' },
                   { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
                 ]
@@ -246,7 +250,7 @@
                 alert("לא סומן איש קשר!");
                 return;
             }
-            window.parent.triggerPopertyTransComplete(unitId, contactId,3);
+            window.parent.app_trigger.triggerPopertyTransComplete(unitId, contactId, 3);
 
         });
 
@@ -284,7 +288,7 @@
             //Listbox's source
             //Initializing the wizzard - creating all elements, adding event handlers and starting the validation
             init: function () {
-                $('#jqxTabs').jqxTabs({ height: 490, width: 980, keyboardNavigation: false, rtl:true });
+                $('#jqxTabs').jqxTabs({ width: '100%', keyboardNavigation: false, rtl: true });
                 $('#nextButton1').jqxButton({ width: 50 });
                 $('#nextButton2').jqxButton({ width: 50 });
                 $('#backButton2').jqxButton({ width: 50 });

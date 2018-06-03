@@ -12,6 +12,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Natam.Mvc.Models;
+using Nistec.Web.Controls;
 
 namespace Natam.Mvc.Controllers
 {
@@ -61,7 +62,7 @@ namespace Natam.Mvc.Controllers
         {
 
             int res = 0;
-            string action="הלקוח";
+            string action="עדכון לקוח";
             LeadsView l=null;
             try
             {
@@ -77,8 +78,10 @@ namespace Natam.Mvc.Controllers
                     l.Creation = DateTime.Now;
                 res = LeadsContext.DoSave(l);
 
-                return Json(GetFormResult(res, action, null, l.LeadId), JsonRequestBehavior.AllowGet);
+                string key = CacheKeys.GetLeadsView(uid);
+                CacheRemove(key, CacheGroup.Crm);
 
+                return Json(FormResult.GetFormResult(res, action, l.LeadId), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -264,6 +267,44 @@ namespace Natam.Mvc.Controllers
              return base.GetJsonResult(list);
              //return Json(list, JsonRequestBehavior.AllowGet);
          }
+
+        #endregion
+
+        #region Agent broadcast
+
+        public ActionResult AgentBroadcast()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult AgentBroadcastGet()
+        {
+            int agentId = GetUser();
+            var ab= LeadsContext.AgentBroacastGet(agentId);
+            return Json(ab, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        // [ValidateAntiForgeryToken]
+        public ActionResult AgentBroadcastUpdate(int Area, int Purpose, int DealType, int Size)
+        {
+
+            int res = 0;
+            string action = "עדכון הפצות במייל";
+            LeadsView l = null;
+            try
+            {
+                int agentId = GetUser();
+                res = LeadsContext.AgentBroacastUpdate(agentId, Area, Purpose, DealType, Size);
+                return Json(FormResult.GetFormResult(res, action), JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                //return GoPrompt(-1, "lead", ex.Message);
+                return Json(GetFormResult(-1, action, ex.Message,0), JsonRequestBehavior.AllowGet);
+            }
+        }
 
         #endregion
 
@@ -855,7 +896,7 @@ namespace Natam.Mvc.Controllers
 
                 transId = TransactionContext.DoSave(l);
 
-                return Json(GetFormResult(transId, action, null, l.TransId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(transId, action, l.TransId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -876,7 +917,7 @@ namespace Natam.Mvc.Controllers
 
                 TransactionContext.DoCancel(transId,uid);
 
-                return Json(GetFormResult(1, action, null, transId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(1, action, transId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)

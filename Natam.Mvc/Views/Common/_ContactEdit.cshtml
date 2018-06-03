@@ -11,7 +11,20 @@
 @section head {
 
     @Scripts.Render("~/bundles/jqx")
-    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    @*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
+<style type="text/css">
+    .form-group {
+        margin: 0 !important;
+        padding: 2px !important;
+    }
+     label.column {
+            width: 70px !important;
+            font-weight:normal !important;
+            padding:0px;
+            margin:0px;
+        }
+    #contactForm {margin: 0;padding:0;}
+</style>
 }
 
 @section scripts {
@@ -80,6 +93,9 @@
                 rules: [
                       { input: '#ContactName', message: 'חובה לציין שם!', action: 'keyup, blur', rule: 'required' },
                       { input: '#Title', message: 'חובה לציין תפקיד!', action: 'keyup, blur', rule: 'required' },
+                      { input: '#Mobile', message: 'חובה לציין טלפן נייד!', action: 'keyup, blur', rule: 'required' },
+                      //{ input: '#Phone1', message: 'חובה לציין טלפון!', action: 'keyup, blur', rule: 'required' },
+                      { input: '#Email', message: 'חובה לציין אמייל!', action: 'keyup, blur', rule: 'required' },
                       { input: '#Email', message: 'אימייל לא תקין!', action: 'keyup', rule: 'email' },
                       {
                           input: '#Mobile', message: 'ניתן להקליד מספרים בלבד!', action: 'valuechanged, blur', rule:
@@ -112,7 +128,24 @@
             $('#contactSubmit').on('click', function (e) {
 
                 e.preventDefault();
-                var actionurl = $('#contactForm').attr('action');
+
+                app_jqxform.formSubmitValidator('#contactForm', function (data) {
+                    if (data.Status >= 0) {
+
+                        //$('#contactWindow').jqxWindow('close');
+                        var pid = $('#ParentId').val();
+                        //$('#contactForm')[0].reset();
+                        $('#ParentId').val(pid);
+                        //$('#ContactId').val(data.OutputId);
+                        if (parent.app_trigger && parent.app_trigger.triggerContactComplete)
+                            parent.app_trigger.triggerContactComplete(data.OutputId, '@op');
+                    }
+                    else {
+                        alert(data.Message);
+                    }
+                });
+
+                @*var actionurl = $('#contactForm').attr('action');
 
                 var validationResult = function (isValid) {
                     if (isValid) {
@@ -122,9 +155,9 @@
                             dataType: 'json',
                             data: $('#contactForm').serialize(),
                             success: function (data) {
-                                
+
                                 if (data.Status >= 0) {
-                                    
+
                                     //$('#contactWindow').jqxWindow('close');
                                     var pid = $('#ParentId').val();
                                     //$('#contactForm')[0].reset();
@@ -143,13 +176,15 @@
                         });
                     }
                 }
-                $('#contactForm').jqxValidator('validate', validationResult);
+                $('#contactForm').jqxValidator('validate', validationResult);*@
 
             });
 
             $('#contactCancel').on('click', function (e) {
                 $('#contactForm')[0].reset();
                 $('#contactForm').jqxValidator('hide');
+                if (window.parent.app_trigger && window.parent.app_trigger.triggerContactClose)
+                    window.parent.app_trigger.triggerContactClose();
             });
         });
 
@@ -159,17 +194,17 @@
 <div style="margin: 0px;">
 
     <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
-        <div id="contactWindow">
+        <div id="contactWindow" style="direction: rtl; text-align: right;">
             <div id="contactHeader">
             </div>
-            <div id="contactBody">
+            <div id="contactBody" style="direction: rtl; text-align: right">
                 <form class="contactForm" id="contactForm" method="post" action="/Common/UpdateContact" target="contact-iframe">
-                    <div style="direction: rtl; text-align: right">
+                    <div style="direction: rtl; text-align: right;">
                         <input type="hidden" id="ParentId" name="ParentId" value="@pid" />
                         <input type="hidden" id="ContactId" name="ContactId" value="" />
                         <input type="hidden" id="Role" name="Role" value="0" />
                         <input type="hidden" id="UploadKey" name="UploadKey" />
-                      <div class="form-group">
+                        <div class="form-group">
                             <label class="column">
                                 שם <span class="mandatory">(*)</span>:
                             </label>
@@ -183,13 +218,15 @@
                         </div>
                         <div class="form-group">
                             <label class="column">
-                                טלפון נייד :
+                                טלפון נייד :<span class="mandatory">(*)</span>
+                            </label>
                             </label>
                             <input id="Mobile" name="Mobile" type="text" class="text-mid" />
                         </div>
                         <div class="form-group">
-                            <label class="column">
-                                דאר אלקטרוני:
+                            <label class="column" style="width:250px!important">
+                                דאר אלקטרוני:<span class="mandatory">(*)</span>
+                            </label>
                             </label>
                             <input id="Email" name="Email" type="text" class="text-mid" />
                         </div>
@@ -203,7 +240,7 @@
                             <label class="column">
                                 הערות:
                             </label>
-                            <textarea id="Details" name="Details" rows="2" cols="40" maxlength="500"></textarea>
+                            <textarea id="Details" name="Details" style="width:160px;height:40px" maxlength="500"></textarea>
                         </div>
                         <div style="height: 5px"></div>
                         <div>
@@ -216,7 +253,6 @@
                 </form>
             </div>
         </div>
-
     </div>
 </div>
 <!--end of content-wrapper-->

@@ -12,38 +12,50 @@ function app_unit_def(unitId, buildingId, propertyType, buildingName, floorNum, 
     this.BuildingName = buildingName;
     this.FloorNum = floorNum;
     this.SumFloorRemain = sumFloorRemain;
-    this.srcOwnerId;
-    this.srcTenantId;
+    this.srcOwnerId = 0;
+    this.srcTenantId = 0;
     this.srcAgentId = 0;
-    this.allowEdit = 0;
+    this.srcDealType = 0;
+    this.srcPurposeId = 0;
     this.srcOrigSize = 0;
-    this.srcFloorNum;
+    this.srcFloorNum = 0;
     this.allowEdit = (this.UserRole == 9) ? 1 : 0;
+    this.allowMedia = true;
     this.isMobile = app.IsMobile();
-    
+    this.mediaUploader = new media_model('#media-files', { 'buildingId': this.BuildingId, 'propertyId': this.UnitId, 'propertyType': "u" }, !this.allowMedia).mediaFiles();
+
+
     //$('#btnImages').attr("disabled", this.isMobile || unitId <= 0);
+    
     $("#hImages").css('display', this.UnitId > 0 ? 'block' : 'none');
 
     $("#btnAds").css('display', this.UnitId > 0 ? 'inline' : 'none');
     $("#linkTransaction").css('display', this.UnitId > 0 && this.PropertyType == 0 ? 'inline' : 'none');
     //$("#tbProp2Admin").css('display', this.UnitId > 0 && this.PropertyType == 0 ? 'inline' : 'none');
-    $("#AgentId").jqxComboBox({
-        showArrow: false, enableSelection: false, disabled: true
-    });
+    //$("#AgentId").jqxComboBox({
+    //    showArrow: false, enableSelection: false, disabled: true
+    //});
 
     app_jqxform.CreateDateTimeInput("DateEndContract");
     app_jqxform.CreateDateTimeInput("DateEndOption1");
     app_jqxform.CreateDateTimeInput("DateEndOption2");
 
-    this.ownerAdapter = app_jqx_list.ownerUnitComboAdapter();
-    app_jqx_list.dealUnitComboAdapter();
-    app_jqx_list.purposeComboAdapter();
-    this.tenantAdapter = app_jqx_list.tenantComboAdapter();
-    app_jqx_list.agentComboAdapter();
-    this.loadControls();
+    //this.ownerAdapter = app_jqx_combo_async.ownerUnitComboAdapter();
+    //app_jqx_combo_async.dealUnitComboAdapter();
+    //app_jqx_combo_async.purposeComboAdapter();
+    //this.tenantAdapter = app_jqx_combo_async.tenantComboAdapter();
+    //app_jqx_combo_async.agentComboAdapter();
+   
+    app_select.PriceType("#PriceType");
+    app_select.ManagementFeeType("#ManagementFeeType");
+    $("#ManagementFeeType").change(function () {
+        if (this.value == "2")
+            $("#ManagementFee-div").show();
+        else
+            $("#ManagementFee-div").hide();
+    });
 
-    this.loadEvents();
-    
+
     this.loadDataAdapter = function () {
 
         var slf = this;
@@ -82,9 +94,8 @@ function app_unit_def(unitId, buildingId, propertyType, buildingName, floorNum, 
 
         var dataAdapter = new $.jqx.dataAdapter(source, {
             loadComplete: function (record) {
-
                 slf.syncData(record);
-
+                slf.loadControls();
             },
             loadError: function (jqXHR, status, error) {
             },
@@ -96,13 +107,81 @@ function app_unit_def(unitId, buildingId, propertyType, buildingName, floorNum, 
         // perform data binding.
         dataAdapter.dataBind();
     };
+
+    $("#BuildingName").val(this.BuildingName);
+    $("#BuildingId").val(this.BuildingId);
+    $("#PropertyType").val(this.PropertyType);
+    $("#FloorNum").val(this.FloorNum);
+
+    var op = this.PropertyType;
+
+    if (op == 1) {
+        $("#liUnitGrid").hide();
+        $("#hTitle").text('עדכון מידע');
+        $("#liTransaction").hide();
+        $("#FloorNum").attr('readonly', false);
+        //$('#divUnitId').hide();
+        $("#form-model").html('');
+        //if (record.UnitId > 0) {
+        //    this.allowEdit = (this.UserId == record.AgentId || this.UserId == 81) ? 1 : 0;
+        //}
+        //else
+        //    this.allowEdit = 1;
+    }
+    else {
+        $("#hTitle").text('טופס עדכון יחידה');
+        $("#FloorNum").attr('readonly', true);
+         $("#liPropertyGrid").hide();
+        $("#liProp2Admin").hide();
+    }
+
+
+    if (this.UnitId > 0)
+    {
+        this.loadDataAdapter();
+    }
+    else
+    {
+        this.allowEdit = 1;
+        //srcOwnerId = OwnerId;
+        $("#liTransaction").hide();
+        $("#liProp2Admin").hide();
+
+        this.srcAgentId = this.UserId;
+        this.loadControls();
+    }
+
+    if (this.BuildingId > 0) {
+        var buildingLink = $('<a href="#">>></a>')
+              .on("click", function (e) {
+                  e.preventDefault();
+                  app_buildings.buildingDef(this.BuildingId);
+              });
+        $("#BuildingLink").append(buildingLink);
+    }
+
+    this.loadEvents();
+
+    this.loadMedia=function()
+    {
+        if (this.mediaUploader == null) {
+            this.mediaUploader = new app_media_uploader('#media-files');
+            this.mediaUploader.init(this.BuildingId, this.UnitId, "u");
+        }
+    }
  
-    this.reloadImages = function () {
 
-        app_media.loadImages(this.UnitId,'u');
-    };
 
-    app_media.loadImages(unitId, 'u');
+    //this.loadMedia();
+
+    //this.mediaIFiles(unitId, buildingId, propertyType);
+
+    //this.reloadImages = function () {
+
+    //    app_media.loadImages(this.UnitId,'u');
+    //};
+
+    //app_media.loadImages(unitId, 'u');
   
     //$("#btnImages").css('display', this.BuildingId > 0 && this.isMobile == false ? 'inline' : 'none');
 
@@ -114,29 +193,32 @@ app_unit_def.prototype.syncData = function (record) {
 
     var op = this.PropertyType;
 
-    $("#BuildingName").val(this.BuildingName);
-    $("#FloorNum").val(this.FloorNum);
-    $("#PropertyType").val(op);
+   // $("#BuildingName").val(this.BuildingName);
+    //$("#FloorNum").val(this.FloorNum);
+    //$("#PropertyType").val(op);
 
-    if (op == 1) {
-        $("#liUnitGrid").hide();
-        $("#hTitle").text('עדכון מידע');
-        $("#liTransaction").hide();
-        $("#FloorNum").attr('readonly', false);
-        //$('#divUnitId').hide();
-        $("#form-model").html('');
-        if (record.UnitId > 0) {
-            this.allowEdit = (this.UserId == record.AgentId || this.UserId == 81) ? 1 : 0;
-        }
-        else
-            this.allowEdit = 1;
-    }
-    else {
-        $("#hTitle").text('טופס עדכון יחידה');
-        $("#FloorNum").attr('readonly', true);
-        $("#liPropertyGrid").hide();
-        $("#liProp2Admin").hide();
-    }
+    //if (op == 1) {
+    //    $("#liUnitGrid").hide();
+    //    $("#hTitle").text('עדכון מידע');
+    //    $("#liTransaction").hide();
+    //    $("#FloorNum").attr('readonly', false);
+    //    //$('#divUnitId').hide();
+    //    $("#form-model").html('');
+    //    if (record.UnitId > 0) {
+    //        this.allowEdit = (this.UserId == record.AgentId || this.UserId == 81) ? 1 : 0;
+    //    }
+    //    else
+    //        this.allowEdit = 1;
+    //}
+    //else {
+    //    $("#hTitle").text('טופס עדכון יחידה');
+    //    $("#FloorNum").attr('readonly', true);
+    //    $("#liPropertyGrid").hide();
+    //    $("#liProp2Admin").hide();
+    //}
+
+    this.allowEdit = (this.UserId == record.AgentId || this.UserRole == 9) ? 1 : 0;
+
 
     if (this.allowEdit == 0) {
         $('#submit').hide();
@@ -149,36 +231,69 @@ app_unit_def.prototype.syncData = function (record) {
     this.srcFloorNum = record.FloorNum;
 
     if (record.UnitId > 0) {
-        app_jqxform.loadDataForm("form", record);
+
+        app_form.loadDataForm("form", record, ["OwnerId", "TenantId", "DealType", "PurposeId"]);
+
         $("#UnitSizeOrig").val(record.UnitSize);
         this.srcOrigSize = record.UnitSize;
         this.srcAgentId = record.AgentId;
+        this.srcTenantId = record.TenantId;
+        this.srcDealType = record.DealType;
+        this.srcPurposeId = record.PurposeId;
+
         //$("#hLeadName").html(record.CustomerName);
-
     }
-    else {
+    //else {
 
-        $("#BuildingId").val(this.BuildingId);
-        //srcOwnerId = OwnerId;
-        $("#liTransaction").hide();
-        $("#liProp2Admin").hide();
+    //    $("#BuildingId").val(this.BuildingId);
+    //    //srcOwnerId = OwnerId;
+    //    $("#liTransaction").hide();
+    //    $("#liProp2Admin").hide();
 
-        this.srcAgentId = this.UserId;
-    }
-
+    //    this.srcAgentId = this.UserId;
+    //}
     this.UnitId = record.UnitId;
 
     this.BuildingId = record.BuildingId
 
-    app_jqxcombos.selectComboBoxValue("PurposeId", record.PurposeId);
-    app_jqxcombos.selectComboBoxValue("OwnerId", this.srcOwnerId);
-    app_jqxcombos.selectComboBoxValue("TenantId", record.TenantId);
+    //if(this.BuildingId>0)
+    //{
+    //    var buildingLink = $('<a href="#">>></a>')
+    //          .on("click", function (e) {
+    //              e.preventDefault();
+    //              app_buildings.buildingDef(record.BuildingId);
+    //          });
+    //    $("#BuildingLink").append(buildingLink);
+    //}
+
+    //app_jqxcombos.selectComboBoxValue("PurposeId", record.PurposeId);
+    //app_jqxcombos.selectComboBoxValue("OwnerId", this.srcOwnerId);
+    //app_jqxcombos.selectComboBoxValue("TenantId", record.TenantId);
 
     
 };
 
 app_unit_def.prototype.loadControls = function () {
     var slf = this;
+
+    this.ownerAdapter = app_jqx_combo_async.ownerInputAdapterSync("#OwnerId", slf.srcOwnerId);
+
+    app_jqx_combo_async.dealUnitComboAdapter("#DealType", slf.srcDealType);
+
+    app_jqx_combo_async.purposeComboAdapter("#PurposeId", slf.srcPurposeId);
+
+    this.tenantAdapter = app_jqx_combo_async.tenantInputAdapterSync("#TenantId", slf.srcTenantId);
+
+    if (slf.UnitId == 0)
+        app_lookups.setInput("form", "AgentId", slf.UserId);
+
+        //var agentid = slf.UnitId > 0 ? slf.srcAgentId : slf.UserId;
+        //app_jqx_combo_async.agentComboAdapter("#AgentId", agentid);
+        //$("#AgentId").jqxComboBox({
+        //    showArrow: false, enableSelection: false, disabled: true
+        //});
+
+
     //initialize validator.
     $('#form').jqxValidator({
         rtl: true,
@@ -196,6 +311,30 @@ app_unit_def.prototype.loadControls = function () {
                    }
                },
                {
+                   input: '#Price', message: 'חובה לציין מחיר!', action: 'keyup, blur', rule: function () {
+                       if (slf.PropertyType != 1)
+                           return true;
+                       return app_jqxform.validateNumber("Price");
+                   }
+               },
+               {
+                   input: '#ParkNum', message: 'חובה לציין מספר חניות!', action: 'keyup, blur', rule: function () {
+                       return app_jqxform.validateNumeric("ParkNum");
+                   }
+               },
+               {
+                   input: '#ParkPrice', message: 'חובה לציין מחיר חנייה!', action: 'keyup, blur', rule: function () {
+                       return app_jqxform.validateNumeric("ParkPrice");
+                   }
+               },
+                {
+                    input: '#ManagementFee', message: 'חובה לציין מחיר דמי ניהול!', action: 'keyup, blur', rule: function () {
+                        if ($("#ManagementFeeType").val() != "2")
+                            return true;
+                        return app_jqxform.validateNumber("ManagementFee");
+                    }
+                },
+               {
                    input: '#UnitSize', message: 'השטח שצויין חורג מהשטח המוגדר', action: 'keyup, blur', rule: function () {
                        if ($("#PropertyType").val() == 0) {
 
@@ -210,17 +349,18 @@ app_unit_def.prototype.loadControls = function () {
                },
                    {
                        input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
-                           return app_jqxform.validateCombo("DealType");
+                           return app_jqxform.validateDropDown("DealType");
                        }
                    },
-                {
-                    input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
-                        return app_jqxform.validateCombo("OwnerId");
-                    }
-                },
+                  { input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'keyup, blur', rule: 'required' },
+                //{
+                //    input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
+                //        return app_jqxform.validateInputAuto("OwnerId");
+                //    }
+                //},
                 {
                     input: '#PurposeId', message: 'חובה לציין סוג נכס!', action: 'select', rule: function (input) {
-                        return app_jqxform.validateCombo("PurposeId");
+                        return app_jqxform.validateDropDown("PurposeId");
                     }
                 }
         ]
@@ -239,9 +379,10 @@ app_unit_def.prototype.loadControls = function () {
                     url: actionurl,
                     type: 'post',
                     dataType: 'json',
-                    data: $('#form').serialize(),
+                    data: app.serialize('#form'),
                     success: function (data) {
-                        alert(data.Message);
+                        app_messenger.Post(data);
+
                         if (data.Status >= 0) {
                             //window.parent.triggerBuildingComplete(data.OutputId);
                             //$('#form')[0].reset();
@@ -267,7 +408,7 @@ app_unit_def.prototype.loadControls = function () {
 
                     },
                     error: function (jqXHR, status, error) {
-                        alert(error);
+                        app_dialog.alert(error);
                     }
                 });
 
@@ -299,47 +440,163 @@ app_unit_def.prototype.loadEvents = function () {
     //Owner
     $('#refreshOwner').click(function () {
         slf.ownerAdapter.dataBind();
-        app_jqxcombos.selectComboBoxValue("OwnerId", slf.srcOwnerId);
+        return false;
+        //app_jqxcombos.selectComboBoxValue("OwnerId", slf.srcOwnerId);
     });
 
     $('#showOwner').click(function (e) {
         e.preventDefault();
-        var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);//item.value;
-        if (val != 0)
-            app_accounts.accountDisplay(val, "בעלים");
+        //var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);//item.value;
+        //if (val != 0)
+        var item = $("#OwnerId").val();
+        if (item && item.value > 0)
+            app_accounts.accountDisplay(item.value, "בעלים");
+        return false;
     });
 
     $('#editOwner').click(function (e) {
         e.preventDefault();
-        var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);
-        app_accounts.accountEdit(val, 2);
+        var item = $("#OwnerId").val();
+        if (item && item.value > 0)
+                app_accounts.accountPanel(item.value, 2, "OwnerId");
+        else
+            app_accounts.accountPanel(0, 2, "OwnerId");
+        return false;
+        //var val = app_jqxcombos.getSelectedComboValue("OwnerId", 0);
+        //app_accounts.accountEdit(val, 2);
     });
     $('#queryOwner').click(function (e) {
         e.preventDefault();
         app_popup.ownerGrid();
+        return false;
     });
     //Tenant
     $('#refreshTenant').click(function () {
         slf.tenantAdapter.dataBind();
-        app_jqxcombos.selectComboBoxValue("TenantId", slf.srcTenantId);
+        return false;
+        //app_jqxcombos.selectComboBoxValue("TenantId", slf.srcTenantId);
     });
 
     $('#showTenant').click(function (e) {
         e.preventDefault();
-        var val = app_jqxcombos.getSelectedComboValue("TenantId", 0);//item.value;
-        if (val != 0)
-            app_accounts.accountDisplay(val, "דייר");
+        var item = $("#TenantId").val();
+        if (item && item.value > 0)
+            app_accounts.accountDisplay(item.value, "דייר");
+        return false;
+        //var val = app_jqxcombos.getSelectedComboValue("TenantId", 0);//item.value;
+        //if (val != 0)
+        //    app_accounts.accountDisplay(val, "דייר");
     });
 
     $('#editTenant').click(function (e) {
         e.preventDefault();
-        var val = app_jqxcombos.getSelectedComboValue("TenantId", 0);
-        app_accounts.accountEdit(val, 4);
+        var item = $("#TenantId").val();
+        if (item && item.value > 0)
+            app_accounts.accountPanel(item.value, 4, "TenantId");
+        else
+            app_accounts.accountPanel(0, 4, "TenantId");
+        return false;
+        //var val = app_jqxcombos.getSelectedComboValue("TenantId", 0);
+        //app_accounts.accountEdit(val, 4);
     });
 
-    $('#btnImages').click(function (e) {
-        e.preventDefault();
-        app_popup.mediaEditor(slf.BuildingId, slf.UnitId, "u");
-    });
+    //$('#btnImages').click(function (e) {
+    //    e.preventDefault();
+    //    if (slf.mediaUploader == null) {
+    //        slf.mediaUploader = new app_media_uploader('#media-files');
+    //        slf.mediaUploader.init(slf.BuildingId, slf.UnitId, "u");
+    //    }
+    //    $('#media-files').show();
+    //    //app_popup.mediaEditor(slf.BuildingId, slf.UnitId, "u");
 
+    //});
+    //$('#btnReloadImages').click(function (e) {
+    //    var id = $("#UnitId").val();
+    //    if (id > 0) {
+    //        //app_media.loadImages(id);
+    //        if (slf.mediaUploader != null) {
+    //            slf.mediaUploader.doRefresh();
+    //        }
+    //    }
+    //});
+
+    $('#media-toggle-off').click(function (e) {
+        $('#media-files').hide();
+        return false;
+    });
 }
+
+
+
+app_trigger = {
+
+    triggerPropertyTransComplete: function (unitId, leadId, contactId) {
+        //app_dialog.dialogIframClose();
+        app_iframe.panelSwitchClose("wiz-parent",true);
+        if (unitId > 0 && contactId > 0) {
+            var url = "/Crm/TransactionSellerDef?id=" + unitId + "&tt=2&pid=" + leadId + "&cid=" + contactId;
+            app.redirectTo(url);
+        }
+     },
+
+    triggerInvestmentComplete: function (id, bid, uid) {
+        app_dialog.dialogIframClose();
+    },
+
+    triggerAccComplete: function (accType, accId, isdialog) {
+
+        
+        if (accType == "2") {
+
+            if (isdialog) {
+                app_jqx.triggerDialogInputAuto("#OwnerId", unitdef.ownerAdapter, accId);
+                app_dialog.dialogClose();
+            }
+            else {
+                app_jqx.triggerInputAutoRefresh("#OwnerId", unitdef.ownerAdapter, accId, function () {
+                    app_iframe.panelSwitchClose("OwnerId");
+                });
+
+                //app_jqx.triggerDialogInputAuto("#OwnerId", unitdef.ownerAdapter, accId, function () {
+                //    app_iframe.panelSwitchClose("OwnerId");
+                //});
+            }
+            //unitdef.ownerAdapter.dataBind();
+
+            //$("#OwnerId").jqxComboBox("source").dataBind();
+            //if (accId)
+            //    $("#OwnerId").val(accId);
+            //app_iframe.panelSwitchClose("OwnerId");
+        }
+        else if (accType == "4") {
+
+            app_jqx.triggerInputAutoRefresh("#TenantId", unitdef.tenantAdapter, accId, function () {
+                app_iframe.panelSwitchClose("TenantId");
+            });
+
+            //app_jqx.triggerDialogInputAuto("#TenantId",unitdef.tenantAdapter, accId, function () {
+            //    app_iframe.panelSwitchClose("TenantId");
+            //});
+
+           //unitdef.tenantAdapter.dataBind();
+
+            //$("#TenantId").jqxComboBox("source").dataBind();
+            //if (accId)
+            //    $("#TenantId").val(accId);
+            //app_iframe.panelSwitchClose("TenantId");
+        }
+        //app_dialog.dialogIframClose();
+    },
+
+    triggerAccCancel: function (accType) {
+        if (accType == "2")
+            app_iframe.panelSwitchClose("OwnerId", false);
+        else if (accType == "4")
+            app_iframe.panelSwitchClose("TenantId", false);
+    },
+    triggerImageChanged: function () {
+        var id = unitdef.UnitId;
+        app_media.loadImages(id, 'u');
+    }
+};
+

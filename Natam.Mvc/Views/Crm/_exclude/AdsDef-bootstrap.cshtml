@@ -1,0 +1,213 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    string op = Request.QueryString["op"];
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    <script type="text/javascript" src="~/Scripts/app/model/ads-def.js"></script>
+
+    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
+
+    <!--uploader===========================================-->
+<script src="~/Scripts/app/app-media.js"></script>
+<script src="~/jqwidgets/jqxsplitter.js"></script>
+<script src="~/Scripts/plagins/colorbox/jquery.colorbox-min.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/colorbox/colorbox.css" />
+
+<script src="~/Scripts/plagins/uploader/js/vendor/jquery.ui.widget.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.iframe-transport.js"></script>
+<script src="~/Scripts/plagins/uploader/js/jquery.fileupload.js"></script>
+<link rel="stylesheet" href="~/Scripts/plagins/uploader/css/jquery.fileupload.css">
+}
+
+@section scripts {
+    <script type="text/javascript">
+
+        var allowEdit = 0;
+
+        $(document).ready(function () {
+
+            app_menu.breadcrumbs("Crm", "Ads");
+
+            JSON.useDateParser();
+            //JSON.useDateParser();
+            var theme = 'Arctic';
+
+            //control buttons
+            //$("#archive").hide();
+            //$("#divImages").hide();
+
+            var adsdef = new app_ads_def(parseInt('@id'), '@op', parseInt('@ViewBag.UserRole'));
+
+            // prepare the data
+            $("form").submit(function (e) {
+
+                e.preventDefault();
+                adsdef.doSubmit();
+
+            });
+
+            //$('#btnReloadImages').click(function (e) {
+            //    var id = $("#UnitId").val();
+            //    if (id > 0)
+            //        app_media.loadImages(id);
+            //});
+        });
+
+        function triggerImageChanged() {
+            app_media.loadImages('@id', 'u');
+        }
+
+    </script>
+
+}
+
+<!--breadcrumb-->
+<div id="breadcrumbs" class="breadcrumbs">
+    @*@Html.ActionLink("Home", "Index", "Home")>
+        @Html.ActionLink("Main", "Main", "Home")>
+        <a href="javascript:parent.history.back()">Ads</a> >
+        @ViewContext.RouteData.Values["action"].ToString()*@
+
+</div>
+
+<div class="clear"></div>
+
+@*<div class="global-view">
+    <div id="wizard" class="row_link"></div>
+    <div class="container">
+        <div class="rtl">
+            <h3 id="hBuildingName">טופס פרסום</h3>
+        </div>
+        <div style="height: 10px;">
+        </div>*@
+
+<div class="global-view">
+    <div class="box-center">
+        <div class="container-box">
+            <div class="box-row">
+                <div class="box-title">
+                    <h3 id="hBuildingName">טופס פרסום</h3>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <h4 class="rtl"><a id="btnImages" href="#">תמונות</a></h4>
+                    <div id="media-files"></div>
+
+                    <!--<span> | </span><a id="btnReloadImages" href="#">רענון</a>-->
+
+                    @*<div id="adsImages" class="rtl">
+                        <div id="media_image0" class="media-image"></div>
+                        <div id="media_image1" class="media-image"></div>
+                        <div id="media_image2" class="media-image"></div>
+                    </div>*@
+
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-sm-6 box-choose">
+ 
+                    <form class="form" id="form" method="post" action="/Crm/UpdateAds">
+                        <input type="hidden" id="AdsId" name="AdsId" />
+                        <div class="tab-content">
+                            <div style="max-width:400px">
+                                <div class="form-group">
+                                    <div class="column">
+                                        קוד נכס:
+                                    </div>
+                                    <input id="PropertyId" name="PropertyId" type="number" readonly class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        סוג נכס:
+                                    </div>
+                                    <div id="PropertyType" name="PropertyType"></div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        כתובת:
+                                    </div>
+                                    <input id="Address" type="text" disabled="disabled" class="text-mid" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        סוג מדיה<span class="mandatory">(*)</span>:
+                                    </div>
+                                    <div id="MediaType" name="MediaType"></div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        מועד רצוי לפרסום:
+                                    </div>
+                                    <div id="AdsDate" name="AdsDate"></div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        סטטוס:
+                                    </div>
+                                    <div id="Status" name="Status"></div>
+                                </div>
+                                <div id="divAdsCode" class="form-group">
+                                    <div class="column">
+                                        קוד מודעה:
+                                    </div>
+                                    <input id="AdsCode" name="AdsCode" type="text" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        ניסוח המודעה<span class="mandatory">(*)</span>:
+                                    </div>
+                                        <textarea id="Description" name="Description" rows="5" cols="60"></textarea>
+                                    </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        פרטים נוספים:
+                                    </div>
+                                    <textarea id="Details" name="Details" rows="5" cols="30"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        הערות:
+                                    </div>
+                                    <input id="Note" name="Note" type="text" style="width:260px" />
+                                </div>
+                                <div class="form-group" style="display:none">
+                                    <div class="column">
+                                        תאריך בקשה לפרסום:
+                                    </div>
+                                    <input id="Creation" name="Creation" readonly type="text" class="text" />
+                                </div>
+                                <div class="form-group">
+                                    <div class="column">
+                                        סוכן:
+                                    </div>
+                                    <input id="AgentId" name="AgentId" type="hidden" class="text-mid" />
+                                    <input id="AgentName" type="text" readonly class="text-mid" />
+                                </div>
+                                <div style="height: 10px"></div>
+                                <div class="form-group">
+                                    <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                                </div>
+                            </div>
+                            <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                            <p class="mandatory">עבור פרסום ביד 2 או אתר החברה – חובה להכניס תמונה</p>
+                        </div>
+                    </form>
+                    <div style="text-align: center">
+
+                        <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
+                        <div id="form-next" style="font-size:18px"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        <!--end of content-wrapper-->
+        <script type="text/javascript">
+           app_menu.activeLayoutMenu("liBuilding");
+        </script>

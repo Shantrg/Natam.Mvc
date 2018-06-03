@@ -10,58 +10,70 @@
 @section head {
 
     @Scripts.Render("~/bundles/jqx")
-    <script type="text/javascript" src="~/Scripts/app/model/accounts-def.js"></script>
-    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+    <script type="text/javascript" src="~/Scripts/app/model/accounts-def.js?ver=2018004"></script>
+    @*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
+
+    <style type="text/css">
+        .form-group {
+            margin: 0 !important;
+            padding: 2px !important;
+        }
+    </style>
 
 }
 
 @section scripts {
     <script type="text/javascript">
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        var id = parseInt('@id');
-        var acctype = parseInt('@acctype');
+            var id = parseInt('@id');
+            var acctype = parseInt('@acctype');
 
-        var accdef = new app_accounts_def(id, acctype, parseInt('@ViewBag.UserRole'), false);
-        accdef.loadDataAdapter();
-        var contactsLoaded = false;
-        $('#accContacts').click(function () {
+            var accdef = new app_accounts_def(id, acctype, parseInt('@ViewBag.UserRole'), false);
+            //accdef.loadDataAdapter();
+            var contactsLoaded = false;
+            $('#accContacts').click(function () {
+                if ($('#contactsGrid').children().length==0) {// contactsLoaded == false) {
+                    //var close = $('<a href="#">סגור</a>').click(function () {
+                    //    $("#contactsGrid").hide();
+                    //});
+                    //$("#contactsGrid").append(close);
+                    var role = app_contacts.getContactRole(acctype);
+                    var uploadKey = null;
+                    app_iframe.appendPanel("contactsGrid", "/Common/_Contacts?id=" + id + "&role=" + role + "&uk=" + uploadKey, "100%", "250",true,"אנשי קשר");
+                    //app_iframe.appendIframe("contactsGrid", "/Common/_Contacts?id=" + id + "&role=" + role + "&uk=" + uploadKey, "100%", "250");
+                    contactsLoaded = true;
+                }
+                else {
+                    $('#contactsGrid').show();
+                }
+            });
 
-            if (contactsLoaded == false) {
-                var close = $('<a href="#">סגור</a>').click(function () {
-                    $("#contactsGrid").hide();
-                });
-                $("#contactsGrid").append(close);
-                var role = app_contacts.getContactRole(acctype);
-                var uploadKey = null;
-                app_iframe.appendIframe("contactsGrid", "/Common/_Contacts?id=" + id + "&role=" + role + "&uk=" + uploadKey, "500", "350");
-                contactsLoaded = true;
-            }
-            else {
-                $('#contactsGrid').show();
-            }
+            $('#accSubmit').on('click', function (e) {
+                e.preventDefault();
+
+                accdef.doSubmit();
+            });
+            $('#accCancel').on('click', function (e) {
+                e.preventDefault();
+
+                if (parent.app_trigger && parent.app_trigger.triggerAccCancel)
+                    parent.app_trigger.triggerAccCancel(acctype);
+            });
+            $('#Email').on('input propertychange paste', function () {
+                //onEmailLink();
+                app_jqxform.setLinkHref('Email', 'emailLink', true);
+            });
+            $('#WebSite').on('input propertychange paste', function () {
+                //onWebsiteLink();
+                app_jqxform.setLinkHref('WebSite', 'websiteLink', false);
+            });
         });
 
-        $('#accSubmit').on('click', function (e) {
-            e.preventDefault();
-
-            accdef.doSubmit();
-        });
-
-        $('#Email').on('input propertychange paste', function () {
-            //onEmailLink();
-            app_jqxform.setLinkHref('Email', 'emailLink', true);
-        });
-        $('#WebSite').on('input propertychange paste', function () {
-            //onWebsiteLink();
-            app_jqxform.setLinkHref('WebSite', 'websiteLink', false);
-        });
-    });
-
-</script>
+    </script>
 }
 
-<div style="margin: 0px;">
+<div style="margin: 4px;">
 
     <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
         <div id="accWindow">
@@ -72,77 +84,112 @@
                     <div style="direction: rtl; text-align: right">
                         <input type="hidden" id="AccountType" name="AccountType" value="2" />
                         <input type="hidden" id="AccountId" name="AccountId" value="" />
-                        <div class="form-group">
-                            <label  class="column">
-                                <span id="lblName">שם</span>: <span class="mandatory">(*)</span></label>
-                            <input id="AccountName" name="AccountName" type="text" class="text-mid" />
+                        <div class="panel-areaB">
+                            <div class="form-group">
+                                <label class="column">
+                                    <span id="lblName">שם</span>: <span class="mandatory">(*)</span>
+                                </label>
+                                <input id="AccountName" name="AccountName" type="text" class="text-mid" />
+                            </div>
+                            <div id="divCategory" class="form-group">
+                                <label class="column">
+                                    <span id="lblCategory">קטגוריה</span>: <span class="mandatory">(*)</span>
+                                </label>
+                                <div id="AccountCategory" name="AccountCategory" style="display: inline-block; text-align: right"></div>
+                            </div>
                         </div>
-                        <div id="divCategory" class="form-group">
+                        <div class="panel-areaB">
+                            <div id="divContact" class="form-group">
+                                <label class="column">
+                                    איש קשר : <span class="mandatory">(*)</span>
+                                </label>
+                                <input id="ContactName" name="ContactName" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    תפקיד:<span class="mandatory">(*)</span>
+                                </label>
+                                <input id="ContactTitle" name="ContactTitle" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    טלפון נייד: <span class="mandatory">(*)</span>
+                                </label>
+                                <input id="Mobile" name="Mobile" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    דאר אלקטרוני: <span class="mandatory">(*)</span>
+                                </label>
+                                <input id="Email" name="Email" type="text" class="text-mid" />
+                                <a id="emailLink" href="" target="_blank">>></a>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="column">
-                                <span id="lblCategory">קטגוריה</span>: <span class="mandatory">(*)</span>
+                                <input id="accContacts" class="btn-default btn7" type="button" value="אנשי קשר" /> 
                             </label>
-                            <div id="AccountCategory" name="AccountCategory" style="display: inline-block; text-align: right"></div>
+                            <div id="contactsGrid"></div>
                         </div>
-                        @*<div id="divContact" class="form-group">
-                            <label class="column">
-                                איש קשר :</label>
-                            <input id="ContactName" name="ContactName" type="text" class="text-mid" />
-                        </div>*@
-                        <div id="contactsGrid"></div>
-                        <div class="form-group">
-                            <label class="column">
-                                כתובת:</label>
-                            <input id="Address" name="Address" type="text" class="text-mid" />
+                        
+                        <div class="panel-areaB">
+                            <div class="form-group">
+                                <label class="column">
+                                    כתובת:
+                                </label>
+                                <input id="Address" name="Address" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עיר:
+                                </label>
+                                <input id="City" name="City" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מיקוד:
+                                </label>
+                                <input id="ZipCode" name="ZipCode" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    טלפון-1 :
+                                </label>
+                                <input id="Phone1" name="Phone1" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    טלפון-2 :
+                                </label>
+                                <input id="Phone2" name="Phone2" type="text" class="text-mid" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מספר פקס :
+                                </label>
+                                <input id="Fax" name="Fax" type="number" class="text-mid" />
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="column">
-                                עיר:</label>
-                            <input id="City" name="City" type="text" class="text-mid" />
+                        <div class="panel-areaB">
+                            <div class="form-group">
+                                <label class="column">
+                                    אינטרנט:
+                                </label>
+                                <input id="WebSite" name="WebSite" type="text" class="text-wide" />
+                                <a id="websiteLink" href="" target="_blank">>></a>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    הערות:
+                                </label>
+                                <textarea id="Details" name="Details" class="textarea-mid"></textarea>
+                            </div>
+                            <div style="height: 5px"></div>
                         </div>
-                        <div class="form-group">
-                            <label class="column">
-                                מיקוד:</label>
-                            <input id="ZipCode" name="ZipCode" type="text" class="text-mid" />
-                        </div>
-                        <div class="form-group">
-                            <label class="column">
-                                טלפון-1 :</label>
-                            <input id="Phone1" name="Phone1" type="text" class="text-mid" />
-                        </div>
-                        <div class="form-group">
-                            <label class="column">
-                                טלפון-2 :
-                            </label>
-                            <input id="Phone2" name="Phone2" type="text" class="text-mid" />
-                        </div>
-                        <div class="form-group">
-                            <label class="column">
-                                מספר פקס :</label>
-                            <input id="Fax" name="Fax" type="number" class="text-mid" />
-                        </div>
-                        @*<div class="form-group">
-                            <label class="column">
-                                דאר אלקטרוני:</label>
-                            <input id="Email" name="Email" type="text" class="text-wide" />
-                            <a id="emailLink" href="" target="_blank">>></a>
-                        </div>*@
-                        <div class="form-group">
-                            <label class="column">
-                                אינטרנט:</label>
-                            <input id="WebSite" name="WebSite" type="text" class="text-wide" />
-                            <a id="websiteLink" href="" target="_blank">>></a>
-                        </div>
-                       <div class="form-group">
-                            <label class="column">
-                                הערות:</label>
-                           <textarea id="Details" name="Details" class="textarea-mid"></textarea>
-                        </div>
-                        <div style="height: 5px"></div>
-                        <div>
+                        <div class="panel-areaB">
                             <input id="accSubmit" class="btn-default btn7" type="button" value="עדכון" />
                             <input id="accCancel" class="btn-default btn7" type="button" value="ביטול" />
-                            <input id="accContacts" class="btn-default btn7" type="button" value="אנשי קשר" />
-
+                            
                             <!--<input class="btn-default btn2" type="button" value="הוספת אנשי קשר" />-->
                         </div>
                         <span dir="rtl" class="mandatory">שדות חובה(*)</span>

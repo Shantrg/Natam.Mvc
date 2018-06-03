@@ -1,19 +1,24 @@
 ﻿@model Pro.Models.BuildingQuery
 @{
+    //var dataModel = Model;// Newtonsoft.Json.JsonConvert.SerializeObject(Model);
     Layout = "~/Views/Shared/_View.cshtml";
     ViewBag.Title = "Buildings";
+    var dataModel = @Html.Raw(Json.Encode(Model));
+
 }
 
 @section head { 
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
-    <script src="~/Scripts/app/app-jqx-grid.js"></script>
-    <script src="~/Scripts/app/model/units-grid.js"></script>
+    <script src="~/Scripts/app/app-jqx-grid-2.0.js"></script>
+    <script src="~/Scripts/app/model/units-grid.js?ver=2018004"></script>
     <style type="text/css">
 
         .row_detail {margin: 10px;direction:rtl;}
         .row_link {margin: 10px;direction:rtl;font-size:16px}
-
+         .jqx-grid-cell {
+            border: none;
+        }
     </style>
 }
 
@@ -23,6 +28,8 @@
     <script type="text/javascript">
     var allowEdit = 0;
     $(document).ready(function () {
+
+
 
         allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;
         var userId = '@ViewBag.UserId';
@@ -40,13 +47,16 @@
             };
         }
 
-        JSON.useDateParser();
+        //JSON.useDateParser();
         var theme = 'Arctic';
 
-        app_units_grid.load('@Model.QueryType', '@Model.Area', '@Model.DealType', '@Model.PurposeType', '@Model.AreaSizeMin', '@Model.AreaSizeMax', '@Model.BuildingName', '@Model.BuildingStreet', '@Model.StreetNo', '@Model.City', '@Model.OwnerId', '@Model.BuildingId');
+        
+
+        app_units_grid.loadModel('@dataModel');
+        @*app_units_grid.load('@Model.QueryType', '@Model.Area', '@Model.DealType', '@Model.PurposeType', '@Model.AreaSizeMin', '@Model.AreaSizeMax', '@Model.BuildingName', '@Model.StreetId', '@Model.StreetNo', '@Model.CityCode', '@Model.OwnerId', '@Model.BuildingId');*@
         app_jqxgrid.gridFilterRtl(this, $("#grid-toolbar"), columnList, dateList);
     });
-   
+
         function getUserId() {
             return @ViewBag.UserId;
         }
@@ -56,11 +66,11 @@
 
         function deleteUnit(unitId, BuildingId, FloorNum, PropertyType) {
             app_units.deleteUnit(unitId, BuildingId, FloorNum, PropertyType);
-        } 
+        }
         var columnList = [
          { label: 'קוד יחידה', value: 'UnitId', checked: false },
          { label: 'כתובת', value: 'Address', checked: false },
-         { label: 'עיר', value: 'City', checked: false },
+         { label: 'עיר', value: 'CityName', checked: false },
          { label: 'סוג', value: 'PropertyTypeName', checked: false },
          //{ label: 'מחיר', value: 'Price', checked: true },
          //{ label: 'מאוכלס', value: 'Populate', checked: true },
@@ -90,7 +100,7 @@
 <div class="clear"></div>
 
 <div class="global">
-    <div class="container">
+    <div class="container-box">
 
         <div class="grid-wrap rtl">
             

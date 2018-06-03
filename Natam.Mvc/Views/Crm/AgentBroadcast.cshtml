@@ -1,0 +1,191 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+   
+}
+
+@section head {
+
+
+    @Scripts.Render("~/bundles/jqx")
+    @Scripts.Render("~/bundles/jqxgrid")
+
+   
+    <script type="text/javascript">
+    $(document).ready(function () {
+        var me = this;
+   
+        @*var dealAdapter = app_jqxcombos.createComboCheckAdapter("DealId", "DealName", "DealType", '@Url.Action("GetDealView", "Building")');
+
+        var purposeAdapter = app_jqxcombos.createComboCheckAdapter("PurposeId", "PurposeName", "PurposeType", '@Url.Action("GetPurposeView", "Building")');
+
+        var areaAdapter = app_jqxcombos.createComboCheckAdapter("AreaId", "AreaName", "AreaType", '@Url.Action("GetAreaViewAll", "Building")', 0, 200, false);
+
+        var sizesAdapter = app_jqxcombos.createComboAdapter("SizeId", "SizeTitle", "RequestSize", '@Url.Action("GetRequestSize", "Common")', 0, 200, false);*@
+
+
+        var source =
+        {
+            datatype: "json",
+            id: 'AgentId',
+            type: 'POST',
+            url: '/Crm/AgentBroadcastGet'
+
+        };
+        var dataAdapter = new $.jqx.dataAdapter(source, {
+            loadComplete: function (record) {
+
+                //app_form.loadDataForm("form", record);
+
+                $("#AgentName").val(record.AgentName);
+
+                app_select.BroadcastDealType("#DealType", record.Deal);
+                app_select.BroadcastPurposeType("#PurposeType", record.Purpose);
+                app_select.BroadcastAreaType("#AreaType", record.Area);
+                app_select.BroadcastSize("#Size", record.Size);
+
+            },
+            loadError: function (jqXHR, status, error) {
+            }
+        });
+
+        dataAdapter.dataBind();
+
+        $(".reset").click(function () {
+            location.reload();
+        });
+
+        $("#submit").click(function () {
+            //e.preventDefault();
+
+            var actionurl = $('#form').attr('action');
+            var postData=[];
+            postData.push("Area=" + $("#AreaType").val() );
+            postData.push("Purpose=" + $("#PurposeType").val() );
+            postData.push("DealType=" + $("#DealType").val() );
+            postData.push("Size=" + $("#Size").val() );
+
+
+            var validationResult = function (isValid) {
+                if (isValid) {
+                     $.ajax({
+                        url: actionurl,
+                        type: 'post',
+                        dataType: 'json',
+                        data: postData.join("&"),
+                        success: function (data) {
+                            app_dialog.alert(data.Message);
+                            //app_messenger.Post(data);
+                            //if (data.Status >= 0) {
+                                
+                            //}
+                        },
+                        error: function (jqXHR, status, error) {
+                            app_dialog.alert(error);
+                        }
+                    });
+                }
+            }
+            // Validate the Form.
+            $('#form').jqxValidator('validate', validationResult);
+        });
+
+        $('#form').jqxValidator({
+            rtl: true,
+            hintType: 'label',
+            animationDuration: 0,
+            rules: [
+                    {
+                        input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
+                            return $("#DealType").val() >= 0;
+                            //var index = $("#MediaType").jqxDropDownList('getSelectedIndex');
+                            //if (index >= 0) { return true; } return false;
+                        }
+                    },
+                    {input: '#PurposeType', message: 'חובה לציין סוג הנכס!', action: 'select', rule: function (input) {
+                        return $("#PurposeType").val() >= 0;
+                    }
+                    },
+                    {
+                        input: '#AreaType', message: 'חובה לציין אזור!', action: 'select', rule: function (input) {
+                            return $("#AreaType").val() >= 0;
+                    }
+                },
+                    {
+                        input: '#Size', message: 'חובה לציין שטח!', action: 'select', rule: function (input) {
+                            return $("#Size").val() >= 0;
+                        }
+                    }
+            ]
+        });
+
+        
+    });
+
+    </script>
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+<div class="clear"></div>
+
+<div class="global-view">
+
+    <div class="container-box">
+        <h3>עדכוני הפצה</h3>
+
+        <div class="panel-area">
+            <div class="panel-area-title">הגדרת עדכוני הפצה במייל</div>
+            <form id="form" action="AgentBroadcastUpdate" method="post">
+                <div class="rtl">
+                    <div class="form-group">
+                        <label class="column">
+                            סוג עסקה:
+                        </label>
+                        <select id="DealType" name="DealType"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוג הנכס/שימוש:
+                        </label>
+                        <select id="PurposeType" name="PurposeType"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            אזור מבוקש:
+                        </label>
+                        <select id="AreaType" name="AreaType"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            שטח:
+                        </label>
+                        <select id="Size" name="Size"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="column">
+                            סוכן:
+                        </label>
+                        <input id="AgentName" type="text" />
+                    </div>
+                    <br />
+                    <input type="button" id="submit" value="עדכון" class="btn-default btn2" />
+                    <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+   app_menu.activeLayoutMenu("liLeads");
+</script>
+
+
+

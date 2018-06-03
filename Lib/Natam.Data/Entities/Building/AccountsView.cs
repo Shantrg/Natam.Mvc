@@ -49,16 +49,19 @@ namespace Pro.Data.Entities
             {
                 entity.Creation = DateTime.Now;
                 int res = 0;
-                using (AccountContext context = new AccountContext())
-                {
-                    context.Set(entity);
-                    res= context.SaveChanges(commandType);
-                    if(res>0 && UploadKey !=null)
-                    {
-                        context.ExecuteNonQuery("sp_Contact_Update_Key", DataParameter.GetSql("AccountId", id, "UploadKey", UploadKey), CommandType.StoredProcedure);
-                    }
-                    return res;
-                }
+                res = DoSaveNew(entity);
+                return res;
+
+                //using (AccountContext context = new AccountContext())
+                //{
+                //    context.Set(entity);
+                //    res= context.SaveChanges(commandType);
+                //    if(res>0 && UploadKey !=null)
+                //    {
+                //        context.ExecuteNonQuery("sp_Contact_Update_Key", DataParameter.GetSql("AccountId", id, "UploadKey", UploadKey), CommandType.StoredProcedure);
+                //    }
+                //    return res;
+                //}
             }
             if (commandType == UpdateCommandType.Update)
                 using (AccountContext context = new AccountContext(id))
@@ -77,6 +80,40 @@ namespace Pro.Data.Entities
             }
         }
 
+        public static int DoSaveNew(AccountView v)
+        {
+
+            var args = new object[]{
+
+                "AccountId", v.AccountId
+                ,"AccountName", v.AccountName
+                ,"AccountType", v.AccountType
+                ,"CompanyName", v.CompanyName
+                ,"Address", v.Address
+                ,"City", v.City
+                ,"ZipCode", v.ZipCode
+                ,"Phone1", v.Phone1
+                ,"Phone2", v.Phone2
+                ,"Phone3", v.Phone3
+                ,"Fax", v.Fax
+                ,"Details", v.Details
+                ,"AgentId", v.AgentId
+                ,"AccountCategory", v.AccountCategory
+                ,"ContactName", v.ContactName
+                ,"Mobile", v.Mobile
+                ,"Email", v.Email
+                ,"ContactTitle", ""//v.ContactTitle
+                ,"ContactDetails", ""// v.ContactDetails
+                ,"ContactRole", "0"//v.ContactRole
+
+            };
+            var parameters = DataParameter.GetSql(args);
+            parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Accounts_AddNew_v1", parameters, System.Data.CommandType.StoredProcedure);
+            v.AccountId = Types.ToInt(parameters[0].Value);
+            return v.AccountId > 0 ? 1 : 0;
+        }
+
         public static int DoSaveNew(AccountContactView v)
         {
 
@@ -92,22 +129,14 @@ namespace Pro.Data.Entities
                 ,"Phone1", v.Phone1
                 ,"Phone2", v.Phone2
                 ,"Phone3", v.Phone3
-                //,"Email", null//v.Email
                 ,"Fax", v.Fax
-                //,"WebSite", v.WebSite
                 ,"Details", v.Details
-                //,"OldId", v.OldId
-                //,"Mobile", null//v.Mobile
-                //,"Segments", v.Segments
                 ,"AgentId", v.AgentId
                 ,"AccountCategory", v.AccountCategory
                 ,"ContactName", v.ContactName
+                ,"Mobile", v.Mobile
+                ,"Email", v.Email
                 ,"ContactTitle", v.ContactTitle
-                ,"ContactEmail", v.ContactEmail
-                ,"ContactMobile", v.ContactMobile
-                ,"ContactPhone1", v.ContactPhone1
-                //,"ContactPhone2", v.ContactPhone2
-                //,"ContactPhone3", v.ContactPhone3
                 ,"ContactDetails", v.ContactDetails
                 ,"ContactRole", v.ContactRole
 
@@ -116,7 +145,7 @@ namespace Pro.Data.Entities
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
             //parameters[1].Direction = System.Data.ParameterDirection.InputOutput;
             //int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Accounts_AddNew", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Accounts_AddNew_v1", parameters, System.Data.CommandType.StoredProcedure);
             v.AccountId = Types.ToInt(parameters[0].Value);
             //var status = Types.ToInt(parameters[1].Value);
             return v.AccountId > 0 ? 1 : 0;
@@ -135,7 +164,7 @@ namespace Pro.Data.Entities
             };
             var parameters = DataParameter.GetSql(args);
             parameters[4].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Account_Validity", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Account_Validity", parameters, System.Data.CommandType.StoredProcedure);
             int accountId = parameters.GetParameterValue<int>("AccountId");
             return new ResultInfo()
             {
@@ -307,35 +336,20 @@ namespace Pro.Data.Entities
 
     public class AccountContactView : AccountView
     {
-//@AccountId int output
-//,@AccountName nvarchar(50)
-//,@AccountType tinyint
-//,@CompanyName nvarchar(50)
-//,@Address nvarchar(50)
-//,@City nvarchar(50)
-//,@ZipCode varchar(10)
-//,@Phone1 varchar(20)
-//,@Phone2 varchar(20)
-//,@Phone3 varchar(20)
-//,@Fax varchar(20)
-//,@Details nvarchar(max)
-//,@AgentId int
-//,@AccountCategory tinyint
-
-        public string ContactName { get; set; }
+        //public string ContactName { get; set; }
         public string ContactTitle { get; set; }
 
-        [EntityProperty(Caption = "טלפון נייד")]
-        public string ContactMobile { get; set; }
-        [EntityProperty(Caption = "טלפון 1")]
-        public string ContactPhone1 { get; set; }
-        //[EntityProperty(Caption = "טלפון 2")]
-        //public string ContactPhone2 { get; set; }
+        //[EntityProperty(Caption = "טלפון נייד")]
+        //public string ContactMobile { get; set; }
+        //[EntityProperty(Caption = "טלפון 1")]
+        //public string ContactPhone1 { get; set; }
+        ////[EntityProperty(Caption = "טלפון 2")]
+        ////public string ContactPhone2 { get; set; }
 
-        //public string ContactPhone3 { get; set; }
+        ////public string ContactPhone3 { get; set; }
 
-        [EntityProperty(Caption = "דואל")]
-        public string ContactEmail { get; set; }
+        //[EntityProperty(Caption = "דואל")]
+        //public string ContactEmail { get; set; }
 
         public string ContactDetails { get; set; }
 
@@ -372,10 +386,15 @@ namespace Pro.Data.Entities
         #region contact
         [EntityProperty(Caption = "איש קשר")]
         public string ContactName { get; set; }
+        [EntityProperty(Caption = "תפקיד")]
+        public string ContactTitle { get; set; }
+
         [EntityProperty(Caption = "סלולארי")]
         public string Mobile { get; set; }
         [EntityProperty(Caption = "דואל")]
         public string Email { get; set; }
+        //public int ContactPrimary { get; set; }
+
         #endregion
 
         public string Fax { get; set; }

@@ -236,7 +236,7 @@
     color: #0088cc !important;
 }
 
-    .jqx-expander-header-bootstrap:hover {
+    .jqx-expander-header-bootstrap:hover:not(.jqx-fill-state-disabled-bootstrap) {
         color: #005580 !important;
         cursor: pointer;
     }
@@ -293,9 +293,6 @@
 }
 
 .jqx-radiobutton-bootstrap {
-    -moz-border-radius: 100%;
-    -webkit-border-radius: 100%;
-    border-radius: 100%;
     background-repeat: no-repeat;
     background: none;
 }
@@ -920,4 +917,8 @@ input[type="password"].jqx-input-bootstrap:-ms-input-placeholder, input[type="pa
     background-image: url('images/icon-down-white.png');
     background-repeat: no-repeat;
     background-position: center;
+}
+.jqx-layout-bootstrap
+{
+    background-color: #cccccc;
 }

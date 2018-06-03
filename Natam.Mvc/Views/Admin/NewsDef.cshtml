@@ -108,9 +108,10 @@
                 rtl:true,
                 width: 400,
                 autoheight: true,
+                altrows: true,
                 source: dataAdapter,
                 localization: getLocalization('he'),
-                pageable: false,
+                pageable: true,
                 showtoolbar: true,
                 rendertoolbar: function (toolbar) {
                     var me = this;
@@ -261,7 +262,7 @@
 
 <div class="global-view">
     
-    <div class="container-rtl">
+    <div class="container-box">
         <div class="grid-wrap">
              <div id="jqxWidget">
                  <!--<input style="margin-right: 5px;" type="button" id="addrowbutton" value="הוספה" />-->
@@ -270,9 +271,9 @@
             <div id="cellbegineditevent"></div>
             <div style="margin-top: 10px;" id="cellendeditevent"></div>
             <div id="popupWindow">
-                <input type="hidden" id="insertFlag" value="0" />
             <div>עריכה</div>
             <div style="overflow: hidden;direction:rtl">
+                <input type="hidden" id="insertFlag" value="0" />
                 <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
                     <tr id="trcode">
                         <td align="right">קוד קבוצה:</td>

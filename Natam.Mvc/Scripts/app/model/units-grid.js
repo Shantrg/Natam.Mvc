@@ -30,7 +30,7 @@ app_units_grid = {
             { name: 'DealName', type: 'string' },
             { name: 'BuildingName', type: 'string' },
             { name: 'Address', type: 'string' },
-            { name: 'City', type: 'string' },
+            { name: 'CityName', type: 'string' },
             { name: 'PropertyTypeName', type: 'string' },
             { name: 'PropertyType', type: 'number' }
         ],
@@ -199,16 +199,18 @@ app_units_grid = {
             initrowdetails: this.initrowdetails,
             columns: [
               {
-                  text: 'קוד יחידה', dataField: 'UnitId', width: 100, cellsalign: 'right', align: 'center', hidden: slf.isMobile, cellsrenderer:
+                  text: '*', dataField: 'UnitId', width: 30, cellsalign: 'right', align: 'center', hidden: slf.isMobile, cellsrenderer:
                 function (row, columnfield, value, defaulthtml, columnproperties) {
-                    return '<div style="text-align:center"><a href="UnitDef?id=' + value + '&bid=' + 0 + '&floor=0&op=0" >הצג</a></div>';
+
+                    return '<div style="margin:6px 6px;direction:rtl"><a title="עריכת יחידה" href="UnitDef?id=' + value + '&bid=' + 0 + '&floor=0&op=0" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;"></i></a></div>';
+                    //return '<div style="text-align:center"><a href="UnitDef?id=' + value + '&bid=' + 0 + '&floor=0&op=0" >הצג</a></div>';
                 }
               }, 
               { text: 'שם בניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center' },
               { text: 'כתובת', dataField: 'Address',  cellsalign: 'right', align: 'center' },
-              { text: 'עיר', dataField: 'City', cellsalign: 'right', align: 'center' },
+              { text: 'עיר', dataField: 'CityName', cellsalign: 'right', align: 'center' },
               { text: 'שטח', dataField: 'UnitSize', cellsalign: 'right', align: 'center' },
-              //{ text: 'קומה', dataField: 'FloorNum', cellsalign: 'right', align: 'center' },
+              { text: 'קומה', dataField: 'FloorNum', cellsalign: 'right', align: 'center' },
               { text: 'סוג', dataField: 'PropertyTypeName', cellsalign: 'right', align: 'center' },
               
               { text: 'מחיר', dataField: 'Price', cellsalign: 'right', align: 'center' },
@@ -226,7 +228,26 @@ app_units_grid = {
             app.redirectTo('UnitDef?id=' +id + '&bid=' + 0 + '&floor=0&op=0');
         });
     },
-    load: function (QueryType, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName ,BuildingStreet ,StreetNo,City ,OwnerId, BuildingId) {
+    loadModel: function (jsonModel) {
+
+        var model = JSON.parse(jsonModel);
+        
+
+        this.isMobile = app.IsMobile();
+
+        this.source.data = { 'QueryType': model.QueryType, 'Area': model.Area, 'DealType': model.DealType, 'PurposeType': model.PurposeType, 'AreaSizeMin': model.AreaSizeMin, 'AreaSizeMax': model.AreaSizeMax, 'BuildingName': '' + model.BuildingName + '', 'StreetId': model.StreetId, 'StreetNo': '' + model.StreetNo + '', 'CityCode': model.CityCode, 'OwnerId': model.OwnerId, 'BuildingId': model.BuildingId, 'AgentId': model.AgentId };
+        var dataAdapter = new $.jqx.dataAdapter(this.source);
+
+        //var dataAdapter = new $.jqx.dataAdapter(this.source, {
+        //    async: false,
+        //    loadComplete: function (data) { },
+        //    loadError: function (xhr, status, error) {
+        //        alert(' status: ' + status + '\n error ' + error)
+        //    }
+        //});
+        this.grid(dataAdapter);
+    },
+    load: function (QueryType, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName ,StreetId ,StreetNo,CityCode ,OwnerId, BuildingId) {
         
         //this.QueryType = QueryType;
         //this.Area = Area;
@@ -242,8 +263,10 @@ app_units_grid = {
         //this.BuildingId = BuildingId;
 
         //this.source.data = { 'QueryType': this.QueryType, 'Area': this.Area, 'DealType': this.DealType, 'PurposeType': this.PurposeType, 'AreaSizeMin': this.AreaSizeMin, 'AreaSizeMax': this.AreaSizeMax, 'BuildingName': '' + this.BuildingName + '', 'BuildingStreet': '' + this.BuildingStreet + '', 'StreetNo': '' + this.StreetNo + '', 'City': '' + this.City + '', 'OwnerId': this.OwnerId, 'BuildingId': this.BuildingId };
+
+
         this.isMobile = app.IsMobile();
-        this.source.data = { 'QueryType': QueryType, 'Area': Area, 'DealType': DealType, 'PurposeType': PurposeType, 'AreaSizeMin': AreaSizeMin, 'AreaSizeMax': AreaSizeMax, 'BuildingName': '' + BuildingName + '', 'BuildingStreet': '' + BuildingStreet + '', 'StreetNo': '' + StreetNo + '', 'City': '' + City + '', 'OwnerId': OwnerId, 'BuildingId': BuildingId };
+        this.source.data = { 'QueryType': QueryType, 'Area': Area, 'DealType': DealType, 'PurposeType': PurposeType, 'AreaSizeMin': AreaSizeMin, 'AreaSizeMax': AreaSizeMax, 'BuildingName': '' + BuildingName + '', 'StreetId': StreetId , 'StreetNo': '' + StreetNo + '', 'CityCode': CityCode , 'OwnerId': OwnerId, 'BuildingId': BuildingId };
 
 
         var dataAdapter = new $.jqx.dataAdapter(this.source, {

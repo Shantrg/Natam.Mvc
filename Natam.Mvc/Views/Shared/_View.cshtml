@@ -11,9 +11,9 @@
     <title>@ViewBag.Title</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <!--CSS-->
-    <link rel="stylesheet" href="~/Content/css/style.css">
-    <link rel="stylesheet" href="~/Content/css/view-form.css" type="text/css" />
-
+    <link rel="stylesheet" href="~/Content/css/style-rtl.css">
+    <link rel="stylesheet" href="~/Content/css/view-form.css?ver=2018004" type="text/css" />
+    <link href="~/Content/fonts/font-awesome.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/jqwidgets/styles/jqx.base.css" type="text/css" />
     <link rel="stylesheet" href="~/jqwidgets/styles/jqx.web.css" type="text/css" />
     <link href="~/Scripts/jq/jquery-ui-1.12.0/jquery-ui.css" rel="stylesheet" />
@@ -26,27 +26,31 @@
     <!--JS-->
     <script src="~/Scripts/jq/jquery-2.1.4.js"></script>
     <script src="~/Scripts/jq/jquery-ui-1.12.0/jquery-ui.min.js"></script>
-    
-    @*<script src="~/Scripts/jq/jquery.min.js"></script>
-     <script src="~/Scripts/jq/ui/1.9.2/jquery-ui.min.js"></script>
-     <link rel="stylesheet" href="~/Scripts/jq/ui/1.9.2/css/jquery-ui.css" type="text/css" />*@
 
-     <script src="~/Scripts/plagins/popbox/bpopup.js"></script>
+
+     @*<script src="~/Scripts/plagins/popbox/bpopup.js"></script>
      <link rel="stylesheet" href="~/Scripts/plagins/popbox/bpopup.css" type="text/css" />
 
     <script src="~/Scripts/bootstrap/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="~/Scripts/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="~/Scripts/bootstrap/css/bootstrap.css">*@
 
     <script src="~/Scripts/plagins/cssmenu/cssmenu.js"></script>
     <link rel="stylesheet" href="~/Scripts/plagins/cssmenu/cssmenu-rtl.css">
 
 
-    <script src="~/Scripts/app/app-model-1.0.js"></script>
-    <script src="~/Scripts/app/app-jqx-1.0.js"></script>
+    <script src="~/Scripts/app/app-model-2.0.js?ver=2018004"></script>
+    <script src="~/Scripts/app/app-control-2.0.js?ver=2018004"></script>
+    <script src="~/Scripts/app/app-jqx-2.0.js?ver=2018004"></script>
     <script src="~/Scripts/app/app-global.js"></script>
     <script src="~/Scripts/app/dateFormat.js"></script>
 
-
+    <script src="~/jqwidgets/jqxcore.js"></script>
+    <script src="~/jqwidgets/jqxnotification.js"></script>
+    
+    <script src="~/Scripts/HubSpot/messenger/js/messenger.min.js"></script>
+    <script src="~/Scripts/HubSpot/messenger/js/messenger-theme-future.js"></script>
+    <link href="~/Scripts/HubSpot/messenger/css/messenger-rtl.css" rel="stylesheet" />
+    <link href="~/Scripts/HubSpot/messenger/css/messenger-theme-flat.css" rel="stylesheet" />
 
     @RenderSection("head", required: false)
 
@@ -58,8 +62,9 @@
         <div id="stuck_container">
             <div class="menuBox">
                 <div id="cssmenu_wrapper" class="container">
-                    <h1 class="navbar-brand navbar-brand_" style="float:left"><a href="~/Home/index">
-                        <img src="~/images/logo-small.png" alt=""></a></h1>
+                    <div class="navbar-brand navbar-brand_" style="float:left;position:absolute;"><a href="~/Home/index">
+                        <img class="navbar-img" src="~/images/logo-small.png" alt=""></a>
+                    </div>
                     <div id="cssmenu">
                         <ul>
                             <li id="liHome" class="active"><a href="~/Home/Main" title="ראשי">ראשי</a></li>
@@ -103,12 +108,19 @@
                                             <img src="~/Images/icons/item.png" alt="" />רשימת עסקאות
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="~/Crm/AgentBroadcast" title="עדכוני הפצה">
+                                            <span>
+                                                <img src="~/Images/icons/item.png" alt="" />עדכוני הפצה
+                                            </span>
+                                        </a>
+                                    </li>
                                     <li><a href="~/Home/Construction" title="טופס תיווך">
                                         <span>
                                             <img src="~/Images/icons/item.png" alt="" />טופס תיווך
                                         </span>
                                     </a></li>
-                                </ul>
+                                 </ul>
                             </li>
                             <li id="liCustomers" class="has-sub">
                                 <a href="#" title='לקוחות נת"מ'><span>לקוחות נת"מ</span></a>
@@ -138,11 +150,15 @@
             </div>
         </div>
     </header>
-
+    <div style="clear:both;height:5px"></div>
     <div id="body">
         @*<div class="title">
              <div style="text-align:right; font-size:130%; font-weight:bold;direction:rtl"><span>שם משתמש : </span><span>@ViewBag.UserName</span></div>
         </div>*@
+        <div style="text-align:center;margin:0 auto">
+            <div id="jqxNotification">
+            </div>
+        </div>
         @RenderSection("featured", required: false)
         <section class="content-wrapper main-content clear-fix">
             @RenderBody()
@@ -150,6 +166,7 @@
     </div>
 
     <!--footer-->
+
     <footer>
         <div class="container">
             <div class="row">
@@ -173,7 +190,10 @@
         </div>
         <!-- {%FOOTER_LINK} -->
     </footer>
-    @*@Scripts.Render("~/bundles/jqwidgets")*@
+    <script type="text/javascript">
+        app_messenger.Init('bottom-right', 'flat');
+    </script>
+     @*@Scripts.Render("~/bundles/jqwidgets")*@
     @RenderSection("scripts", required: false)
 </body>
 </html>

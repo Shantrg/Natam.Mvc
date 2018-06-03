@@ -19,7 +19,7 @@ namespace Pro.Data.Entities
             var parameters = DataParameter.GetSqlList("PropType", PropType, "PropId", PropId, "Replacement", Replacement);
             DataParameter.AddOutputParameter(parameters, "Result", System.Data.SqlDbType.Int, 4);
 
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Property_Remove", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Property_Remove", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             var status = Types.ToInt(parameters[3].Value);
             return status;
 

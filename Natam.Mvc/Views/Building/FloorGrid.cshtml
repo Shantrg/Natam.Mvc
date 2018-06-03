@@ -221,7 +221,7 @@
 <div class="clear"></div>
 
 <div class="global">
-    <div class="container">
+    <div class="container-box">
 
         <div class="grid-wrap">
             <div class="box-title">
@@ -416,7 +416,7 @@
                         url: '@Url.Action("UpdateFloor", "Building")',
                         type: 'post',
                         dataType: 'json',
-                        data: $('#contactForm').serialize(),
+                        data: app.serialize('#contactForm'),
                         success: function (data) {
 
                             if (data.Status >= 0) {

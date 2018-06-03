@@ -20,6 +20,7 @@ app_ads_grid = {
             { name: 'Description', type: 'string' },
             { name: 'AgentName', type: 'string' },
             { name: 'Creation', type: 'date' },
+            { name: 'StatusModified', type: 'date' },
             { name: 'StatusName', type: 'string' }
         ],
         id: 'AdsId',
@@ -118,7 +119,7 @@ app_ads_grid = {
                 }
               }, 
               { text: 'סוג מדיה', dataField: 'AdsTypeName', width: 120, cellsalign: 'right', align: 'center', hidden: ismobile },
-              { text: 'אזור-עיר', dataField: 'AreaName', filtercondition: 'starts_with', width: 120, cellsalign: 'right', align: 'center', hidden: ismobile },
+              { text: 'אזור-עיר', dataField: 'AreaName', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center', hidden: ismobile },
               { text: 'שם הבניין', dataField: 'BuildingName', filtercondition: 'CONTAINS', width: 120, cellsalign: 'right', align: 'center', hidden: ismobile },
               { text: 'כתובת', dataField: 'Address', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
               { text: 'סוג נכס', dataField: 'PurposeName', filtercondition: 'CONTAINS', width: 100, cellsalign: 'right', align: 'center' },

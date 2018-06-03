@@ -9,9 +9,8 @@
 }
 @section head {
     @Scripts.Render("~/bundles/jqx")
-    <script type="text/javascript" src="~/Scripts/app/model/trans-def.js"></script>
+    <script type="text/javascript" src="~/Scripts/app/model/trans-def.js?ver=2018004"></script>
     <script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
-    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
     <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
 
     <style type="text/css">
@@ -127,25 +126,17 @@
 <div class="clear"></div>
 
 <div class="global-view">
-    <div class="container">
+    <div class="container-box">
         <div class="box-title">
             <h3>דוח סיכום עסקה מצד בעל הנכס/מוכר<span id="spn_cancel"></span></h3>
         </div>
         <div id="tag-form">
-            @*@using (Html.BeginForm("UpdateBuilding", "Building", null, FormMethod.Post, new { id = "form", Class = "form" }))
-                {
-            *@
-            <!--Html.AntiForgeryToken(), target = "form-iframe"
-                          Html.ValidationSummary(true)
-                              -->
-
 
             <form class="form" id="form" method="post" action="/Crm/UpdateTransaction">
-                @*<input id="UploadKey" type="hidden" name="UploadKey" />
-                    <input id="ValidateResult" type="hidden"/>*@
+                
                 <input id="TransType" name="TransType" value="2" type="hidden" />
                 <input id="Trans_Status" name="Trans_Status" value="0" type="hidden" />
-                <div class="tab-content tab-border">
+                <div class="panel-area tab-content tab-border">
                     <table>
                         <tr>
                             <td>תאריך:</td>
@@ -161,255 +152,274 @@
                         </tr>
                     </table>
                 </div>
-                <h4>פרטי בעל הנכס/מוכר</h4>
-                <div class="tab-content tab-border">
-                    <input type="hidden" id="Seller_Id" name="Seller_Id" />
+                <div class="panel-area">
+                    <h4>פרטי בעל הנכס/מוכר</h4>
+                    <div class="tab-content tab-border">
+                        <input type="hidden" id="Seller_Id" name="Seller_Id" />
 
-                    <table border="1">
-                        <tr>
-                            <td>שם המוכר\חברה<span class="mandatory">(*)</span>:</td>
-                            <td colspan="3"><input type="text" id="Seller_Name" name="Seller_Name" style="width: 100%" /></td>
-                        </tr>
-                        <tr>
-                            <td>איש קשר<span class="mandatory">(*)</span>:</td>
-                            <td><input type="text" id="Seller_ContactName" name="Seller_ContactName" /></td>
-                            <td>תפקיד:</td>
-                            <td><input type="text" id="Seller_ContactTitle" name="Seller_ContactTitle" /></td>
-                        </tr>
-                        <tr>
-                            <td>כתובת<span class="mandatory">(*)</span>:</td>
-                            <td><input type="text" id="Seller_Address" name="Seller_Address" /></td>
-                            <td>עיר<span class="mandatory">(*)</span>:</td>
-                            <td><input type="text" id="Seller_City" name="Seller_City" /></td>
-                        </tr>
-                        <tr>
-                            <td>טלפון<span class="mandatory">(*)</span>:</td>
-                            <td><input type="text" id="Seller_Phone" name="Seller_Phone" /></td>
-                            <td>פקס:</td>
-                            <td><input type="text" id="Seller_Fax" name="Seller_Fax" /></td>
-                        </tr>
-                        <tr>
-                            <td>מייל<span class="mandatory">(*)</span>:</td>
-                            <td colspan="3"><input type="text" id="Seller_Email" name="Seller_Email" style="width: 100%;" /></td>
-                        </tr>
-                    </table>
-                </div>
-                <h4>צד שני של העסקה</h4>
-                <div class="tab-content tab-border">
-                    <input type="hidden" id="Client_Id" name="Client_Id" />
-                    <table>
-                        <tr>
-                            <td>העסקה מתייחסת ל:</td>
-                            <td colspan="3">הדייר/רוכש</td>
-                        </tr>
-                        <tr>
-                            <td>שם הדייר\רוכש<span class="mandatory">(*)</span>:</td>
-                            <td colspan="4"><input type="text" id="Client_Name" name="Client_Name" style="width: 100%;" /></td>
-                        </tr>
-                    </table>
-                </div>
-                <h4>תאור הנכס</h4>
-                <div class="tab-content tab-border">
-                    <table>
-                        <tr>
-                            <td>מס' הנכס</td>
-                            <td><input type="number" id="PropertyId" name="PropertyId" readonly="readonly" /></td>
-                            <td>תאריך עדכון אחרון</td>
-                            <td><input type="text" id="Property_LastUpdate" name="Property_LastUpdate" readonly="readonly" /></td>
-                        </tr>
-                        <tr>
-                            <td>שם בניין:</td>
-                            <td><input type="text" id="BuildingName" name="BuildingName" /></td>
-                            <td>סוג הנכס:</td>
-                            <td class="td-combo">
-                                <div id="Property_Type" name="Property_Type"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>כתובת<span class="mandatory">(*)</span>:</td>
-                            <td><input type="text" id="Property_Address" name="Property_Address" /></td>
-                            <td> עיר:</td>
-                            <td><input type="text" id="Property_City" name="Property_City" /></td>
-                        </tr>
-                        <tr>
-                            <td>קומה:</td>
-                            <td><input type="text" id="Property_Floor" name="Property_Floor" /></td>
-                            <td>שטח -מ"ר:</td>
-                            <td><input type="text" id="Property_Size" name="Property_Size" /></td>
-                        </tr>
-                        <tr>
-                            <td>הערות:</td>
-                            <td colspan="2"><input type="text" id="Property_Comment" name="Property_Comment" style="width:100%" /></td>
-                            <td><input type="checkbox" id="IsNatam" name="IsNatam" />&nbsp:<span>בניין בניהול נת"מ</span></td>
-                        </tr>
-                    </table>
-                </div>
-                <h4>מהות ושווי העסקה</h4>
-                <div class="tab-content tab-border">
-                    <h5>שכירות:</h5>
-                    <table>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td>מחיר ל מ''ר\לחנייה</td>
-                            <td>מס' חודשים</td>
-                            <td>סה''כ ב שח</td>
-                        </tr>
-                        <tr>
-                            <td>שטח ב מ"ר:</td>
-                            <td><input type="number" step="any" id="Value_Rent_Size" name="Value_Rent_Size" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Price" name="Value_Rent_Price" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Period" name="Value_Rent_Period" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Total" name="Value_Rent_Total" class="input-num" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td># מקומות חנייה:</td>
-                            <td><input type="number" id="Value_Rent_Park_No" name="Value_Rent_Park_No" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Park_Price" name="Value_Rent_Park_Price" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Park_Period" name="Value_Rent_Park_Period" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Rent_Park_Total" name="Value_Rent_Park_Total" class="input-num" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="4">סה"כ:</td>
-                            <td><input type="number" id="TotalRentValue" name="TotalRentValue" class="input-num" /></td>
-                        </tr>
-                    </table>
-                    <h5>מכירה:</h5>
-                    <table>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td>מחיר ל מ''ר\לחנייה</td>
-                            <td></td>
-                            <td>סה''כ ב שח</td>
-                        </tr>
-                        <tr>
-                            <td>שטח ב מ"ר:</td>
-                            <td><input type="number" step="any" id="Value_Sale_Size" name="Value_Sale_Size" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Sale_Price" name="Value_Sale_Price" class="input-num" /></td>
-                            <td><input type="number" class="input-num" readonly="readonly" /></td>
-                            <td><input type="number" step="any" id="Value_Sale_Total" name="Value_Sale_Total" class="input-num" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td># מקומות חנייה:</td>
-                            <td><input type="number" id="Value_Sale_Park_No" name="Value_Sale_Park_No" class="input-num" /></td>
-                            <td><input type="number" step="any" id="Value_Sale_Park_Price" name="Value_Sale_Park_Price" class="input-num" /></td>
-                            <td><input type="number" class="input-num" readonly="readonly" /></td>
-                            <td><input type="number" step="any" id="Value_Sale_Park_Total" name="Value_Sale_Park_Total" class="input-num" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="4">סה"כ:</td>
-                            <td><input type="number" id="TotalSaleValue" name="TotalRentValue" class="input-num" /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="5"><hr /></td>
-                        </tr>
-                        <tr>
-                            <td colspan="4">סה"כ שווי עסקה:</td>
-                            <td><input type="number" id="TotalValue" name="TotalValue" class="input-num" /></td>
-                        </tr>
-                    </table>
- 
-                    <h5>פרטים:</h5>
-                    <table>
-                        <tr>
-                            <td>תאריך העסקה<span class="mandatory">(*)</span></td>
-                            <td>תאריך סיום החוזה<span class="mandatory">(*)</span></td>
-                        </tr>
-                        <tr>
-                            <td><div id="ContractDate" name="ContractDate"></div></td>
-                            <td><div id="DateEndContract" name="DateEndContract"></div></td>
-                        </tr>
-                        <tr>
-                            <td>תאריך סיום אופציה1</td>
-                            <td>תאריך סיום אופציה2</td>
-                        </tr>
-                        <tr>
-                            <td><div id="DateEndOption1" name="DateEndOption1"></div></td>
-                            <td><div id="DateEndOption2" name="DateEndOption2"></div></td>
-                        </tr>
-                    </table>
-
-                </div>
-                <h4>פרטי תשלום</h4>
-                <div class="tab-content tab-border">
-                    <table>
-                        <tr>
-                            <td>גובה העמלה לפני מע"מ<span class="mandatory">(*)</span></td>
-                        </tr>
-                        <tr>
-                            <td><input type="number" id="ComissionNet" name="ComissionNet" /></td>
-                        </tr>
-                    </table>
-
-                    <table>
-                        <tr>
-                            <td>גורם חיצוני\הוצאות אחרות</td>
-                            <td>אחוז</td>
-                            <td>סכום לפני מע"מ</td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" id="Payment_Ex_Item" name="Payment_Ex_Item" /></td>
-                            <td><input type="number" id="Payment_Ex_Percent" name="Payment_Ex_Percent" /></td>
-                            <td><input type="number" id="Payment_Ex_Net" name="Payment_Ex_Net" readonly /></td>
-                        </tr>
-                    </table>
-                    <h5>חלוקה בנת"מ</h5>
-                    <table>
-                        <tr>
-                            <td>סוכן</td>
-                            <td>אחוז</td>
-                            <td>סכום לפני מע"מ</td>
-                        </tr>
-                        <tr>
-                            <td class="td-combo"><div id="Payment_In_Item_1" name="Payment_In_Item_1"></div></td>
-                            <td><input type="number" step="any" id="Payment_In_Percent_1" name="Payment_In_Percent_1" /></td>
-                            <td><input type="number" step="any" id="Payment_In_Net_1" name="Payment_In_Net_1" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td class="td-combo"><div id="Payment_In_Item_2" name="Payment_In_Item_2"></div></td>
-                            <td><input type="number" step="any" id="Payment_In_Percent_2" name="Payment_In_Percent_2" /></td>
-                            <td><input type="number" step="any" id="Payment_In_Net_2" name="Payment_In_Net_2" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td class="td-combo"><div id="Payment_In_Item_3" name="Payment_In_Item_3"></div></td>
-                            <td><input type="number" step="any" id="Payment_In_Percent_3" name="Payment_In_Percent_3" /></td>
-                            <td><input type="number" step="any" id="Payment_In_Net_3" name="Payment_In_Net_3" readonly /></td>
-                        </tr>
-                        <tr>
-                            <td class="td-combo"><div id="Payment_In_Item_4" name="Payment_In_Item_4"></div></td>
-                            <td><input type="number" step="any" id="Payment_In_Percent_4" name="Payment_In_Percent_4" /></td>
-                            <td><input type="number" step="any" id="Payment_In_Net_4" name="Payment_In_Net_4" readonly /></td>
-                        </tr>
-                    </table>
-
-                </div>
-                <div class="form-group">
-                    <label class="column">
-                        הערות:
-                    </label><br />
-                    <textarea id="Comment" name="Comment" class="textarea-mid"></textarea>
-                </div>
-                <div style="height:10px"></div>
-                <div style="width:70%; display:block">
-                    <div style="float:left;width:20%; text-align:center">
-                        <hr />
-                        <span>חתימת המתווך</span>
-                    </div>
-                    <div style="float: right; width: 20%; text-align: center">
-                        <hr />
-                        <span>חתימת המנהל</span>
+                        <table border="1">
+                            <tr>
+                                <td>שם המוכר\חברה<span class="mandatory">(*)</span>:</td>
+                                <td colspan="3"><input type="text" id="Seller_Name" name="Seller_Name" style="width: 100%" /></td>
+                            </tr>
+                            <tr>
+                                <td>איש קשר<span class="mandatory">(*)</span>:</td>
+                                <td><input type="text" id="Seller_ContactName" name="Seller_ContactName" /></td>
+                                <td>תפקיד:</td>
+                                <td><input type="text" id="Seller_ContactTitle" name="Seller_ContactTitle" /></td>
+                            </tr>
+                            <tr>
+                                <td>כתובת<span class="mandatory">(*)</span>:</td>
+                                <td><input type="text" id="Seller_Address" name="Seller_Address" /></td>
+                                <td>עיר<span class="mandatory">(*)</span>:</td>
+                                <td><input type="text" id="Seller_City" name="Seller_City" /></td>
+                            </tr>
+                            <tr>
+                                <td>טלפון<span class="mandatory">(*)</span>:</td>
+                                <td><input type="text" id="Seller_Phone" name="Seller_Phone" /></td>
+                                <td>פקס:</td>
+                                <td><input type="text" id="Seller_Fax" name="Seller_Fax" /></td>
+                            </tr>
+                            <tr>
+                                <td>מייל<span class="mandatory">(*)</span>:</td>
+                                <td colspan="3"><input type="text" id="Seller_Email" name="Seller_Email" style="width: 100%;" /></td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
-                <div style="height:10px; clear:both"></div>
-                <div>
+                <div class="panel-area">
+                    <h4>צד שני של העסקה</h4>
+                    <div class="tab-content tab-border">
+                        <input type="hidden" id="Client_Id" name="Client_Id" />
+                        <table>
+                            <tr>
+                                <td>העסקה מתייחסת ל:</td>
+                                <td colspan="3">הדייר/רוכש</td>
+                            </tr>
+                            <tr>
+                                <td>שם הדייר\רוכש<span class="mandatory">(*)</span>:</td>
+                                <td colspan="4"><input type="text" id="Client_Name" name="Client_Name" style="width: 100%;" /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <h4>תאור הנכס</h4>
+                    <div class="tab-content tab-border">
+                        <table>
+                            <tr>
+                                <td>מס' הנכס</td>
+                                <td><input type="number" id="PropertyId" name="PropertyId" readonly="readonly" /></td>
+                                <td>תאריך עדכון אחרון</td>
+                                <td><input type="text" id="Property_LastUpdate" name="Property_LastUpdate" readonly="readonly" /></td>
+                            </tr>
+                            <tr>
+                                <td>שם בניין:</td>
+                                <td><input type="text" id="BuildingName" name="BuildingName" /></td>
+                                <td>סוג הנכס:</td>
+                                <td class="td-combo">
+                                    <div id="Property_Type" name="Property_Type"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>כתובת<span class="mandatory">(*)</span>:</td>
+                                <td><input type="text" id="Property_Address" name="Property_Address" /></td>
+                                <td> עיר:</td>
+                                <td><input type="text" id="Property_City" name="Property_City" /></td>
+                            </tr>
+                            <tr>
+                                <td>קומה:</td>
+                                <td><input type="text" id="Property_Floor" name="Property_Floor" /></td>
+                                <td>שטח -מ"ר:</td>
+                                <td><input type="text" id="Property_Size" name="Property_Size" /></td>
+                            </tr>
+                            <tr>
+                                <td>הערות:</td>
+                                <td colspan="2"><input type="text" id="Property_Comment" name="Property_Comment" style="width:100%" /></td>
+                                <td><input type="checkbox" id="IsNatam" name="IsNatam" />&nbsp:<span>בניין בניהול נת"מ</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <h4>מהות ושווי העסקה</h4>
+                    <div class="tab-content tab-border">
+                        <h5>שכירות:</h5>
+                        <table>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>מחיר ל מ''ר\לחנייה</td>
+                                <td>מס' חודשים</td>
+                                <td>סה''כ ב שח</td>
+                            </tr>
+                            <tr>
+                                <td>שטח ב מ"ר:</td>
+                                <td><input type="number" step="any" id="Value_Rent_Size" name="Value_Rent_Size" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Price" name="Value_Rent_Price" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Period" name="Value_Rent_Period" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Total" name="Value_Rent_Total" class="input-num" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td># מקומות חנייה:</td>
+                                <td><input type="number" id="Value_Rent_Park_No" name="Value_Rent_Park_No" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Park_Price" name="Value_Rent_Park_Price" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Park_Period" name="Value_Rent_Park_Period" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Rent_Park_Total" name="Value_Rent_Park_Total" class="input-num" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">סה"כ:</td>
+                                <td><input type="number" id="TotalRentValue" name="TotalRentValue" class="input-num" /></td>
+                            </tr>
+                        </table>
+                        <h5>מכירה:</h5>
+                        <table>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>מחיר ל מ''ר\לחנייה</td>
+                                <td></td>
+                                <td>סה''כ ב שח</td>
+                            </tr>
+                            <tr>
+                                <td>שטח ב מ"ר:</td>
+                                <td><input type="number" step="any" id="Value_Sale_Size" name="Value_Sale_Size" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Sale_Price" name="Value_Sale_Price" class="input-num" /></td>
+                                <td><input type="number" class="input-num" readonly="readonly" /></td>
+                                <td><input type="number" step="any" id="Value_Sale_Total" name="Value_Sale_Total" class="input-num" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td># מקומות חנייה:</td>
+                                <td><input type="number" id="Value_Sale_Park_No" name="Value_Sale_Park_No" class="input-num" /></td>
+                                <td><input type="number" step="any" id="Value_Sale_Park_Price" name="Value_Sale_Park_Price" class="input-num" /></td>
+                                <td><input type="number" class="input-num" readonly="readonly" /></td>
+                                <td><input type="number" step="any" id="Value_Sale_Park_Total" name="Value_Sale_Park_Total" class="input-num" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">סה"כ:</td>
+                                <td><input type="number" id="TotalSaleValue" name="TotalRentValue" class="input-num" /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5"><hr /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">סה"כ שווי עסקה:</td>
+                                <td><input type="number" id="TotalValue" name="TotalValue" class="input-num" /></td>
+                            </tr>
+                        </table>
+
+                        <h5>פרטים:</h5>
+                        <table>
+                            <tr>
+                                <td>תאריך העסקה<span class="mandatory">(*)</span></td>
+                                <td>תאריך סיום החוזה<span class="mandatory">(*)</span></td>
+                            </tr>
+                            <tr>
+                                <td><div id="ContractDate" name="ContractDate"></div></td>
+                                <td><div id="DateEndContract" name="DateEndContract"></div></td>
+                            </tr>
+                            <tr>
+                                <td>תאריך סיום אופציה1</td>
+                                <td>תאריך סיום אופציה2</td>
+                            </tr>
+                            <tr>
+                                <td><div id="DateEndOption1" name="DateEndOption1"></div></td>
+                                <td><div id="DateEndOption2" name="DateEndOption2"></div></td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <h4>פרטי תשלום</h4>
+                    <div class="tab-content tab-border">
+                        <table>
+                            <tr>
+                                <td>גובה העמלה לפני מע"מ<span class="mandatory">(*)</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="number" id="ComissionNet" name="ComissionNet" /></td>
+                            </tr>
+                        </table>
+
+                        <table>
+                            <tr>
+                                <td>גורם חיצוני\הוצאות אחרות</td>
+                                <td>אחוז</td>
+                                <td>סכום לפני מע"מ</td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" id="Payment_Ex_Item" name="Payment_Ex_Item" /></td>
+                                <td><input type="number" id="Payment_Ex_Percent" name="Payment_Ex_Percent" step="0.01" /></td>
+                                <td><input type="number" id="Payment_Ex_Net" name="Payment_Ex_Net" step=0.01 /></td>
+                            </tr>
+                        </table>
+                        <h5>חלוקה בנת"מ</h5>
+                        <table>
+                            <tr>
+                                <td>סוכן</td>
+                                <td>אחוז</td>
+                                <td>סכום לפני מע"מ</td>
+                            </tr>
+                            <tr>
+                                <td class="td-combo"><div id="Payment_In_Item_1" name="Payment_In_Item_1"></div></td>
+                                <td><input type="number" step="any" id="Payment_In_Percent_1" name="Payment_In_Percent_1" /></td>
+                                <td><input type="number" step="any" id="Payment_In_Net_1" name="Payment_In_Net_1" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td class="td-combo"><div id="Payment_In_Item_2" name="Payment_In_Item_2"></div></td>
+                                <td><input type="number" step="any" id="Payment_In_Percent_2" name="Payment_In_Percent_2" /></td>
+                                <td><input type="number" step="any" id="Payment_In_Net_2" name="Payment_In_Net_2" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td class="td-combo"><div id="Payment_In_Item_3" name="Payment_In_Item_3"></div></td>
+                                <td><input type="number" step="any" id="Payment_In_Percent_3" name="Payment_In_Percent_3" /></td>
+                                <td><input type="number" step="any" id="Payment_In_Net_3" name="Payment_In_Net_3" readonly /></td>
+                            </tr>
+                            <tr>
+                                <td class="td-combo"><div id="Payment_In_Item_4" name="Payment_In_Item_4"></div></td>
+                                <td><input type="number" step="any" id="Payment_In_Percent_4" name="Payment_In_Percent_4" /></td>
+                                <td><input type="number" step="any" id="Payment_In_Net_4" name="Payment_In_Net_4" readonly /></td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                <div class="panel-area">
+                    <div class="form-group">
+                        <label class="column">
+                            הערות:
+                        </label><br />
+                        <textarea id="Comment" name="Comment" class="textarea-mid"></textarea>
+                    </div>
+                    <ul>
+                        <li>1. התשלום לסוכן ייעשה עד שלושה ימים מיום התשלום בפועל לחברת נת"מ שירותי נדל"ן.</li>
+                        <li>2. התשלום לסוכן יהווה את מלוא התמורה במונחי עלות לנת"מ הסוכן ישא בעצמו ועל חשבונו בלבד בכל המיסים, ההיטלים, הסוציאליות והנלוות ע"פ דין בגין התמורה.</li>
+                        <li>3. במידה ומאיזושהי סיבה לא תתבצע בפועל העסקה, יחזיר הסוכן את חלקו.</li>
+                        <li>4. לדו"ח זה יצורף צילום חשבונית / קבלה או צ'קים.</li>
+                    </ul>
+                </div>
+                
+                    <div style="height:10px"></div>
+                    <div style="width:70%; display:block">
+                        <div style="float:left;width:20%; text-align:center">
+                            <hr />
+                            <span>חתימת המתווך</span>
+                        </div>
+                        <div style="float: right; width: 20%; text-align: center">
+                            <hr />
+                            <span>חתימת המנהל</span>
+                        </div>
+                    </div>
+                    <div style="height:10px; clear:both"></div>
+                <div class="panel-area">
                     <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
                     <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
                     <input id="print" type="button" value="הדפסה" class="btn-default btn2" />
                     <input id="cancel" type="button" value="ביטול" class="btn-default btn2" />
                 </div>
-            </form>
-            @*}*@
+</form>
+            
         </div>
     </div>
 </div>

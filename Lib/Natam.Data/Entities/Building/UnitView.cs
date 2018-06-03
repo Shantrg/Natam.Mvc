@@ -50,12 +50,17 @@ namespace Pro.Data.Entities
 ,"Memo", v.Memo
 ,"AgentId", v.AgentId
 ,"PropertyType", v.PropertyType
+,"PriceType", v.PriceType
+,"ManagementFeeType", v.ManagementFeeType
+,"ManagementFee", v.ManagementFee
+,"ParkPrice", v.ParkPrice
+,"ParkNum", v.ParkNum
             };
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
             parameters[1].Direction = System.Data.ParameterDirection.InputOutput;
             //int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
             v.UnitId = Types.ToInt(parameters[0].Value);
             var status = Types.ToInt(parameters[1].Value);
             return status;
@@ -118,7 +123,7 @@ namespace Pro.Data.Entities
 
             var parameters = DataParameter.GetSqlList("UnitId",UnitId,"UserId",UserId);
             DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Unit_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             var status = Types.ToInt(parameters[2].Value);
             return status;
         }
@@ -231,23 +236,27 @@ namespace Pro.Data.Entities
 
         public static IEnumerable<UnitGridView> ViewByBuilding(int BuildingId, int PageSize, int PageNum, string Sort, string Filter)
         {
-            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v1", "QueryType", 4, "PageSize", PageSize, "PageNum", PageNum, "IdArg", BuildingId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "BuildingStreet", null, "StreetNo", null, "City", null, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v2", "QueryType", 4, "PageSize", PageSize, "PageNum", PageNum, "IdArg", BuildingId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<UnitGridView> ViewByOwner(int OwnerId, int PageSize, int PageNum, string Sort, string Filter)
         {
-            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v1", "QueryType", 3, "PageSize", PageSize, "PageNum", PageNum, "IdArg", OwnerId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "BuildingStreet", null, "StreetNo", null, "City", null, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v2", "QueryType", 3, "PageSize", PageSize, "PageNum", PageNum, "IdArg", OwnerId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
         }
-         
+
+        public static IEnumerable<UnitGridView> ViewByAgent(int AgentId, int PageSize, int PageNum, string Sort, string Filter)
+        {
+            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v2", "QueryType", 5, "PageSize", PageSize, "PageNum", PageNum, "IdArg", AgentId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
+        }
         public static IEnumerable<UnitGridView> ViewByAddress( int PageSize, int PageNum,
             string BuildingName,
-            string BuildingStreet,
+            int StreetId,
             string StreetNo,
-            string City,
+            int CityCode,
             string Sort,
             string Filter)
         {
-            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v1", "QueryType", 2, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", BuildingName, "BuildingStreet", BuildingStreet, "StreetNo", StreetNo, "City", City, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v2", "QueryType", 2, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", BuildingName, "StreetId", StreetId, "StreetNo", StreetNo, "CityCode", CityCode, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<UnitGridView> ViewByArgs(int PageSize, int PageNum,
@@ -260,7 +269,7 @@ namespace Pro.Data.Entities
            string Filter
            )
         {
-            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v1", "QueryType", 1, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<UnitGridView>("sp_Query_BuildingUnit_v2", "QueryType", 1, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<UnitGridView> QueryView(
@@ -272,11 +281,12 @@ namespace Pro.Data.Entities
            int SizeMin,
            int SizeMax,
            string BuildingName,
-           string BuildingStreet,
+           int StreetId,
            string StreetNo,
-           string City,
+           int CityCode,
            int OwnerId,
            int BuildingId,
+           int AgentId,
            string Sort,
            string Filter
            )
@@ -286,11 +296,13 @@ namespace Pro.Data.Entities
                 case 1:
                     return ViewByArgs(PageSize, PageNum,AreaId, DealType, PurposeType, SizeMin, SizeMax,Sort,Filter);
                 case 2:
-                    return ViewByAddress(PageSize, PageNum, BuildingName, BuildingStreet, StreetNo, City,Sort,Filter);
+                    return ViewByAddress(PageSize, PageNum, BuildingName, StreetId, StreetNo, CityCode, Sort,Filter);
                 case 3:
                     return ViewByOwner(OwnerId,PageSize, PageNum,Sort,Filter);
                 case 4:
                     return ViewByBuilding(BuildingId, PageSize, PageNum, Sort, Filter);
+                case 5:
+                    return ViewByAgent(AgentId, PageSize, PageNum, Sort, Filter);
                 default:
                     return null;
             }
@@ -305,7 +317,7 @@ namespace Pro.Data.Entities
     {
         public static UnitBuildingInfoView ViewUnitBuildingInfo(int UnitId)
         {
-            return DbNatam.Instance.EntityItemGet<UnitBuildingInfoView>("vw_UnitInfo", "UnitId", UnitId);
+            return DbNatam.Instance.EntityItemGet<UnitBuildingInfoView>("vw_UnitInfo_v1", "UnitId", UnitId);
         }
 
         
@@ -313,7 +325,7 @@ namespace Pro.Data.Entities
         
         public string Address { get; set; }
         
-        public string City { get; set; }
+        public string CityName { get; set; }
     }
     public class UnitInfoView : UnitView
     {
@@ -334,7 +346,7 @@ namespace Pro.Data.Entities
 
         public string Address { get; set; }
 
-        public string City { get; set; }
+        public string CityName { get; set; }
 
         public string UserName { get; set; }
 
@@ -380,6 +392,13 @@ namespace Pro.Data.Entities
         public string Memo { get; set; }
         public int AgentId { get; set; }
         public int PropertyType { get; set; }
+        public int PriceType { get; set; }
+        public int ManagementFeeType { get; set; }
+        public float ManagementFee { get; set; }
+        public float ParkPrice { get; set; }
+        public int ParkNum { get; set; }
+
+
 
         //[EntityProperty(EntityPropertyType.View)]
         //public float FreeFloorSize { get; set; }
@@ -401,5 +420,5 @@ namespace Pro.Data.Entities
         #endregion
 
     }
- 
+
 }

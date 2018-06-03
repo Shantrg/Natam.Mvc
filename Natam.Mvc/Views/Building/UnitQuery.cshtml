@@ -6,11 +6,12 @@
 }
 
 @section head {
-
-
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
-
+<script src="~/Scripts/plagins/tabs/jcxtabs.min.js"></script>
+<link href="~/Scripts/plagins/tabs/jcxtabs-light.css" rel="stylesheet" /> 
+       
+<script src="~/Scripts/app/model/units-query.js?ver=2018004"></script>
     <style type="text/css">
         table {
             direction: rtl;
@@ -24,11 +25,11 @@
         direction:rtl; text-align:right;
 
         }
-        .row_link {
+        /*.row_link {
             margin: 10px;
             direction: rtl;
             font-size: 16px;
-        }
+        }*/
         .inline {
             display: inline-block;
         }
@@ -36,13 +37,9 @@
         .label {
             display: inline-block;
         }
+        /*.tab-pane{text-align: right;  direction: rtl; margin:10px}*/
     </style>
-    <script>
-        $(function () {
-            $('#tab-query li:eq(0) a').tab('show');
-        });
-    </script>
-
+ 
     <script type="text/javascript">
         $(document).ready(function () {
             var me = this;
@@ -51,258 +48,12 @@
                 $('#AdminContainer').append(app_const.buildingToActiveLink);
             }
 
-            loadFormSerachType("formGeneral");
-            loadFormSerachType("formAddress");
-            loadFormSerachType("formOwner");
-            loadFormSerachType("formNatam");
+            var unitsQuery = new app_units_query();
 
-
-            var dealAdapter = app_jqxcombos.createListAdapter("DealId", "DealName", "listDeal", '@Url.Action("GetDealView", "Building")', 200, 120);
-            $('#listDeal').on('change', function (event) {
-                app_jqxcombos.listBoxToInput("listDeal", "Deal");
-            });
-            var purposeAdapter = app_jqxcombos.createListAdapter("PurposeId", "PurposeName", "listPurpose", '@Url.Action("GetPurposeView", "Building")', 200, 120);
-            $('#listPurpose').on('change', function (event) {
-                app_jqxcombos.listBoxToInput("listPurpose", "Purpose");
-            });
-
-            var zoneAdapter = app_jqxcombos.createListAdapter("ZoneId", "ZoneName", "listZone", '@Url.Action("GetZoneView", "Building")', 200, 120);
-
-               var areaSource =
-               {
-                   dataType: "json",
-                   dataFields: [
-                       { name: 'AreaId' },
-                       { name: 'ZoneId' },
-                       { name: 'AreaName' }
-                   ],
-                   data: { 'zone': 0 },
-                   type: 'POST',
-                   url: '@Url.Action("GetAreaView", "Building")'
-               };
-
-               var areaAdapter = new $.jqx.dataAdapter(areaSource, {
-                   //contentType: "application/json; charset=utf-8",
-                   loadError: function (jqXHR, status, error) {
-                       //alert("areaAdapter failed: " + error);
-                   },
-                   loadComplete: function (data) {
-                       //alert("areaAdapter is Loaded");
-                   }
-               });
-               // perform Data Binding.
-               //areaAdapter.dataBind();
-
-
-               $("#listArea").jqxListBox(
-               {
-                   rtl: true,
-                   source: areaAdapter,
-                   width: '100%',
-                   height: 180,
-                   multiple: true,
-                   //disabled: true,
-                   //promptText: "בחירת אזור",
-                   displayMember: 'AreaName',
-                   valueMember: 'AreaId'
-               });
-               $('#listArea').on('change', function (event) {
-                   app_jqxcombos.listBoxToInput("listArea", "Area");
-               });
-
-               $("#listZone").bind('select', function (event) {
-                   if (event.args) {
-
-                       $("#listArea").jqxListBox({ disabled: false, selectedIndex: -1 });
-                       var value = event.args.item.value;
-                       areaSource.data = { 'zone': value };
-                       areaAdapter = new $.jqx.dataAdapter(areaSource);
-                       $("#listArea").jqxListBox({ source: areaAdapter });
-                       $('#Zone').val(value);
-                   }
-               });
-
-              var natamSource =
-             {
-                 dataType: "json",
-                 dataFields: [
-                     { name: 'BuildingId' },
-                     { name: 'BuildingName' }
-                 ],
-                 data: {},
-                 type: 'POST',
-                 url: '@Url.Action("GetBuildingByNatamView", "Building")'
-             };
-
-               var natamAdapter = new $.jqx.dataAdapter(natamSource, {
-                   //contentType: "application/json; charset=utf-8",
-                   loadError: function (jqXHR, status, error) {
-                       //alert("dealAdapter failed: " + error);
-                   },
-                   loadComplete: function (data) {
-                       //alert("dealAdapter is Loaded");
-                   },
-                   formatData: function (data) {
-                       data.name_startsWith = $("#searchNatam").val();
-                       return data;
-                   }
-               });
-               // perform Data Binding.
-               //dealAdapter.dataBind();
-
-               $("#listNatam").jqxListBox(
-               {
-                   rtl: true,
-                   source: natamAdapter,
-                   width: 340,
-                   height: 420,
-                   displayMember: 'BuildingName',
-                   valueMember: 'BuildingId',
-                   scrollBarSize: 5,
-                   filterable: true,
-                   filterPlaceHolder:'חיפוש',
-                   searchMode: 'contains'
-               });
-
-               var ownerSource =
-               {
-                   dataType: "json",
-                   dataFields: [
-                       { name: 'AccountId' },
-                       { name: 'AccountName' },
-                       { name: 'ContactView' }
-                    ],
-                   data: {},
-                   type: 'POST',
-                   url: '@Url.Action("GetOwnerView", "Building")'
-               };
-               var ownerAdapter = new $.jqx.dataAdapter(ownerSource, {
-                   contentType: "application/json; charset=utf-8",
-                   loadError: function (jqXHR, status, error) {
-                       //alert("dealAdapter failed: " + error);
-                   },
-                   loadComplete: function (data) {
-                       //alert("dealAdapter is Loaded");
-                   },
-                   formatData: function (data) {
-                       data.name_startsWith = $("#searchOwner").val();
-                       return data;
-                   }
-
-               });
-               // perform Data Binding.
-               //dealAdapter.dataBind();
-
-               $("#listOwner").jqxListBox(
-               {
-                   rtl: true,
-                   source: ownerAdapter,
-                   width: 340,
-                   height: 420,
-                   displayMember: 'AccountName',
-                   valueMember: 'AccountId',
-                   scrollBarSize: 5,
-                   filterable: true,
-                   filterPlaceHolder: 'חיפוש',
-                   searchMode: 'contains'
-               });
-
-               $('#ownerSearchBy').on('change', function () {
-                   var val = $('#ownerSearchBy').val();
-                   if (val == "1") {
-                       $("#listOwner").jqxListBox('displayMember', 'ContactView');
-                   }
-                   else {
-                       $("#listOwner").jqxListBox('displayMember', 'AccountName');
-                   }
-                   ownerAdapter.dataBind();
-               });
-               $(".reset").click(function () {
-                   location.reload();
-               });
-               
-              
-               $('#listNatam').on('select', function (event) {
-                   var args = event.args;
-                   if (args) {
-                       var index = args.index;
-                       var item = args.item;
-                       $('#selectedNatamId').val(item.value);
-                   }
-               });
-               $('#listOwner').on('select', function (event) {
-                   var args = event.args;
-                   if (args) {
-                       var index = args.index;
-                       var item = args.item;
-                       $('#selectedOwnerId').val(item.value);
-                   }
-               });
-               $("#selectAllArea").click(function () {
-                   
-                   var items = $("#listArea").jqxListBox('getItems');
-                   jQuery.each(items, function (i, item) {
-                       $("#listArea").jqxListBox('selectItem', item);
-                   });
-
-               });
-               $("#unselectAllArea").click(function () {
-                   $("#listArea").jqxListBox('clearSelection');
-               });
-
-            //===================================================
-
-               $('.formGeneral').change(function () {
-                       var action = app_query.getFormAction("formGeneral");
-                       $("#formGeneral").attr('action',action);
-               });
-               $('.formAddress').change(function () {
-                   var action = app_query.getFormAction("formAddress");
-                   $("#formAddress").attr('action', action);
-               });
-               $('.formOwner').change(function () {
-                   var action = app_query.getFormAction("formOwner");
-                   $("#formOwner").attr('action', action);
-                   //}
-               });
-               $('.formNatam').change(function () {
-                   var action = app_query.getFormAction("formNatam");
-                   $("#formNatam").attr('action', action);
-                   //}
-               });
-
-               function loadFormSerachType(form) {
-                   var action = app_query.getFormAction(form);
-                   $("#" + form).attr('action', action);
-               }
-
- 
-               //$("#formGeneral").submit(function (e) {
-               //    e.preventDefault();
-               //    app_query.doFormSubmit("formGeneral");
-               //});
-
-               //$("#formAddress").submit(function (e) {
-               //    e.preventDefault();
-               //    app_query.doFormSubmit("formAddress");
-               //});
-
-               //$("#formOwner").submit(function (e) {
-               //    e.preventDefault();
-               //    app_query.doFormSubmit("formOwner");
-            //});
-
-               $('#submitAddress').on('click', function () {
-                   if ($("#building_name").val() == '' && $("#building_street").val() == '' && $("#building_city").val() == '') {
-                       alert("נא לציין שם בניין או כתובת");
-                       return false;
-                   }
-                   $("#formAddress").submit();
-               });
 
      });
- 
-       
+
+
 
         //$("#formAddress").on("submit", function () {
         //    alert('on submit');
@@ -338,116 +89,160 @@
 
 <div class="global-view">
 
-    <div class="container">
+    <div class="container-box">
         <div class="box-title">
             <h3>איתור נכסים</h3>
         </div>
-        
-        <div id="AdminContainer"></div>
-        <ul id="tab-query" class="nav nav-tabs">
-            <li class="active"><a href="#tab-address" data-toggle="tab">חיפוש לפי כתובת</a></li>
-            <li>
-                <a href="#tab-general" data-toggle="tab">חיפוש כללי</a>
-            </li>
-            <li><a href="#tab-owner" data-toggle="tab">חיפוש לפי בעלים</a></li>
-            <li><a href="#tab-natam" data-toggle="tab">בניינים בניהול נת"מ</a></li>
-        </ul>
-        <div id="tab-content" class="tab-content" dir="rtl">
-            <div class="tab-pane fade in active" id="tab-address">
-                <div>
-                    <p>חיפוש לפי שם בניין או לפי כתובת</p>
-                    <form id="formAddress" action="BuildingGrid" method="post">
-                        <div class="rtl">
-                            <p>חיפוש לפי שם בניין</p>
-                            <div class="form-group">
-                                <label class="column">
-                                    שם הבניין:
-                                </label><br />
-                                <input type="text" id="building_name" name="building_name" />
-                            </div>
-                            <p>חיפוש לפי כתובת-חובה להקליד עיר ורחוב</p>
-                            <div class="form-group">
-                                <label class="column">
-                                    עיר:
-                                </label><br />
-                                <input type="text" id="building_city" name="building_city" />
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    רחוב ומספר בניין:
-                                </label><br />
-                                <div style="display: inline">
-                                    <input type="text" id="building_street" name="building_street" /><span style="width: 20px;">&nbsp;</span><input type="text" name="building_num" style="width: 40px" />
-                                    <p>מספר בניין אופציונאלי</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <ul>
-                                <li class="inline"><input type="radio" class="formAddress" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
-                                <li class="inline"><input type="radio" class="formAddress" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
-                            </ul>
-                        </div>
-                        <br />
-                        <div>
-                            <input type="hidden" name="query_type" value="tab-address" />
-                            <input type="button" id="submitAddress" value="הצג" class="btn-default btn2" />
-                            <input type="reset" value="נקה" class="btn-default btn2" />
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="tab-pane fade in" id="tab-general">
-
-                <div>
-                    <p>חיפוש כללי</p>
-                    <p>באפשרותכם להוסיף הערות לבניינים קייימים ע"י חיפוש במנוע להלן.<br>
-                        במידה והבניין אינו קיים במערכת <a href="BuildingNew">לחצו כאן לרישום בניין חדש.</a><br />
-                    </p>
-                    <form id="formGeneral" action="BuildingGrid" method="post">
-            
  
-                            <div style="width:100%;margin-left:20px;">
-                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+            <div id="jcx-tabs" class="jcx-tabs rtl">
+                <ul id="tab-query" class="nav nav-tabs">
+                    <li class="active"><a href="#tab-address" data-toggle="tab">חיפוש לפי כתובת</a></li>
+                    <li>
+                        <a id="li-general" href="#tab-general" data-toggle="tab">חיפוש כללי</a>
+                    </li>
+                    <li><a id="li-agent" href="#tab-agent" data-toggle="tab">חיפוש לפי סוכן</a></li>
+                    <li><a id="li-owner" href="#tab-owner" data-toggle="tab">חיפוש לפי בעלים</a></li>
+                    <li><a id="li-natam" href="#tab-natam" data-toggle="tab">בניינים בניהול נת"מ</a></li>
+                </ul>
+                <!--<div id="tab-content" class="tab-content" dir="rtl">-->
+                <div class="jcxtab-panel active" id="tab-address">
+                    <div class="panel-area" style="text-align: right;  direction: rtl;">
+                        <p class="panel-area-title">חיפוש לפי שם בניין או לפי כתובת</p>
+                        
+                        <form id="formAddress" action="BuildingGrid" method="post">
+                            <div>
+                                
+                                <ul style="list-style-type: circle">
+                                    <li>
+                                        <p style="color:#5AB1D0;font-weight:bold">חיפוש לפי שם בניין</p>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                שם הבניין:
+                                            </label>
+                                            <input type="hidden" id="building_name_val" name="building_name"/>
+                                            <input type="text" id="building_name"/><i class="fa fa-search"></i>
+                                            <div id="BuildingLinks"></div>
+                                        </div>
+                                        <div style="height:20px"></div>
+                                    </li>
+                                    <li><p style="color:#5AB1D0;font-weight:bold">חיפוש לפי כתובת</p>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                עיר:
+                                            </label>
+                                            <input type="text" id="CityCode" /><i class="fa fa-search"></i>
+                                            <input type="hidden" id="CityCode_val" name="CityCode" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                רחוב:
+                                            </label>
+                                            <input type="text" id="StreetId" /><i class="fa fa-search"></i>
+                                            <input type="hidden" id="StreetId_val" name="StreetId" value="tab-address" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>
+                                                (אופציונאלי)מספר בניין:
+                                            </label>
+                                            <div>
+                                                <input type="text" name="building_num" style="width: 40px" />
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div style="height:20px"></div>
+                            </div>
+                            <div>
+                                <ul>
+                                    <li class="inline"><input type="radio" class="formAddress" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
+                                    <li class="inline"><input type="radio" class="formAddress" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
+                                </ul>
+                            </div>
+                            <br />
+                            <div>
+                                <input type="hidden" name="query_type" value="tab-address" />
+                                <input type="button" id="submitAddress" value="הצג" class="btn-default btn2" />
+                                <input id="reset" type="button" value="נקה" class="btn-default btn2" />
+                            </div>
+                            <div id="AdminContainer" class="rtl"></div>
+                        </form>
+                    </div>
+                </div>
+                <div class="jcxtab-panel" id="tab-general">
+
+                    <div class="panel-area">
+                        <p class="panel-area-title">חיפוש כללי</p>
+                        <p>
+                            באפשרותכם להוסיף הערות לבניינים קייימים ע"י חיפוש במנוע להלן.<br>
+                            במידה והבניין אינו קיים במערכת <a href="BuildingNew">לחצו כאן לרישום בניין חדש.</a><br />
+                        </p>
+                        <form id="formGeneral" action="BuildingGrid" method="post">
+
+                            <div class="row">
+                                <div class="column-right">
                                     <span>שם האזור</span>
                                     <div id="listZone" name="listZone"></div>
                                 </div>
-                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+                                <div class="column-right">
                                     <span>גודל השטח (מ"ר)</span>
-                                        <div style="vertical-align:top">
-                                            <span>מ:</span><br />
-                                            <input type="number" name="size-from" /><br />
-                                            <span>עד:</span><br />
-                                            <input type="number" name="size-to" />
-                                        </div>
+                                    <div style="vertical-align:top">
+                                        <span>מ:</span><br />
+                                        <input type="number" name="size-from" /><br />
+                                        <span>עד:</span><br />
+                                        <input type="number" name="size-to" />
+                                    </div>
                                 </div>
-                                <div style="clear:both"></div>
                             </div>
 
-                            <div style="width:100%;margin-left:20px;">
+
+                            @*<div style="margin-left:20px;">
+                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+                                    
+                                </div>
+                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+                                    
+                                </div>
+                                <div style="clear:both"></div>
+                            </div>*@
+
+                            <div style="margin-left:20px;">
                                 <span> שם העיר - מתעדכן אוטומטית</span> | <a href="#" id="selectAllArea">סמן  הכל</a> | <a href="#" id="unselectAllArea">בטל</a>
                                 <div style="max-width:380px">
                                     <div id="listArea" name="listArea"></div>
                                 </div>
                             </div>
+                            
                             <div style="height:20px"></div>
-                            <div style="width:100%;margin-left:20px;">
-                                    <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
-                                        <span>סוג העסקה</span>
-                                        <div id="listDeal" name="listDeal"></div>
-                                    </div>
-                                    <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
-                                        <span>ייעוד הנכס</span>
-                                        <div id="listPurpose" name="listPurpose"></div>
-                                    </div>
-                                    <div style="clear:both"></div>
+
+                            <div class="row">
+                                <div class="column-right">
+                                    <span>סוג העסקה</span>
+                                    <div id="listDeal" name="listDeal"></div>
                                 </div>
-                        <div>
-                            <ul>
-                                <li class="inline"><input type="radio" class="formGeneral" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
-                                <li class="inline"><input type="radio" class="formGeneral" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
-                            </ul>
-                        </div>
+                                <div class="column-right">
+                                    <span>ייעוד הנכס</span>
+                                    <div id="listPurpose" name="listPurpose"></div>
+                                </div>
+                            </div>
+
+
+                            @*<div style="margin-left:20px;">
+                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+                                    <span>סוג העסקה</span>
+                                    <div id="listDeal" name="listDeal"></div>
+                                </div>
+                                <div style="float: right; padding-left: 20px; padding-bottom: 20px; ">
+                                    <span>ייעוד הנכס</span>
+                                    <div id="listPurpose" name="listPurpose"></div>
+                                </div>
+                                <div style="clear:both"></div>
+                            </div>*@
+                            <div>
+                                <ul>
+                                    <li class="inline"><input type="radio" class="formGeneral" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
+                                    <li class="inline"><input type="radio" class="formGeneral" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
+                                </ul>
+                            </div>
                             <div>
 
                                 <input type="hidden" id="Purpose" name="Purpose" value="" />
@@ -458,70 +253,99 @@
                                 <input type="submit" value="הצג" class="btn-default btn2" />
                                 <input type="reset" value="נקה" class="btn-default btn2 reset" />
                             </div>
-                    </form>
- 
-                </div>
+                        </form>
 
-            </div>
-            <div class="tab-pane fade in" id="tab-owner">
-                <div>
-                    <p>חיפוש לפי בעלים</p>
-                    <form id="formOwner" action="BuildingGrid" method="post">
-                        <div class="rtl">
-                            <div class="form-group">
-                                <div>
-                                    חיפוש בעלים לפי
-                                    <select id="ownerSearchBy" style="border:none">
-                                        <option value="0" selected="selected">שם חברה</option>
-                                        <option value="1">איש קשר</option>
-                                    </select>
-                                </div>
-                                <br />
-                                <div class="rtl">
-                                    <div id="listOwner" name="listOwner"></div>
+                    </div>
+
+                </div>
+                <div class="jcxtab-panel" id="tab-agent">
+                    <div class="panel-area">
+                        <p class="panel-area-title">חיפוש לפי סוכן</p>
+                        <form id="formAgent" action="BuildingUnitGrid" method="post">
+                            <div class="rtl">
+                                <div class="form-group">
+                                     <div class="rtl">
+                                        <div id="listAgent" name="listAgent"></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <ul>
-                                <li class="inline"><input type="radio" class="formOwner" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
-                                <li class="inline"><input type="radio" class="formOwner" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
-                            </ul>
-                        </div>
-                       <br />
-                        <div>
-                            <input type="hidden" id="selectedOwnerId" name="selectedOwnerId" value="" />
-                            <input type="hidden" name="query_type" value="tab-owner" />
-                            <input type="submit" value="הצג" class="btn-default btn2" />
-                            <input type="reset" value="נקה" class="btn-default btn2 reset" />
-                        </div>
-                    </form>
+                            @*<div>
+                                <ul>
+                                    <li class="inline"><input type="radio" class="formAgent" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
+                                    <li class="inline"><input type="radio" class="formAgent" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
+                                </ul>
+                            </div>*@
+                            <br />
+                            <div>
+                                <input type="hidden" name="search_type" value="Units" />
+                                <input type="hidden" id="selectedAgentId" name="selectedAgentId" value="" />
+                                <input type="hidden" name="query_type" value="tab-agent" />
+                                <input type="submit" value="הצג" class="btn-default btn2" />
+                                <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            <div class="tab-pane fade in" id="tab-natam">
-                <div>
-                    <p>בניינים בניהול נת"מ</p>
-                    <form id="formNatam" action="BuildingGrid" method="post">
-                        <div id="listNatam" name="listNatam"></div>
-                        <div>
-                            <ul>
-                                <li class="inline"><input type="radio" class="formNatam" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
-                                <li class="inline"><input type="radio" class="formNatam" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
-                            </ul>
-                        </div>
-                        <br />
-
-                        <div>
-                            <input type="hidden" id="selectedNatamId" name="selectedNatamId" value="" />
-                            <input type="hidden" name="query_type" value="tab-natam" />
-                            <input type="submit" value="הצג" class="btn-default btn2" />
-                            <input type="reset" value="נקה" class="btn-default btn2 reset" />
-                        </div>
-                    </form>
+                <div class="jcxtab-panel" id="tab-owner">
+                    <div class="panel-area">
+                        <p class="panel-area-title">חיפוש לפי בעלים</p>
+                        <form id="formOwner" action="BuildingGrid" method="post">
+                            <div class="rtl">
+                                <div class="form-group">
+                                    <div>
+                                        חיפוש בעלים לפי
+                                        <select id="ownerSearchBy" style="border:none">
+                                            <option value="0" selected="selected">שם חברה</option>
+                                            <option value="1">איש קשר</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                    <div class="rtl">
+                                        <div id="listOwner" name="listOwner"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <ul>
+                                    <li class="inline"><input type="radio" class="formOwner" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
+                                    <li class="inline"><input type="radio" class="formOwner" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
+                                </ul>
+                            </div>
+                            <br />
+                            <div>
+                                <input type="hidden" id="selectedOwnerId" name="selectedOwnerId" value="" />
+                                <input type="hidden" name="query_type" value="tab-owner" />
+                                <input type="submit" value="הצג" class="btn-default btn2" />
+                                <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                            </div>
+                        </form>
+                    </div>
                 </div>
+                <div class="jcxtab-panel" id="tab-natam">
+                    <div class="panel-area">
+                        <p class="panel-area-title">בניינים בניהול נת"מ</p>
+                        <form id="formNatam" action="BuildingGrid" method="post">
+                            <div id="listNatam" name="listNatam"></div>
+                            <div>
+                                <ul>
+                                    <li class="inline"><input type="radio" class="formNatam" name="search_type" value="Units" checked="checked" /><span>איתור יחידות</span></li>
+                                    <li class="inline"><input type="radio" class="formNatam" name="search_type" value="Buildings" /><span>איתור בניינים</span></li>
+                                </ul>
+                            </div>
+                            <br />
 
+                            <div>
+                                <input type="hidden" id="selectedNatamId" name="selectedNatamId" value="" />
+                                <input type="hidden" name="query_type" value="tab-natam" />
+                                <input type="submit" value="הצג" class="btn-default btn2" />
+                                <input type="reset" value="נקה" class="btn-default btn2 reset" />
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <!--</div>-->
             </div>
-        </div>
     </div>
 </div>
 <script type="text/javascript">

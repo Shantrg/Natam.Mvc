@@ -75,26 +75,15 @@
                  success: function (data, status, xhr) {
 
                      if (data.Status == 10) {
-                         alert('עודכן בהצלחה');
+                         app_dialog.alert('עודכן בהצלחה');
                          commit(true);
                      }
                      else {
-                         alert(data.Description);
+                         app_dialog.alert(data.Description);
                          commit(false);
                      }
-                     //if (data.Commit) {
-                     //    //alert('עודכן בהצלחה');
-                     //    commit(true);
-                     //    dataAdapter.dataBind();
-                     //}
-                     //else {
-                     //    alert('לא עודכנו נתונים');
-                     //    if (command == 0)
-                     //        $('#regResult').val(data.Description);
-                     //    else
-                     //        $('#signResult').val(data.Description);
-                     //    commit(false);
-                     //}
+                     $("#jqxgrid").jqxGrid('source').dataBind();
+
                  },
                  error: function () {
                      alert('אירעה שגיאה, לא עודכנו נתונים');
@@ -154,9 +143,10 @@
              rtl: true,
              width: '80%',
              autoheight: true,
+             altrows: true,
              source: dataAdapter,
              localization: getLocalization('he'),
-             pageable: false,
+             pageable: true,
              showtoolbar: true,
              rendertoolbar: function (toolbar) {
                  var me = this;
@@ -534,10 +524,12 @@
                  url: '@Url.Action("UserUpsUpdate", "Admin")',
                  data: { 'UserId': id, 'Ups': $("#Ups").val(), 'command': 1 },
                  success: function (data, status, xhr) {
-                     if (data.Status == 10) 
-                         alert('עודכן בהצלחה');
+                     if (data.Status == 10) {
+                         app_dialog.alert('עודכן בהצלחה');
+                         $('#jqxgrid').jqxGrid('source').dataBind();
+                     }
                      else
-                         alert(data.Description);
+                         app_dialog.alert(data.Description);
 
                      //if (data == '1') {
                      //    alert('עודכן בהצלחה');
@@ -557,14 +549,14 @@
     </script>
 }
 <hgroup class="title">
-    <h3 class="rightPan">הגדרות כלליות-<span>סוג משתמש</span></h3>
+    <h3 class="rightPan">הגדרות כלליות-<span>משתמשים</span></h3>
     
 </hgroup>
 <div class="clear"></div>
 
 <div class="global-view">
     
-    <div class="container-rtl">
+    <div class="container-box">
         <div class="grid-wrap">
              <div id="jqxWidget">
                  <!--<input style="margin-right: 5px;" type="button" id="addrowbutton" value="הוספה" />-->
@@ -573,12 +565,12 @@
             <div id="cellbegineditevent"></div>
             <div style="margin-top: 10px;" id="cellendeditevent"></div>
             <div id="popupRegister">
+            <div>עריכה</div>
+            <div style="overflow: hidden;direction:rtl">
                 <input type="hidden" id="regAccountId" value="1" />
                 <input type="hidden" id="regLang" value="" />
                 <input type="hidden" id="regEvaluation" value="0" />
                 <input type="hidden" id="regCreation" value="" />
-            <div>עריכה</div>
-            <div style="overflow: hidden;direction:rtl">
                  <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
                     <tr>
                         <td>שם משתמש:</td>
@@ -635,6 +627,8 @@
             </div>
        </div>
             <div id="popupWindow">
+            <div>עריכה</div>
+            <div style="overflow: hidden;direction:rtl">
                 <input type="hidden" id="insertFlag" value="0" />
                 <!--<input type="hidden" id="ApplicationId" value="0" />-->
                 <input type="hidden" id="AccountId" value="1" />
@@ -643,8 +637,6 @@
                 <input type="hidden" id="OwnerId" value="0" />-->
                 <input type="hidden" id="Evaluation" value="0" />
                 <input type="hidden" id="Creation" value="" />
-            <div>עריכה</div>
-            <div style="overflow: hidden;direction:rtl">
                  <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
                     <tr>
                         <td>קוד משתמש:</td>
@@ -708,9 +700,9 @@
             </div>
        </div>
             <div id="popupPass">
-                <input type="hidden" id="insertUps" value="0" />
             <div>עריכת סיסמה</div>
             <div style="overflow: hidden;direction:rtl">
+                <input type="hidden" id="insertUps" value="0" />
                  <table style="border-spacing: 10px;border-collapse: separate;direction:rtl">
                     <tr>
                         <td>קוד משתמש:</td>

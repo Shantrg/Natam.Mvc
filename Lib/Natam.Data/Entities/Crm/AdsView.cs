@@ -84,7 +84,7 @@ namespace Pro.Data.Entities
                         PropertyId = PropertyId,
                         PropertyType = 1,
                         AgentId = AgentId,
-                        AgentName = UserProfile.LookupUserName(AgentId)
+                        AgentName = UserProfile.LookupDisplayName(AgentId)
                     };
 
             AdsView ads = new AdsView()
@@ -93,10 +93,11 @@ namespace Pro.Data.Entities
                 Details = string.Format("{0}:{1} \n{2}:{3} \n{4}:{5}", "קומה", property.FloorNum, "שטח", property.UnitSize, "מחיר למ''ר", property.Price),
                 PropertyId = PropertyId,
                 PropertyType=1,
+                PurposeId=property.PurposeId,
                 AgentId = AgentId,
                 Address = property.Address,
                 //BuildingName = property.BuildingName,
-                AgentName = UserProfile.LookupUserName(AgentId)
+                AgentName = UserProfile.LookupDisplayName(AgentId)
             };
             return ads;
         }
@@ -110,7 +111,7 @@ namespace Pro.Data.Entities
                     PropertyId = PropertyId,
                     PropertyType = 3,
                     AgentId = AgentId,
-                    AgentName = UserProfile.LookupUserName(AgentId)
+                    AgentName = UserProfile.LookupDisplayName(AgentId)
                 };
 
             AdsView ads = new AdsView()
@@ -119,10 +120,11 @@ namespace Pro.Data.Entities
                 Details = string.Format("{0}:{1} \n{2}:{3}", "שטח", property.Size, "מחיר לדונם", property.Price),
                 PropertyId = PropertyId,
                 PropertyType = 3,
+                PurposeId = 1,//none
                 AgentId = AgentId,
                 Address = string.Format("{0} {1} {2}", property.Street, property.StreetNo, property.City),
                 //BuildingName ="",
-                AgentName = UserProfile.LookupUserName(AgentId)
+                AgentName = UserProfile.LookupDisplayName(AgentId)
             };
             return ads;
         }
@@ -143,9 +145,10 @@ namespace Pro.Data.Entities
                 ,"AdsCode",v.AdsCode,0
                 ,"Details",v.Details,0
                 ,"PropertyType",v.PropertyType,0
+                ,"PurposeId",v.PurposeId,0
             };
             var parameters = DataParameter.GetSqlWithDirection(args);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Ads_Add", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Ads_Add", parameters, System.Data.CommandType.StoredProcedure);
             var AdsState = parameters.GetParameterValue<int>("AdsState");
             v.AdsId = parameters.GetParameterValue<int>("AdsId");
             v.AdsEnd = parameters.GetParameterValue<DateTime>("AdsEnd");
@@ -186,18 +189,23 @@ namespace Pro.Data.Entities
             set;
         }
         
+        public int PurposeId
+        {
+            get;
+            set;
+        }
         //public int UnitNum
         //{
         //    get;
         //    set;
         //}
-           
+
         //public string AdsOptions
         //{
         //    get;
         //    set;
         //}
-          
+
         public DateTime AdsDate
         {
             get;
@@ -265,14 +273,27 @@ namespace Pro.Data.Entities
             get;
             set;
         }
-       
+        public DateTime? StatusModified
+        {
+            get;
+            set;
+        }
+        public string AdsStreet
+        {
+            get;
+            set;
+        }
+        public string AdsQuarter
+        {
+            get;
+            set;
+        }
+        #endregion
 
-       #endregion
 
-      
     }
 
-     public class AdsPropertyView : AdsView,IEntityItem
+    public class AdsPropertyView : AdsView,IEntityItem
      {
          public const string ViewName = "vw_Crm_Ads";
 

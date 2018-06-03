@@ -32,18 +32,26 @@ namespace Pro.Models
                     BuildingId = Types.ToInt(Request["selectedNatamId"]);//Request.Form["listNatam"]);
                     IsValid = BuildingId > 0;
                     break;
-                 case "tab-owner":
+                case "tab-agent":
+                    QueryType = 5;
+                    AgentId = Types.ToInt(Request["selectedAgentId"]);
+                    IsValid = AgentId > 0;
+                    break;
+                case "tab-owner":
                     QueryType = 3;
                     OwnerId = Types.ToInt(Request["selectedOwnerId"]);//Request.Form["listOwner"]);
                     IsValid = OwnerId > 0;
                     break;
                case "tab-address":
                     BuildingName = Request["building_name"];
-                    BuildingStreet = Request["building_street"];
+                    //BuildingStreet = Request["building_street"];
                     StreetNo = Request["building_num"];
-                    City = Request["building_city"];
+                    //City = Request["building_city"];
+                    CityCode = Types.ToInt(Request["CityCode"]);
+                    StreetId = Types.ToInt(Request["StreetId"]);
                     QueryType = 2;
-                    IsValid = !string.IsNullOrEmpty(BuildingName) || !string.IsNullOrEmpty(BuildingStreet) || !string.IsNullOrEmpty(City);
+                    //IsValid = !string.IsNullOrEmpty(BuildingName) || !string.IsNullOrEmpty(BuildingStreet) || !string.IsNullOrEmpty(City);
+                    IsValid = !string.IsNullOrEmpty(BuildingName) || CityCode>0;
                     break;
                 case "tab-general":
                     AgentId = Nistec.Types.ToInt(Request["agent_id"]);
@@ -81,9 +89,11 @@ namespace Pro.Models
         public bool ShowNewOnly {get;set;}
 
         public string BuildingName {get;set;}
-        public string BuildingStreet { get; set; }
+        //public string BuildingStreet { get; set; }
         public string StreetNo { get; set; }
-        public string City { get; set; }
+        //public string City { get; set; }
+        public int CityCode { get; set; }
+        public int StreetId { get; set; }
         public int OwnerId { get; set; }
         public int BuildingId { get; set; }
     }

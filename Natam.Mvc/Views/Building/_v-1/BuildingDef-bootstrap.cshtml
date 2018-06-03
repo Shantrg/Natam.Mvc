@@ -1,0 +1,468 @@
+﻿@{
+    Layout = "~/Views/Shared/_View.cshtml";
+    Page.Title = "Building";
+
+    int id = Nistec.Types.ToInt(Request.QueryString["id"]);
+    
+}
+@section head {
+
+    @Scripts.Render("~/bundles/jqx")
+<script src="~/Scripts/plagins/tabs/jcxtabs.min.js"></script>
+<link href="~/Scripts/plagins/tabs/jcxtabs-light.css" rel="stylesheet" />  
+<script type="text/javascript" src="~/Scripts/app/model/building-def.js"></script>
+
+@*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+  <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>*@
+
+}
+
+@section scripts {
+    <script type="text/javascript">
+
+    var allowEdit = 0;
+
+    $(document).ready(function () {
+        JSON.useDateParser();
+        //JSON.useDateParser();
+        var theme = 'Arctic';
+
+        //control buttons
+        $("#archive").hide();
+        $(".calc").hide();
+        $("#divImages").hide();
+        $("#showInvestment").hide();
+
+        var buildingdef = new app_building_def(parseInt('@id'), parseInt('@ViewBag.UserRole'), true);
+
+        buildingdef.loadDataAdapter();
+
+        
+        // prepare the data
+        $("form").submit(function (e) {
+
+            e.preventDefault();
+            buildingdef.doSubmit();
+
+        });
+
+        $('#tab-building').on('click', function (e) {
+            //e.preventDefault();
+            buildingdef.validateTabs();
+        });
+
+        $('#btnImages').click(function (e) {
+            e.preventDefault();
+            app_popup.mediaEditor(buildingdef.srcBuildingId, 0, "b");
+        });
+
+        $('#archive').on('click', function () {
+            var id = $('#BuildingId').val();
+            if (confirm("פעולה זו תעביר את הבניין לארכיון , האם להמשיך?") == false)
+                return;
+            $.ajax({
+                url: '/Building/DoArchive',
+                type: 'post',
+                dataType: 'json',
+                data: { 'BuildingId': id },
+                success: function (data) {
+                    if (data.Status >= 0) {
+                        $('#BuildingId').val(data.OutputId);
+                        app_rout.redirectToFinal("building-ok");
+                    }
+                    else
+                        alert(data.Message);
+                },
+                error: function (jqXHR, status, error) {
+                    alert(error);
+                }
+            });
+        });
+
+    });
+
+    function triggerAccComplete(accType, accId) {
+        if (accType == 2) {
+            $("#BuildingOwnerId").jqxComboBox("source").dataBind();
+            if (accId)
+                $("#BuildingOwnerId").val(accId);
+        }
+        else if (accType == 6) {
+            $("#ManagementCompany").jqxComboBox("source").dataBind();
+            if (accId)
+                $("#ManagementCompany").val(accId);
+        }
+        app_dialog.dialogIframClose();
+    }
+    function triggerContactComplete(contactId, op) {
+
+        app_jqx.triggerDialogComboBox(contactId, "#ManagementContact");
+        //$("#ManagementContact").jqxComboBox("source").dataBind();
+        ////if (op == 'buildingcontact')
+
+        //$("#ManagementContact").val(contactId);
+        //app_dialog.dialogIframClose();
+    }
+
+    function triggerInvestmentComplete(id, bid, uid) {
+        app_dialog.dialogIframClose();
+    }
+</script>
+
+}
+
+<!--breadcrumb-->
+<div class="breadcrumbs">
+@Html.ActionLink("Home", "Index", "Home")>
+@Html.ActionLink("Main", "Main", "Home")>
+<a href="javascript:parent.history.back()">Buildings</a> >
+@ViewContext.RouteData.Values["action"].ToString()
+</div>
+
+<div class="clear"></div>
+
+<div class="global-view">
+    <div id="wizard" class="row_link"></div>
+    <div class="container-box">
+        <div class="box-title">
+            <h3 id="hBuildingName">הגדרת בניין</h3>
+        </div>
+        <div class="rtl">
+           
+            <ul class="nav nav-tabs" id="tab-building">
+                <li class="active"><a id="linkA" data-toggle="tab" href="#sectionA">כללי</a></li>
+                <li><a id="linkB" data-toggle="tab" href="#sectionB">נתונים כללים</a></li>
+                <li><a id="linkC" data-toggle="tab" href="#sectionC">חניות</a></li>
+                <li><a id="linkD" data-toggle="tab" href="#sectionD">ניהול</a></li>
+                <li><a id="linkE" data-toggle="tab" href="#sectionE">מחירים</a></li>
+                <li><a id="linkF" data-toggle="tab" href="#sectionF">הערות</a></li>
+                <li id="floorLink"></li>
+            </ul>
+
+        </div>
+        <div style="height: 10px;">
+        </div>
+        <div>
+            @*@using (Html.BeginForm("UpdateBuilding", "Building", null, FormMethod.Post, new { id = "form", Class = "form" }))
+            {
+                *@<!--Html.AntiForgeryToken(), target = "form-iframe"
+                                Html.ValidationSummary(true)
+                      action="/Building/UpdateBuilding" target = "form-iframe"
+                      method="post" action="/Building/UpdateBuilding"
+                                    -->
+
+            <form class="form" id="form" method="post" action="/Building/UpdateBuilding">
+                <input type="hidden" id="PurposeType" name="PurposeType" />
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <h4>כללי</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    קוד בניין:
+                                </label>
+                                <input id="BuildingId" type="number" name="BuildingId" class="number" readonly="true" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                     שם בניין<span class="mandatory">(*)</span>:
+                                </label>
+                                <input id="BuildingName" type="text" name="BuildingName" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    השקעה:
+                                </label>
+                                <a id="showInvestment" href="#">הצג</a>
+                                <input id="Investment" name="Investment" type="checkbox" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                      סוג הנכס/שימוש<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="PurposeList" name="PurposeList" style="padding: 10px" data-type="checklist">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    שם האזור<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="AreaId" name="AreaId">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עיר<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="CityCode" name="CityCode">
+                                </div>
+                                <!--<input id="City" name="City" type="text" class="text" placeholder="עיר" />-->
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    רחוב<span class="mandatory">(*)</span>:
+                                </label>
+                                <div id="StreetId" name="StreetId">
+                                </div>
+                                <!--<input id="Street" name="Street" type="text" class="text" />-->
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מס' בית<span class="mandatory">(*)</span>:
+                                </label>
+                                <input id="StreetNo" name="StreetNo" type="text" maxlength="10" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מיקוד:
+                                </label>
+                                <input id="ZipCode" name="ZipCode" type="text" class="number" placeholder="00000" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    בעלים עיקריים<span class="mandatory">(*)</span>:
+                                </label>
+                                <a id="showOwner" href="#">הצג</a>|
+                                <a id="refreshOwner" href="#">רענן</a>|
+                                <a id="queryOwner" href="#">איתור</a>|
+                                <a id="editOwner" href="#">עריכה</a>
+                                <div id="BuildingOwnerId" name="BuildingOwnerId">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionB" class="tab-pane fade in">
+                        <h4>נתונים כללים</h4>
+                        <div>
+                                <div class="form-group calc">
+                                    <label class="column">
+                                        שטח למסחר:
+                                    </label>
+                                    <input id="SizeTrade" name="SizeTrade" readonly="readonly" type="number" class="number" />
+                                </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    שטח למשרדים:
+                                </label>
+                                <input id="SizeOffice" name="SizeOffice" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    שטח לתעשיה:
+                                </label>
+                                <input id="SizeIndustry" name="SizeIndustry" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    שטח למגורים:
+                                </label>
+                                <input id="SizeResidence" name="SizeResidence" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    שטח מחסנים:
+                                </label>
+                                <input id="SizeWarehouse" name="SizeWarehouse" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    שטח חניה:
+                                </label>
+                                <input id="SizeParking" name="SizeParking" readonly="readonly" type="number" class="number" />
+                            </div>
+                           <div class="form-group calc">
+                                <label class="column">
+                                    סה"כ שטח מעל הקרקע:
+                                </label>
+                                <input id="SizeFloorUp" name="SizeFloorUp" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    סה"כ שטח:
+                                </label>
+                                <input id="SizeTotal" name="SizeTotal" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    מס' קומות מעל הקרקע:
+                                </label>
+                                <input id="FloorNoUp" name="FloorNoUp" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group calc">
+                                <label class="column">
+                                    מס' קומות מתחת לקרקע:
+                                </label>
+                                <input id="FloorNoDown" name="FloorNoDown" readonly="readonly" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עומס מותר ק"ק:
+                                </label>
+                                <input id="OverloadGround" name="OverloadGround" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    עומס מותר קומות:
+                                </label>
+                                <input id="OverloadUp" name="OverloadUp" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג מיזוג:
+                                </label>
+                                <div id="AirConditionType" name="AirConditionType" class="inlineCombo"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מספר מעליות:
+                                </label>
+                                <input id="ElevatorNo" name="ElevatorNo" type="number" class="number" />
+                            </div>
+                            @*<div class="form-group">
+                                <label class="column">
+                                    גודל מרתפים:
+                                </label>
+                                <input id="BuildingBasementSize" name="BuildingBasementSize" type="number" />
+                            </div>*@
+                            <div class="form-group">
+                                <label class="column">
+                                    שומר בכניסה:
+                                </label>
+                                <input id="SecurityCompany" name="SecurityCompany" type="checkbox"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionC" class="tab-pane fade in">
+                        <h4>חניות</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מקומות חניה:
+                                </label>
+                                <input id="ParkingNo" name="ParkingNo" type="number" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג חניון:
+                                </label>
+                                <div id="ParkingType" name="ParkingType" class="inlineCombo"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מחיר חנייה:
+                                </label>
+                                <input id="ParkingPrice" name="ParkingPrice" type="number" class="number" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionD" class="tab-pane fade in">
+                        <h4>ניהול</h4>
+                        <div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    שם חברת ניהול:
+                                </label>
+                                <a id="showManagement" href="#">הצג</a>|
+                                <a id="refreshManagement" href="#">רענן</a>|
+                                <a id="editManagement" href="#">עריכה</a>
+                                <div id="ManagementCompany" name="ManagementCompany">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    מנהל בניין:
+                                </label>
+                                <a id="showContact" href="#">הצג</a>|
+                                <a id="refreshContact" href="#">רענן</a>|
+                                <a id="editContact" href="#">עריכה</a>
+                                <div id="ManagementContact" name="ManagementContact">
+                                </div>
+                            </div>
+                           </div>
+                    </div>
+                    <div id="sectionE" class="tab-pane fade in">
+                        <h4>מחירים</h4>
+                        <div>
+                            <div id="PricesGrid"></div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    דמי אחזקה למ"ר:
+                                </label>
+                                <input id="ManagementFees" name="ManagementFees" type="number" step="any" class="number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    יחס נטו ברוטו:
+                                </label>
+                                <input id="BuildingGrossNet" name="BuildingGrossNet" type="number" step="any" class="number" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sectionF" class="tab-pane fade in">
+                        <h4>מידע כללי</h4>
+                        <div>
+                            <div class="form-group">
+                                <label class="column">
+                                    סוג בניין:
+                                </label>
+                                <div id="BuildingClass" name="BuildingClass">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    מועד אכלוס:
+                                </label>
+                                <div id="BuildingPopulateTime" name="BuildingPopulateTime"></div>
+                            </div>
+                            <div id="divImages" class="form-group">
+                                <label class="column">
+                                    תמונות:
+                                </label>
+                                <input id="btnImages" type="button" value="הצג תמונות" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="column">
+                                    מועד עדכון:
+                                </label>
+                                <input id="LastUpdate" name="LastUpdate" readonly="true" type="text" class="text" />
+                            </div>
+                            <div class="form-group">
+                                <label class="column">
+                                    הערות:
+                                </label>
+                                <textarea id="Memo" name="Memo" class="textarea-mid"></textarea>
+                            </div>
+                         </div>
+                    </div>
+                    <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                </div>
+                <div>
+                    <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                    <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                    <input id="archive" type="button" value="מחיקה" class="btn-default btn2" />
+                    <span id="isSendMailSpan"><input id="MailOnChanges" name="MailOnChanges" type="checkbox" />&nbsp;<span>האם לשלוח עדכון</span></span>
+                </div>
+
+            </form>
+            @*}*@
+            <div style="text-align: center">
+                
+                <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
+                <div id="form-next" style="font-size:18px"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--end of content-wrapper-->
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

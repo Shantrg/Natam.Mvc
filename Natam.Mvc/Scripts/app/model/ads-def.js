@@ -1,5 +1,5 @@
 ﻿
-//============================================================================================ app_plots_def
+//============================================================================================ app_ads_def
 
 function app_ads_def(AdsId, AdsOp, userRole) {
 
@@ -8,34 +8,44 @@ function app_ads_def(AdsId, AdsOp, userRole) {
     this.UserRole =  userRole;
     this.allowEdit = userRole==9? 1:0;
     this.isMobile = app.IsMobile();
-
-    // prepare the data
-    //this.adsTypeAdapter = app_jqx_list.adsTypeComboAdapter();
+    this.mediaUploader=null;
+    var slf = this;
   
     if (AdsId <= 0 || this.allowEdit == 0)
         $("#divAdsCode").hide();
 
-    //$("#divAdsCode").prop('disabled', AdsId <= 0 || this.allowEdit == 0);
+    this.loadMediaItems = function (async) {
 
-    $("#AdsDate").jqxDateTimeInput({ formatString: 'dd/MM/yyyy' });
-    //$("#Creation").val('');
-     
+        var unitId = $("#PropertyId").val();
+        var pt = app_media.propertyTypeToChar($("#PropertyType").val());
+
+        if (this.mediaUploader == null) {
+            this.mediaUploader = new media_model('#media-files', { 'buildingId': 0, 'propertyId': unitId, 'propertyType': pt }, true);
+            this.mediaUploader.load(async);
+        }
+    }
+
+    $("#AdsDate").jqxDateTimeInput({ formatString: 'dd/MM/yyyy', rtl:true, width:150 });
     $('#btnImages').attr("disabled", this.isMobile);
+ 
     $('#btnImages').click(function (e) {
         e.preventDefault();
-        var unitId = $("#PropertyId").val();
-        var pt =app_media.propertyTypeToChar( $("#PropertyType").val());
-
-        app_popup.mediaEditor(0, unitId, pt);
+        slf.loadMediaItems(true);
+        $('#media-files').toggle();
     });
 
     $('#btnReloadImages').click(function (e) {
         var id = $("#PropertyId").val();
-        if (id > 0)
-            app_media.loadImages(id);
+        if (id > 0) {
+            //app_media.loadImages(id);
+            if (slf.mediaUploader != null) {
+                slf.mediaUploader.doRefresh();
+            }
+        }
     });
+    
+
     $("#form").on('validationSuccess', function () {
-        //alert('validationSuccess');
         // Display the Server's Response which came as result of the Form Submit.
         $("#form-iframe").fadeIn('fast');
     });
@@ -48,14 +58,39 @@ function app_ads_def(AdsId, AdsOp, userRole) {
 
     var slf = this;
 
-    app_jqx_list.adsPropertyTypeComboAdapter();
-    $("#PropertyType").jqxDropDownList({ enableSelection: false });
-    $("#PropertyType").val();
-    app_jqx_list.adsTypeComboAdapter();
-    app_jqx_list.adsStatusComboAdapter();
-    if (this.allowEdit == 0) {
-        $("#Status").jqxComboBox({ enableSelection: false });
-    }
+    //app_jqx_list.adsPropertyTypeComboAdapter();
+    //app_select.AdsPropertyType();
+    //$("#PropertyType").jqxDropDownList({ enableSelection: false });
+    //$("#PropertyType").val();
+
+    //app_jqx_list.adsTypeComboAdapter();
+    app_select.AdsTypeJqx();
+    $('#MediaType').on('select', function (event) {
+        var args = event.args;
+        var item = $('#MediaType').jqxDropDownList('getItem', args.index);
+        switch (item.value) {
+            case "2":
+            case "3":
+            case "4":
+                $('#MediaType-yad2').show();
+                break;
+            default:
+                $('#MediaType-yad2').hide();
+                break;
+        }
+        // var item = $('#jqxDropDownList').jqxDropDownList('getItem', args.index);
+        // if (item != null) {
+        //     //Selected: ' + item.label;
+        //}
+    });
+
+    //app_jqx_list.adsStatusComboAdapter();
+    app_select.AdsStatus("form", "#Status");
+
+    //if (this.allowEdit == 0) {
+    //    $("#Status").attr('disabled', 'disabled');
+    //    //$("#Status").jqxComboBox({ enableSelection: false });
+    //}
 
     this.source =
         {
@@ -74,21 +109,20 @@ function app_ads_def(AdsId, AdsOp, userRole) {
         },
         loadComplete: function (record) {
 
-            app_jqxform.loadDataForm("form", record);
+            app_form.loadDataForm("form", record);
 
             $("#AgentName").val(record.AgentName);
-            //$("#BuildingName").val(record.BuildingName);
             $("#Address").val(record.Address);
 
+            app_select.AdsPropertyType("#PropertyType", record.PropertyType, "form");
+
+            var mediaType = record.MediaType;
             if (record.MediaType==0)
                 $("#MediaType").val('');
-
-            if (record.PropertyId > 0) {
-                var pt = app_media.propertyTypeToChar(record.PropertyType);
-                app_media.loadImages(record.PropertyId, pt);
+            else if(mediaType===2 || mediaType===3 || mediaType===4)
+            {
+                $("#MediaType-yad2").show();
             }
-
-            //selectCheckList("AdsTypeList", record.MediaType);
 
             var disabled = false;
             if (record.Status == 0) {
@@ -101,115 +135,73 @@ function app_ads_def(AdsId, AdsOp, userRole) {
             if (disabled)
                 $("#submit").hide();
 
-            //this.allowEdit = (this.UserRole == 9) ? 1 : 0;
-
-            //if (record.Status > 0) {
-            //    this.allowEdit = (this.UserRole == 9) ? 1 : 0;
-            //}
-            //else {
-            //    this.allowEdit = 1;
-            //}
-
-            //if (this.allowEdit == 0) {
-            //    $("#submit").hide();
-            //    //$("#reset").hide();
-            //    //$("#archive").hide();
-            //    $("#Status").prop('disabled', true);
-            //}
-            //else {
-            //    $("#Status").prop('disabled', false);
-            //}
+            if (record.PropertyId > 0) {
+                var pt = app_media.propertyTypeToChar(record.PropertyType);
+                slf.loadMediaItems(true);
+            }
         },
         loadError: function (jqXHR, status, error) {
         },
     });
-    // perform data binding.
+   
     this.dataAdapter.dataBind();
 
-    //this.AdsTypeSource =
-    //  {
-    //      dataType: "json",
-    //      async: false,
-    //      dataFields: [
-    //          { name: 'AdsTypeId' },
-    //          { name: 'AdsTypeName' }
-    //      ],
-    //      type: 'POST',
-    //      url: '/Building/GetAdsTypeView'
-    //  };
-    //this.AdsTypeAdapter = new $.jqx.dataAdapter(this.AdsTypeSource);
-
-    //$("#AdsTypeList").jqxListBox(
-    //{
-    //    rtl: true,
-    //    source: this.AdsTypeAdapter,
-    //    width: 240,
-    //    height: 120,
-    //    checkboxes: true,
-    //    displayMember: 'AdsTypeName',
-    //    valueMember: 'AdsTypeId'
-    //});
-
+   
     $('#form').jqxValidator({
         rtl: true,
         hintType: 'label',
         animationDuration: 0,
         rules: [
                { input: '#Description', message: 'חובה לציין נוסח מודעה!', action: 'keyup, blur', rule: 'required' },
-               //{
-               //    input: '#Description', message: 'חובה לציין נוסח מודעה!', action: 'select', rule: function (input) {
-               //        var index = $("#AreaId").jqxComboBox('getSelectedIndex');
-               //        if (index >= 0) { return true; } return false;
-               //    }
-               //},
                 {
                     input: '#MediaType', message: 'חובה לציין סוג מדיה!', action: 'select', rule: function (input) {
-                       var index = $("#MediaType").jqxComboBox('getSelectedIndex');
+                        //return $("#MediaType").val() > 0;
+                       var index = $("#MediaType").jqxDropDownList('getSelectedIndex');
                        if (index >= 0) { return true; } return false;
                    }
                }
-               //{
-               //    input: '#AdsTypeList', message: 'חובה לציין סוג מדיה!', action: 'select', rule: function (input) {
-               //        var items = $("#AdsTypeList").jqxListBox('getCheckedItems');
-               //        if (items && items.length > 0)
-               //            return true;
-               //        return false;
-               //    }
-               //}
-               //{
-               //    input: '#OwnerId', message: 'חובה לציין בעלים!', action: 'select', rule: function (input) {
-               //        var index = $("#OwnerId").jqxComboBox('getSelectedIndex');
-               //        if (index >= 0) { return true; } return false;
-               //    }
-               //}
-              //{ input: '#Street', message: 'חובה לציין רחוב!', action: 'keyup, blur', rule: 'required' },
-              //{ input: '#StreetNo', message: 'חובה לציין מספר בית!', action: 'keyup, blur', rule: 'required' },
-              //{ input: '#City', message: 'חובה לציין עיר!', action: 'keyup, blur', rule: 'required' }
         ]
     });
 
 
     this.validateImages = function () {
         
-        var propType = $("#PropertyType").val();
-        if (propType == 3)
-            return true;
+        //var propType = $("#PropertyType").val();
+        //if (propType == 3)
+        //    return true;
 
-        var mediaType = $("#MediaType").val();
+        var purpose = $("#PurposeId").val();
+        if (purpose == 2) {
 
-        if (mediaType == 1 || mediaType == 3 || mediaType == 4)
-        {
-            if ($("#media_image0").find('> img').length)
-                return true;
-            else if($("#media_image1").find('> img').length)
-                return true;
-            else if ($("#media_image2").find('> img').length)
-                return true;
-            else
+
+            this.loadMediaItems(false);
+            var mu = this.mediaUploader;
+            var mediaCount = (mu) ? mu.mediaCount() : 0;
+
+            /*
+            AdsTypeId	AdsTypeName
+            1	אתר החברה
+            2	יד2-רגיל
+            3	יד2-צהוב
+            4	יד2-ורוד
+            5	גלובס
+            6	דה מרקר
+            7	שילוט
+            */
+
+
+            var mediaType = $("#MediaType").val();
+            if ((mediaType === "1" || mediaType === "3" || mediaType === "4") && mediaCount == 0)
                 return false;
+            else
+                return true;
 
+            //return mediaCount > 0;
         }
-        return true;
+        else
+        {
+            return true;
+        }
     }
 
     this.doSubmit = function () {
@@ -217,7 +209,7 @@ function app_ads_def(AdsId, AdsOp, userRole) {
 
         if (!this.validateImages())
         {
-            alert("חובה להוסיף תמונה");
+            app_dialog.alert("חובה להוסיף תמונה");
             return;
         }
         var actionurl = $('#form').attr('action');
@@ -235,24 +227,16 @@ function app_ads_def(AdsId, AdsOp, userRole) {
                     url: actionurl,
                     type: 'post',
                     dataType: 'json',
-                    data: $('#form').serialize(),
+                    data: app.serialize('#form'),
                     success: function (data) {
-
+                        app_messenger.Post(data);
                         if (data.Status >= 0) {
-                            //window.parent.triggerBuildingComplete(data.OutputId);
-                            //$('#form')[0].reset();
                             $('#AdsId').val(data.OutputId);
-                            //redirectToFinal("building-ok");
-                            alert(data.Message);
-                            //window.history.back();
                             app.redirectTo("/Crm/AdsGrid?id=0&op=agent");
-                            //app.redirectTo(document.referrer);
                         }
-                        else
-                            alert(data.Message);
                     },
                     error: function (jqXHR, status, error) {
-                        alert(error);
+                        app_dialog.alert(error);
                     }
                 });
 

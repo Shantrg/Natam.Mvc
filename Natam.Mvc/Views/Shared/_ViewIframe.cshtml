@@ -11,9 +11,9 @@
     <title>@ViewBag.Title</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <!--CSS-->
-    <link rel="stylesheet" href="~/Content/css/style.css">
+    <link rel="stylesheet" href="~/Content/css/style-rtl.css">
     <link rel="stylesheet" href="~/Content/fonts/font-awesome.css">
-    <link rel="stylesheet" href="~/Content/css/view-form.css" type="text/css" />
+    <link rel="stylesheet" href="~/Content/css/view-form.css?ver=2018004" type="text/css" />
 
     <link rel="stylesheet" href="~/jqwidgets/styles/jqx.base.css" type="text/css" />
     <link rel="stylesheet" href="~/jqwidgets/styles/jqx.arctic.css" type="text/css" />
@@ -31,16 +31,26 @@
      <script src="~/Scripts/jq/ui/1.9.2/jquery-ui.min.js"></script>
      <link rel="stylesheet" href="~/Scripts/jq/ui/1.9.2/css/jquery-ui.css" type="text/css" />*@
 
-    <script src="~/Scripts/bootstrap/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="~/Scripts/bootstrap/css/bootstrap.css">
+    @*<script src="~/Scripts/bootstrap/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="~/Scripts/bootstrap/css/bootstrap.css">*@
 
-     <script src="~/Scripts/plagins/popbox/bpopup.js"></script>
-     <link rel="stylesheet" href="~/Scripts/plagins/popbox/bpopup.css" type="text/css" />
+     @*<script src="~/Scripts/plagins/popbox/bpopup.js"></script>
+     <link rel="stylesheet" href="~/Scripts/plagins/popbox/bpopup.css" type="text/css" />*@
 
-    <script src="~/Scripts/app/app-model-1.0.js"></script>
-    <script src="~/Scripts/app/app-jqx-1.0.js"></script>
+    <script src="~/Scripts/app/app-model-2.0.js?ver=2018004"></script>
+    <script src="~/Scripts/app/app-control-2.0.js?ver=2018004"></script>
+    <script src="~/Scripts/app/app-jqx-2.0.js?ver=2018004"></script>
     <script src="~/Scripts/app/app-global.js"></script>
     <script src="~/Scripts/app/dateFormat.js"></script>
+
+
+    <script src="~/jqwidgets/jqxcore.js"></script>
+    <script src="~/jqwidgets/jqxnotification.js"></script>
+
+    <script src="~/Scripts/HubSpot/messenger/js/messenger.min.js"></script>
+    <script src="~/Scripts/HubSpot/messenger/js/messenger-theme-future.js"></script>
+    <link href="~/Scripts/HubSpot/messenger/css/messenger-rtl.css" rel="stylesheet" />
+    <link href="~/Scripts/HubSpot/messenger/css/messenger-theme-flat.css" rel="stylesheet" />
 
     @RenderSection("head", required: false)
 
@@ -53,12 +63,18 @@
     </header>
 
     <div id="body">
-        @RenderSection("featured", required: false)
-        <section class="content-wrapper main-content clear-fix">
-            @RenderBody()
-        </section>
-    </div>
-
+        <div style="text-align:center;margin:0 auto">
+            <div id="jqxNotification">
+            </div>
+        </div>
+            @RenderSection("featured", required: false)
+            <section class="content-wrapper main-content clear-fix">
+                @RenderBody()
+            </section>
+        </div>
+    <script type="text/javascript">
+        app_messenger.Init('bottom-right', 'flat');
+    </script>
     <!--footer-->
      @RenderSection("scripts", required: false)
 </body>

@@ -7,7 +7,6 @@
 }
 @section head {
     @Scripts.Render("~/bundles/jqx")
-    <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
     <script type="text/javascript" src="~/Scripts/jq/jquery.ui.1.11.1.js"></script>
     <link rel="stylesheet" href="~/Scripts/jq/css/jquery-ui.css" type="text/css" />
 
@@ -216,7 +215,7 @@
                         url: actionurl,
                         type: 'post',
                         dataType: 'json',
-                        data: $('#form').serialize(),
+                        data: app.serialize('#form'),
                         success: function (data) {
                             alert(data.Message);
                             if (data.Status >= 0) {

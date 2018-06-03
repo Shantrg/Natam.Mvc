@@ -20,6 +20,11 @@ namespace Natam.Mvc
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
             routes.MapRoute(
+                name: "RouteError",
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Home", action = "Error", id = UrlParameter.Optional }
+            );
+            routes.MapRoute(
                 name: "Natam_Admin",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Admin", action = "Manager", id = UrlParameter.Optional },

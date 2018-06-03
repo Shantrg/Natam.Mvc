@@ -1,22 +1,22 @@
 ﻿@{
     Layout = "~/Views/Shared/_View.cshtml";
     ViewBag.Title = "Buildings";
-    
-    int id= Nistec.Types.ToInt(Request["id"]);
-    string op=Request["op"];
-    
+
+    int id = Nistec.Types.ToInt(Request["id"]);
+    string op = Request["op"];
+
 }
 
 @section head {
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
-<script src="~/Scripts/app/model/ads-grid.js"></script>
- <style type="text/css">
-    input {
-        direction: rtl;
-        text-align: right;
-    }
-</style>
+    <script src="~/Scripts/app/model/ads-grid.js?ver=2018004"></script>
+    <style type="text/css">
+        input {
+            direction: rtl;
+            text-align: right;
+        }
+    </style>
 }
 @section scripts {
 
@@ -25,16 +25,16 @@
             var id = '@id';
             var allowEdit = ('@ViewBag.UserRole' == 9) ? 1 : 0;
 
-            load(id, '@op',100);
+            load(id, '@op', 100);
 
-            function load(id,op, state) {
+            function load(id, op, state) {
                 @*if(allowEdit>0)
                 {
                     app_jqxcombos.createComboCheckAdapter("UserId", "DisplayName", "Agent", '@Url.Action("GetAgentList", "Common")');
                 }*@
                 app_ads_grid.load(id, op, state, '@ViewBag.UserRole');
             }
-         
+
             $('#Agent').on('select', function (event) {
 
                 var args = event.args;
@@ -44,7 +44,7 @@
                     var item = event.args.item;
 
                     if (item != null) {
-                        load(item.value , 'agent');
+                        load(item.value, 'agent');
                     }
                 }
             });
@@ -67,39 +67,39 @@
 }
 
 
-        <!--breadcrumb-->
-        <div class="breadcrumbs">
-            @Html.ActionLink("Home", "Index", "Home")>
-            @Html.ActionLink("Main", "Main", "Home")>
-            <a href="javascript:parent.history.back()">Buildings</a> >
-            @ViewContext.RouteData.Values["action"].ToString()
-        </div>
+<!--breadcrumb-->
+<div class="breadcrumbs">
+    @Html.ActionLink("Home", "Index", "Home")>
+    @Html.ActionLink("Main", "Main", "Home")>
+    <a href="javascript:parent.history.back()">Buildings</a> >
+    @ViewContext.RouteData.Values["action"].ToString()
+</div>
 
-        <div class="clear"></div>
+<div class="clear"></div>
 
-        <div class="global">
-            <div class="container">
+<div class="global-view">
+    <div class="container-box">
 
-                <div class="grid-wrap">
-                    <div class="box-title">
-                        <h3 id="hTitle">פרסום</h3>
-                        <div id="Agent"></div>
-                    </div>
- 
-                    <div id="jqxWidget">
-                        <div id="jqxgrid" style="position:relative;z-index:1;"></div>
-                        <div class="rtl" style="margin-top:10px">
-                            <input type="button" id="btnShow" value="הצג" class="btn-default btn2" />
-                            <input type="button" id="btnAll" value="הצג הכל" class="btn-default btn2" />
-                            <input type="button" id="btnDelete" value="מחיקה" class="btn-default btn2" />
-                            <input type="button" id="btnRefresh" value="רענון" class="btn-default btn2" />
-                            <input type="button" id="btnRemoveFilter" value="הסר סינון" class="btn-default btn2" />
-                        </div>
-                    </div>
+        <div class="grid-wrap">
+            <div class="box-title">
+                <h3 id="hTitle">פרסום</h3>
+                <div id="Agent"></div>
+            </div>
+
+            <div id="jqxWidget">
+                <div id="jqxgrid" style="position:relative;z-index:1;"></div>
+                <div class="rtl" style="margin-top:10px">
+                    <input type="button" id="btnShow" value="הצג" class="btn-default btn2" />
+                    <input type="button" id="btnAll" value="הצג הכל" class="btn-default btn2" />
+                    <input type="button" id="btnDelete" value="מחיקה" class="btn-default btn2" />
+                    <input type="button" id="btnRefresh" value="רענון" class="btn-default btn2" />
+                    <input type="button" id="btnRemoveFilter" value="הסר סינון" class="btn-default btn2" />
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <script type="text/javascript">
-           app_menu.activeLayoutMenu("liBuilding");
-    </script>
+<script type="text/javascript">
+    app_menu.activeLayoutMenu("liBuilding");
+</script>

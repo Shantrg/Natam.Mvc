@@ -104,7 +104,28 @@ namespace Pro.Data.Entities
         {
             return DbNatam.Instance.QueryJson("Crm_Area", null);
         }
-         public static string DealTypes()
+        public static string City()
+        {
+            return DbNatam.Instance.QueryJson("Dmg_Cities", null);
+        }
+        public static string CityByRegion(int Region)
+        {
+            return DbNatam.Instance.QueryJson("Dmg_Cities", "Region", Region);
+        }
+
+        public static string Streets()
+        {
+            return DbNatam.Instance.QueryJson("Dmg_Streets", null);
+        }
+        public static string StreetsByCity(int CityCode)
+        {
+            return DbNatam.Instance.QueryJson("Dmg_Streets", "CityCode", CityCode);
+        }
+        public static string StreetsByRegion(int Region)
+        {
+            return DbNatam.Instance.QueryJson("vw_Dmg_Streets", "Region", Region);
+        }
+        public static string DealTypes()
         {
             return DbNatam.Instance.QueryJson("Crm_Deal", null);
         }

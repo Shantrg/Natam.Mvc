@@ -109,7 +109,7 @@
                             url: actionurl,
                             type: 'post',
                             dataType: 'json',
-                            data: $('#contactForm').serialize(),
+                            data: app.serialize('#contactForm'),
                             success: function (data) {
                                 alert(data.Message);
                                 if (data.Status >= 0) {

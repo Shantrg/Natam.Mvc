@@ -248,11 +248,11 @@
 
         function triggerAccComplete(accType,accid) {
             customers_accounsRefresh();
-            app_dialog.dialogClose(NScustomers.accountDialog);
+            app_dialog.app_dialog.dialogClose(NScustomers.accountDialog);
         };
 
         function triggerSelected(accid) {
-            window.parent.triggerAccComplete('@Model.AccType',accid);
+            window.parent.app_trigger.triggerAccComplete('@Model.AccType', accid,true);
         };
 
         function customers_contactRefresh() {

@@ -98,12 +98,13 @@
                         url: '@Url.Action("UpdateAccountNews", "Common")',
                         type: 'post',
                         dataType: 'json',
-                        data: $('#newsForm').serialize(),
+                        data: app.serialize('#newsForm'),
                         success: function (data) {
                             alert(data.Message);
                             if (data.Status >= 0) {
                                 var accid = $('#AccountId').val();
-                                window.parent.triggerNewsComplete(accid);
+                                if (parent.app_trigger && parent.app_trigger.triggerNewsComplete)
+                                    parent.app_trigger.triggerNewsComplete(accid);
                                 $('#newsForm')[0].reset();
                                 $('#AccountId').val(accid);
                             }

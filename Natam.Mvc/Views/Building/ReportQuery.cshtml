@@ -1,8 +1,8 @@
 ﻿@{
     Layout = "~/Views/Shared/_View.cshtml";
     Page.Title = "Building";
-    
-   
+
+
 }
 
 @section head {
@@ -10,109 +10,64 @@
 
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
-   <script type="text/javascript" src="~/jqwidgets/jqxradiobutton.js"></script>
+    <script type="text/javascript" src="~/Scripts/app/model/address_model.js"></script>
+    <script type="text/javascript" src="~/jqwidgets/jqxradiobutton.js"></script>
     <style type="text/css">
-        
     </style>
-    
+
 
     <script type="text/javascript">
         $(document).ready(function () {
             var me = this;
 
-            $("#jqxRadioButton").jqxRadioButton({ width: 250, height: 25, checked: true,rtl:true });
-            $("#jqxRadioButton2").jqxRadioButton({ width: 250, height: 25, rtl: true });
-            $("#jqxRadioButton3").jqxRadioButton({ width: 250, height: 25, rtl: true });
-            $("#jqxRadioButton4").jqxRadioButton({ width: 250, height: 25, rtl: true });
-            $("#jqxRadioButton5").jqxRadioButton({ width: 250, height: 25, rtl: true });
+            $("#divArea").hide();
+            $("#divDeal").hide();
+            $("#divPurpose").hide();
+            $("#divSize").hide();
+            $("#divAddress").hide();
+            $("#CityCode").val('');
+            $("#StreetId").val('');
+
+            var reports = [
+                    { value: "1", label: "דוח: רשימת נכסים לפי אזור" },
+                    { value: "2", label: "דוח: רשימת נכסים לפי כתובת" },
+                    { value: "3", label: "דוח: רשימת בעלים לפי אזור" },
+                    { value: "4", label: "דוח: ביקושים של לקוחות" },
+                    { value: "5", label: "דוח: שטחים פנויים" }
+            ];
+            $("#ReportList").jqxDropDownList({ source: reports, width: 200, height: 25, rtl: true, autoDropDownHeight: true, placeHolder: "בחירת דוח" });
+            $('#ReportList').on('select', function (event) {
+                var args = event.args;
+                var item = $('#ReportList').jqxDropDownList('getItem', args.index);
+
+                if (item != null) {
+                    setReport(item.value);
+                    //$("#report_name").text(item.label);
+                    //$('#Events').jqxPanel('prepend', '<div style="margin-top: 5px;">Selected: ' + item.label + '</div>');
+                }
+            });
+
+
+            var outputTypes = [
+                    { value: "1", label: "תצוגה למסך" },
+                    { value: "2", label: "ייצוא לקובץ" }
+            ];
+            $("#OutputType").jqxDropDownList({ source: outputTypes, width: 200, height: 25, rtl: true, autoDropDownHeight: true, placeHolder: "בחירת תצוגה" });
+            $('#OutputType').on('select', function (event) {
+                var args = event.args;
+                var item = $('#OutputType').jqxDropDownList('getItem', args.index);
+
+                if (item != null) {
+
+                    if (item.value == "2")
+                        $("#formGeneral").attr("action", "/Building/ReportExport");
+                    else
+                        $("#formGeneral").attr("action", "/Building/ReportGrid");
+                }
+            });
+            $("#OutputType").val("1");
 
             var sizesAdapter = app_jqxcombos.createComboAdapter("SizeId", "SizeTitle", "RequestSize", '@Url.Action("GetRequestSize", "Common")', 0, 200, false);
-
-
-            setReport(1);
-           
-            $('#jqxRadioButton').on('checked', function (event) {
-                setReport(1);
-            });
-            $('#jqxRadioButton2').on('checked', function (event) {
-                setReport(2);
-            });
-            $('#jqxRadioButton3').on('checked', function (event) {
-                setReport(3);
-            });
-            $('#jqxRadioButton4').on('checked', function (event) {
-                setReport(4);
-            });
-            $('#jqxRadioButton5').on('checked', function (event) {
-                setReport(5);
-            });
-
-
-            //$("#jqxRadioButton").on('change', function (event) {
-            //    var checked = event.args.checked;
-            //    if (checked) {
-            //        setReport(1);
-            //    }
-            //});
-            //$("#jqxRadioButton2").on('change', function (event) {
-            //    var checked = event.args.checked;
-            //    if (checked) {
-            //        setReport(2);
-            //    }
-            //});
-            //$("#jqxRadioButton3").on('change', function (event) {
-            //    var checked = event.args.checked;
-            //    if (checked) {
-            //        setReport(3);
-            //    }
-            //});
-            //$("#jqxRadioButton4").on('change', function (event) {
-            //    var checked = event.args.checked;
-            //    if (checked) {
-            //        setReport(4);
-            //    }
-            //});
-            //$("#jqxRadioButton5").on('change', function (event) {
-            //    var checked = event.args.checked;
-            //    if (checked) {
-            //        setReport(5);
-            //    }
-            //});
-
-            function setReport(reportType) {
-
-                $("#divArea").hide();
-                $("#divDeal").hide();
-                $("#divPurpose").hide();
-                $("#divSize").hide();
-                $("#divAddress").hide();
-                $("#query_type").val(reportType);
-                
-                switch(reportType)
-                {
-                    case 1:
-                        $("#report_name").text("דוח: רשימת נכסים לפי אזור");
-                        $("#divArea").show(); break;
-                    case 2:
-                        $("#report_name").text("דוח: רשימת נכסים לפי כתובת");
-                        $("#divAddress").show(); break;
-                    case 3:
-                        $("#report_name").text("דוח: רשימת בעלים לפי אזור");
-                        $("#divArea").show(); break;
-                    case 4:
-                        $("#report_name").text("דוח: ביקושים של לקוחות");
-                        $("#divArea").show();
-                        $("#divSize").show();
-                        $("#divPurpose").show();
-                        break;
-                    case 5:
-                        $("#report_name").text("דוח: שטחים פנויים");
-                        $("#divArea").show();
-                        $("#divSize").show();
-                        $("#divDeal").show();
-                        break;
-                }
-            }
 
             var dealAdapter = app_jqxcombos.createListAdapter("DealId", "DealName", "listDeal", '@Url.Action("GetDealView", "Building")', 200, 120);
             $('#listDeal').on('change', function (event) {
@@ -125,188 +80,384 @@
 
             var zoneAdapter = app_jqxcombos.createDropDownAdapter("ZoneId", "ZoneName", "listZone", '@Url.Action("GetZoneView", "Building")', 200, 120);
 
-               var areaSource =
-               {
-                   dataType: "json",
-                   dataFields: [
-                       { name: 'AreaId' },
-                       { name: 'ZoneId' },
-                       { name: 'AreaName' }
-                   ],
-                   data: { 'zone': 0 },
-                   type: 'POST',
-                   url: '@Url.Action("GetAreaView", "Building")'
-               };
+            var areaSource =
+            {
+                dataType: "json",
+                dataFields: [
+                    { name: 'AreaId' },
+                    { name: 'ZoneId' },
+                    { name: 'AreaName' }
+                ],
+                data: { 'zone': 0 },
+                type: 'POST',
+                url: '@Url.Action("GetAreaView", "Building")'
+            };
 
-               var areaAdapter = new $.jqx.dataAdapter(areaSource, {
-                   //contentType: "application/json; charset=utf-8",
-                   loadError: function (jqXHR, status, error) {
-                       //alert("areaAdapter failed: " + error);
-                   },
-                   loadComplete: function (data) {
-                       //alert("areaAdapter is Loaded");
-                   }
-               });
- 
+            var areaAdapter = new $.jqx.dataAdapter(areaSource, {
+                //contentType: "application/json; charset=utf-8",
+                loadError: function (jqXHR, status, error) {
+                    //alert("areaAdapter failed: " + error);
+                },
+                loadComplete: function (data) {
+                    //alert("areaAdapter is Loaded");
+                }
+            });
 
-               $("#listArea").jqxListBox(
-               {
-                   rtl: true,
-                   source: areaAdapter,
-                   width: 450,
-                   height: 180,
-                   multiple: true,
-                   //disabled: true,
-                   //promptText: "בחירת אזור",
-                   displayMember: 'AreaName',
-                   valueMember: 'AreaId'
-               });
-               $('#listArea').on('change', function (event) {
-                   app_jqxcombos.listBoxToInput("listArea", "Area");
-               });
 
-               $("#listZone").bind('select', function (event) {
-                   if (event.args) {
+            $("#listArea").jqxListBox(
+            {
+                rtl: true,
+                source: areaAdapter,
+                width: 450,
+                height: 180,
+                multiple: true,
+                //disabled: true,
+                //promptText: "בחירת אזור",
+                displayMember: 'AreaName',
+                valueMember: 'AreaId'
+            });
+            $('#listArea').on('change', function (event) {
+                app_jqxcombos.listBoxToInput("listArea", "Area");
+            });
 
-                       $("#listArea").jqxListBox({ disabled: false, selectedIndex: -1 });
-                       var value = event.args.item.value;
-                       areaSource.data = { 'zone': value };
-                       areaAdapter = new $.jqx.dataAdapter(areaSource);
-                       $("#listArea").jqxListBox({ source: areaAdapter });
-                       $('#Zone').val(value);
-                   }
-               });
+            $("#listZone").bind('select', function (event) {
+                if (event.args) {
 
-                            
-               $("#reset").click(function () {
-                   location.reload();
-               });
-               
-              
-               $("#selectAllArea").click(function () {
-                   
-                   var items = $("#listArea").jqxListBox('getItems');
-                   jQuery.each(items, function (i, item) {
-                       $("#listArea").jqxListBox('selectItem', item);
-                   });
+                    $("#listArea").jqxListBox({ disabled: false, selectedIndex: -1 });
+                    var value = event.args.item.value;
+                    areaSource.data = { 'zone': value };
+                    areaAdapter = new $.jqx.dataAdapter(areaSource);
+                    $("#listArea").jqxListBox({ source: areaAdapter });
+                    $('#Zone').val(value);
+                }
+            });
 
-               });
-               $("#unselectAllArea").click(function () {
-                   $("#listArea").jqxListBox('clearSelection');
-               });
+            this.addresssModel = new app_addres_model({enableArea:false,enableAddress:true});
 
-           });
-      
+            //var addresElements = function () {
+
+            //    var slf = this;
+
+            //    var citySource =
+            //    {
+            //        dataType: "json",
+            //        dataFields: [
+            //            { name: 'CityName' },
+            //            { name: 'CityCode' }
+            //        ],
+            //        data: { 'area': 0 },
+            //        type: 'POST',
+            //        url: '/Building/GetCityListByArea'//GetCityListView'
+            //    };
+            //    var cityAdapter = new $.jqx.dataAdapter(citySource);
+
+            //    $("#CityCode").jqxInput(
+            //    {
+            //        source: cityAdapter,
+            //        width: 200,
+            //        height: 25,
+            //        rtl: true,
+            //        items: 10,
+            //        //placeHolder: "נא לבחור...",
+            //        displayMember: 'CityName',
+            //        valueMember: 'CityCode'
+            //    });
+
+            //    var streetSource =
+            //    {
+            //        dataType: "json",
+            //        dataFields: [
+            //            { name: 'StreetId' },
+            //            { name: 'StreetCode' },
+            //            { name: 'StreetName' },
+            //            { name: 'CityCode' },
+            //            { name: 'Region' }
+            //        ],
+            //        data: { 'city': 0 },
+            //        type: 'POST',
+            //        url: '/Building/GetStreetsListByCity'
+            //    };
+            //    var streetAdapter = new $.jqx.dataAdapter(streetSource);
+
+            //    $("#StreetId").jqxInput(
+            //    {
+            //        width: 200,
+            //        height: 25,
+            //        disabled: true,
+            //        rtl: true,
+            //        items: 10,
+            //        displayMember: 'StreetName',
+            //        valueMember: 'StreetId'
+            //    });
+
+            //    $("#StreetId").jqxInput({ disabled: true, value: null });
+
+
+            //    $('#CityCode').on('change', function (event) {
+            //        //var type = event.args.type; // keyboard, mouse or null depending on how the value was changed.
+            //        var value = $('#CityCode').val();
+            //        if (value == null || value == "") {
+            //            $("#StreetId").jqxInput({ disabled: true, value: null });
+            //            slf.srcStreetId = 0;
+            //            slf.srcCityCode = 0;
+            //        }
+            //    });
+
+
+            //    $("#CityCode").bind('select', function (event) {
+
+            //        $("#StreetId").val("");
+
+            //        if (event.args && event.args.item) {
+
+            //            var value = event.args.item.value;
+            //            $("#StreetId").jqxInput({ disabled: false, value: null });
+            //            streetSource.data = { 'city': value };
+
+            //            streetAdapter = new $.jqx.dataAdapter(streetSource, {
+            //                loadComplete: function (record) {
+            //                    if (slf.srcCityCode == value && slf.srcStreetId > 0)
+            //                        $("#StreetId").val(slf.srcStreetId);
+            //                },
+            //                loadError: function (jqXHR, status, error) {
+            //                    console.log(status);
+            //                },
+            //            });
+
+            //            $("#StreetId").jqxInput({ source: streetAdapter });
+            //        }
+            //        else {
+            //            $("#StreetId").jqxInput({ disabled: true, value: null });
+            //            slf.srcStreetId = 0;
+            //            slf.srcCityCode = 0;
+            //        }
+            //    });
+
+            //};
+
+
+            $("#reset").click(function () {
+                location.reload();
+            });
+
+
+            $("#selectAllArea").click(function () {
+
+                var items = $("#listArea").jqxListBox('getItems');
+                jQuery.each(items, function (i, item) {
+                    $("#listArea").jqxListBox('selectItem', item);
+                });
+
+            });
+            $("#unselectAllArea").click(function () {
+                $("#listArea").jqxListBox('clearSelection');
+            });
+
+            function setReport(reportType) {
+
+                $("#divArea").hide();
+                $("#divDeal").hide();
+                $("#divPurpose").hide();
+                $("#divSize").hide();
+                $("#divAddress").hide();
+                $("#query_type").val(reportType);
+
+                switch (reportType) {
+                    case "1":
+                        $("#report_name").text("דוח: רשימת נכסים לפי אזור");
+                        $("#divArea").show(); break;
+                    case "2":
+                        $("#report_name").text("דוח: רשימת נכסים לפי כתובת");
+                        $("#divAddress").show(); break;
+                    case "3":
+                        $("#report_name").text("דוח: רשימת בעלים לפי אזור");
+                        $("#divArea").show(); break;
+                    case "4":
+                        $("#report_name").text("דוח: ביקושים של לקוחות");
+                        $("#divArea").show();
+                        $("#divSize").show();
+                        $("#divPurpose").show();
+                        break;
+                    case "5":
+                        $("#report_name").text("דוח: שטחים פנויים");
+                        $("#divArea").show();
+                        $("#divSize").show();
+                        $("#divDeal").show();
+                        break;
+                }
+            }
+
+            var validateArea = function () {
+
+                var valid = $("#Area").val() != "";
+                if (!valid)
+                    app_dialog.alert("נא לבחור אזור");
+                return valid;
+            }
+            var validateAddress = function () {
+
+                var itemCity = $("#CityCode").val();
+                var itemStreet = $("#StreetId").val();
+                $("#CityCode_val").val('');
+                $("#StreetId_val").val('');
+
+                if (itemCity)
+                    app_jqx.inputAutoValue("#CityCode", "#CityCode_val");
+                if (itemStreet)
+                    app_jqx.inputAutoValue("#StreetId", "#StreetId_val");
+
+
+                var valid = itemCity && itemCity.value > 0;
+                //"building_street"
+
+                if (!valid)
+                    app_dialog.alert("נא לציין כתובת");
+                return valid;
+            }
+
+            function validateForm() {
+
+                var reportType = $('#ReportList').jqxDropDownList('getSelectedItem');
+
+                if (reportType == null) {
+                    app_dialog.alert("נא לבחור סוג דוח");
+                    return false;
+                }
+                switch (reportType.value) {
+                    case "1":
+                        $("#report_name").text("דוח: רשימת נכסים לפי אזור");
+                        if (!validateArea())
+                            return false;
+                        break;
+                    case "2":
+                        $("#report_name").text("דוח: רשימת נכסים לפי כתובת");
+                        if (!validateAddress())
+                            return false;
+                        break;
+                    case "3":
+                        $("#report_name").text("דוח: רשימת בעלים לפי אזור");
+                        if (!validateArea())
+                            return false;
+                        break;
+                    case "4":
+                        $("#report_name").text("דוח: ביקושים של לקוחות");
+                        if (!validateArea())
+                            return false;
+                        break;
+                    case "5": //$("#report_name").text("דוח: שטחים פנויים");
+                        if (!validateArea())
+                            return false;
+                        break;
+                }
+                return true;
+            }
+
+            $('#formGeneral').submit(function (e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            });
+
+
+        });
     </script>
 }
 
 <!--breadcrumb-->
 <div class="breadcrumbs">
-@Html.ActionLink("Home", "Index", "Home")>
-@Html.ActionLink("Main", "Main", "Home")>
-@ViewContext.RouteData.Values["action"].ToString()
+    @Html.ActionLink("Home", "Index", "Home")>
+    @Html.ActionLink("Main", "Main", "Home")>
+    @ViewContext.RouteData.Values["action"].ToString()
 </div>
 
 
-<div class="global-view">
+<div class="clear"></div>
 
-    <div class="container-rtl">
+<div class="global-view">
+    <div class="container-box">
+
+
+
         <div class="box-title">
             <h3>מערכת נכסים - דוחות</h3>
         </div>
-        <div id='jqxWidget'>
-            <h4 id="report_name" style="color:#0094ff"></h4>
-            <div style='margin-top: 10px;' id='jqxRadioButton'>
-               רשימת נכסים לפי אזור
-            </div>
-            <div style='margin-top: 10px;' id='jqxRadioButton2'>
-                <span>רשימת נכסים לפי כתובת</span>
-            </div>
-            <div style='margin-top: 10px;' id='jqxRadioButton3'>
-                <span>רשימת בעלים לפי אזור</span>
-            </div>
-            <div style='margin-top: 10px;' id='jqxRadioButton4'>
-                <span>ביקושים של לקוחות</span>
-            </div>
-            <div style='margin-top: 10px;' id='jqxRadioButton5'>
-                <span>דוח שטחים פנויים</span>
+        <div id='jqxWidget' class="rtl">
+
+            <div class="panel-area">
+                <h4 class="panel-area-title" id="report_name" style="color:#0094ff"></h4>
+                <div id='ReportList'></div>
+
+                <div style="height:5px"></div>
+                <div id='OutputType'></div>
             </div>
             <div>
-                
             </div>
-         </div>
-
-        <form id="formGeneral" action="/Building/ReportExport" method="post">
-            <div>
-                <input type="hidden" id="Purpose" name="Purpose" value="" />
-                <input type="hidden" id="Deal" name="Deal" value="" />
-                <input type="hidden" id="Area" name="Area" value="" />
-                <input type="hidden" id="Zone" name="Zone" value="" />
-                <input type="hidden" id="query_type" name="query_type" value="" />
-            </div>
-
-            <div id="divArea">
-                <h4>רשימת אזורים</h4>
-                <div id="listZone" name="listZone"></div>
-                <div id="listArea" name="listArea"></div>
-                <div><a href="#" id="selectAllArea">סמן  הכל</a> | <a href="#" id="unselectAllArea">בטל</a></div>
-            </div>
-
-            <div id="divDeal">
-                <h4>סוג עסקה</h4>
-                <div id="listDeal" name="listDeal"></div>
-            </div>
-
-            <div id="divPurpose">
-                <h4>סוג נכס</h4>
-                <div id="listPurpose" name="listPurpose"></div>
-            </div>
-
-            <div id="divSize">
-                <h4>(גודל השטח (מ"ר</h4>
-                <div id="RequestSize" name="RequestSize">
+        </div>
+        <div class="panel-area">
+            <form id="formGeneral" action="/Building/ReportExport" method="post">
+                <div>
+                    <input type="hidden" id="Purpose" name="Purpose" value="" />
+                    <input type="hidden" id="Deal" name="Deal" value="" />
+                    <input type="hidden" id="Area" name="Area" value="" />
+                    <input type="hidden" id="Zone" name="Zone" value="" />
+                    <input type="hidden" id="query_type" name="query_type" value="" />
                 </div>
 
-                @*<span>מ:</span><br />
-                <input type="number" name="size-from" /><br />
-                <span>עד:</span><br />
-                <input type="number" name="size-to" />*@
-            </div>
+                <div id="divArea">
+                    <h4>רשימת אזורים</h4>
+                    <div id="listZone" name="listZone"></div>
+                    <div id="listArea" name="listArea"></div>
+                    <div><a href="#" id="selectAllArea">סמן  הכל</a> | <a href="#" id="unselectAllArea">בטל</a></div>
+                </div>
 
-            <div id="divAddress">
-                <h4>חיפוש לפי כתובת</h4>
-                <div class="rtl">
-                    @*<div class="form-group">
-                        <label class="column">
-                            שם הבניין:
-                        </label><br />
-                        <input type="text" name="building_name" />
-                    </div>*@
-                    <div class="form-group">
-                        <label class="column">
-                            עיר:
-                        </label><br />
-                        <input type="text" name="building_city" />
+                <div id="divDeal">
+                    <h4>סוג עסקה</h4>
+                    <div id="listDeal" name="listDeal"></div>
+                </div>
+
+                <div id="divPurpose">
+                    <h4>סוג נכס</h4>
+                    <div id="listPurpose" name="listPurpose"></div>
+                </div>
+
+                <div id="divSize">
+                    <h4>(גודל השטח (מ"ר</h4>
+                    <div id="RequestSize" name="RequestSize">
                     </div>
-                    <div class="form-group">
-                        <label>
-                            רחוב:
-                        </label><br />
-                        <div style="display: inline">
-                            <input type="text" name="building_street" /><span style="width: 20px;">&nbsp;</span>
-                            @*<input type="text" name="building_num" style="width: 40px" />*@
+                </div>
+
+                <div id="divAddress">
+                    <h4>חיפוש לפי כתובת</h4>
+                    <div class="rtl">
+                        <div class="form-group">
+                            <label class="column">
+                                עיר:
+                            </label><br />
+                            <input type="text" id="CityCode" />
+                            <input type="hidden" name="CityCode" id="CityCode_val" />
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                רחוב:
+                            </label><br />
+                            <div style="display: inline">
+                                <input type="text" id="StreetId" /><span style="width: 20px;">&nbsp;</span>
+                                <input type="hidden" name="StreetId" id="StreetId_val" />
+
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <br />
-            <div>
-                <input type="submit" value="הצג" class="btn-default btn2" />
-                <input id="reset" type="reset" value="נקה" class="btn-default btn2" />
-            </div>
-        </form>
+                <br />
+                <div>
+                    <input id="submit" type="submit" value="הצג" class="btn-default btn2" />
+                    <input id="reset" type="reset" value="נקה" class="btn-default btn2" />
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
 <script type="text/javascript">
     app_menu.activeLayoutMenu("liBuilding");
 </script>

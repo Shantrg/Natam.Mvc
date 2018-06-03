@@ -2,8 +2,9 @@
 //============================================================================================ app_plots_grid
 
 app_plots_grid = {
-
-    allowEdit:0,
+    rowMenu:undefined,
+    allowEdit: 0,
+    isMobile:app.IsMobile(),
     // prepare the data
     source:
     {
@@ -11,8 +12,8 @@ app_plots_grid = {
         datatype: "json",
         datafields: [
             { name: 'PlotsId', type: 'number' },
-            { name: 'Street', type: 'string' },
-            { name: 'City', type: 'string' },
+            { name: 'StreetName', type: 'string' },
+            { name: 'CityName', type: 'string' },
             { name: 'Size', type: 'number' },
             { name: 'Price', type: 'number' },
             { name: 'OwnerName', type: 'string' },
@@ -22,7 +23,7 @@ app_plots_grid = {
         id: 'PlotsId',
         type: 'POST',
         url: '/Building/GetPlotsGrid',
-        //pagenum: 3,
+        pagenum: 0,
         pagesize: 20,
         //root: 'Rows',
         //beforeprocessing: function (data) {
@@ -33,7 +34,8 @@ app_plots_grid = {
         //}
     },
     grid: function (dataAdapter, ismobile) {
-        var slf=this;
+        var slf = this;
+        $(".grid-wrap").css('max-width', '1150px');
         // create Tree Grid
         $("#jqxgrid").jqxGrid(
         {
@@ -43,43 +45,61 @@ app_plots_grid = {
             source: dataAdapter,
             localization: getLocalization('he'),
             virtualmode: false,
-            rendergridrows: function (obj) {
-                //alert('virtualmode');
-                console.log(obj)
-                return obj.data;
-            },
             pageable: true,
-            pagermode: 'simple',
+            //pagermode: 'simple',
             altrows: true,
             sortable: true,
             showfilterrow: true,
             filterable: true,
             columns: [
               {
-                  text: 'קוד מגרש', dataField: 'PlotsId', filtercondition: 'equal', width: 120, cellsalign: 'right', align: 'center', cellsrenderer:
+                  text: 'קוד מגרש', dataField: 'PlotsId', filtercondition: 'equal', width: 80, cellsalign: 'center', align: 'center', cellsrenderer:
                 function (row, columnfield, value, defaulthtml, columnproperties) {
 
-                    var link = '<div style="text-align:center"><a title="הצג מגרש" href="PlotsDef?id=' + value + '" >הצג</a>';
-                    if (slf.allowEdit > 0)
-                        link += ' | <a href="javascript:app_buildings.plotsDelete(' + value + ')" >הסרה</a>';
+                    //var link = '<div style="margin:6px 6px;direction:rtl;"><a title="עריכת מגרש" href="PlotsDef?id=' + value + '" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;"></i></a>';
+                    //if (slf.allowEdit > 0 && !slf.isMobile)
+                    //link += '<label style="padding-right:15px;"><a href="#" title="הסרת מגרש" onclick="app_plots_grid.delete_plot(' + value + ');"><i class="fa fa-remove" style="font-size:14px;color:red;"></i></a></label>';
 
-                    return link + '</div>';
+
+                    //var link = '<div style="text-align:center"><a title="הצג מגרש" href="PlotsDef?id=' + value + '" >הצג</a>';
+                    //if (slf.allowEdit > 0)
+                    //    link += ' | <a href="javascript:app_buildings.plotsDelete(' + value + ')" >הסרה</a>';
+
+                    return '<div style="margin:6px 20px;direction:rtl;"><label><a href="#" onclick="app_jqxgrid_menu.rowMenu(' + row + ',' + value + ');"><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;"></i></a></label></div>';
+
+                    //return link + '</div>';
                 }
               }, 
-              { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', width: 120, cellsalign: 'right', align: 'center', hidden: ismobile },
+              { text: 'עיר', dataField: 'CityName', filtercondition: 'starts_with', width: 200, cellsalign: 'right', align: 'center' },
+              { text: 'רחוב', dataField: 'StreetName', filtercondition: 'starts_with', width: 200, cellsalign: 'right', align: 'center'},
+              { text: 'בעלים', dataField: 'OwnerName', filtercondition: 'CONTAINS', width: 200, cellsalign: 'right', align: 'center' },
               { text: 'סוכן', dataField: 'AgentName', filtercondition: 'CONTAINS', width: 120, cellsalign: 'right', align: 'center' },
-              { text: 'בעלים', dataField: 'OwnerName', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
-              { text: 'שטח', dataField: 'Size', filtercondition: 'CONTAINS', width: 120, cellsalign: 'right', align: 'center', hidden: ismobile },
+              { text: 'שטח', dataField: 'Size', filtercondition: 'CONTAINS', width: 120, cellsalign: 'right', align: 'center' },
               { text: 'מחיר לדונם', dataField: 'Price', filtercondition: 'equal', width: 100, cellsalign: 'right', align: 'center' },
               { text: 'מועד עדכון', dataField: 'LastUpdate', filtercondition: 'equal', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
             ]
         });
-        
+        //$('#jqxgrid').on('rowclick', function (event) {
+        //    var args = event.args;
+        //    gridArgs = args;
+        //    // row's bound index.
+        //    var boundIndex = args.rowindex;
+        //    // row's visible index.
+        //    var visibleIndex = args.visibleindex;
+        //    // right click.
+        //    var rightclick = args.rightclick;
+        //    // original event.
+        //    var ev = args.originalEvent;
+        //});
+
+       
     },
-    load: function (id,userRule) {
+    load: function (id,userInfo){//userRule) {
 
-        this.allowEdit = (userRule == 9) ? 1 : 0;
+        this.UInfo = userInfo;
+        this.allowEdit = (userInfo.UserRole == 9) ? 1 : 0;
 
+        //this.allowEdit = (userRule == 9) ? 1 : 0;
         this.source.data = { 'id': id};
         var ismobile = app.IsMobile();
         var dataAdapter = new $.jqx.dataAdapter(this.source, {
@@ -88,5 +108,58 @@ app_plots_grid = {
             loadError: function (xhr, status, error) { alert(' status: ' + status + '\n error ' + error) }
         });
         this.grid(dataAdapter, ismobile);
+        this.loadRowMenu();
+        return this;
+    },
+    loadRowMenu:function(){
+        var _slf = this;
+        this.rowMenu = app_jqxgrid_menu.init("#jqxgrid");
+        if (_slf.allowEdit != 1)
+            $("#rmDel").hide();
+        $("#rmEdit").on('click', function () {
+            //app.redirectTo('/Building/PlotsDef?id=' + _slf.rowMenu.rowValue + '');
+            _slf.doEdit(_slf.rowMenu.rowValue);
+        });
+        $("#rmDel").on('click', function () {
+            app_plots_grid.delete_plot(_slf.rowMenu.rowValue);
+        });
+        $("#plots-new").on('click', function () {
+            _slf.doEdit(0);
+        });
+    },
+    delete_plot: function (id) {
+
+        app_dialog.confirm("האם למחוק מגרש " + id, function () {
+            $.ajax({
+                //async: async,
+                type: "POST",
+                url: "/Building/DeletePlots",
+                data: { 'PlotsId': id },
+                //contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    $("#jqxgrid").jqxGrid('source').dataBind();
+                    app_messenger.Post(data);
+                },
+                error: function (e) {
+                    app_dialog.alert(e);
+                }
+            });
+        });
+    },
+    doEdit: function (id) {
+
+        wizard.displayStep(2);
+        this.showControl(id, 'e');
+    },
+    showControl: function (id, option, action) {
+
+        var data_model = { Id: id, UserInfo: this.UInfo , Role: this.UInfo.UserRole, Option: option, Action: action };
+        $("#plots-def-window").empty();
+        this.Control = null;
+        this.Control = new app_plots_control("#plots-def-window");
+        this.Control.init(data_model);
+        this.Control.display();
     }
 };
+

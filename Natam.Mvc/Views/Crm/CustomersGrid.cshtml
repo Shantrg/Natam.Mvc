@@ -10,10 +10,13 @@
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
     <script type="text/javascript" src="~/jqwidgets/jqxdata.export.js"></script>
-<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
+@*<link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />*@
     <style type="text/css">
         input {
             direction:rtl;text-align:right;
+        }
+          .jqx-grid-cell {
+            border: none;
         }
     </style>
 }
@@ -24,7 +27,6 @@
     <script type="text/javascript">
 
         var NScustomers = {};
-
         $(document).ready(function () {
             JSON.useDateParser();
             var theme = 'Arctic';
@@ -73,15 +75,7 @@
                 loadComplete: function (data) { },
                 loadError: function (xhr, status, error) { alert(' status: ' + status + '\n error ' + error) }
             });
-            var cellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
-
-                //return '<div style="text-align:center"><a href="CustomerDef?id=' + value + '" >הצג</a></div>';
-                var link = '<div style="text-align:center"><a href="javascript:customers_accountEdit(' + value + ')" >הצג</a>';
-                //if (allowEdit > 0)
-                //    link += ' | <a href="javascript:customers_accountDelete(' + value + ')" >הסרה</a>';
-
-                return link + '</div>';
-            };
+            
             var contactcellsrenderer = function (row, columnfield, value, defaulthtml, columnproperties) {
                 var accid = $('#jqxgrid').jqxGrid('getrowdata', row).AccountId;
                
@@ -117,10 +111,12 @@
                     rtl: true,
                     columns: [
                       {
-                          text: '*', dataField: 'ContactId', width: 100, cellsalign: 'right', align: 'center',
+                          text: '*', dataField: 'ContactId', width: 35, cellsalign: 'right', align: 'center',
                           cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
                               var accid = id;// $('#jqxgrid').jqxGrid('getrowdata', row).AccountId;
-                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="customers_contactEdit(' + value + ',' + accid + ');" >הצג</a> | <a href="#" onclick="customers_contactDelete(' + value + ');">הסר</a></div>'
+                              return '<div style="margin:4px 4px;direction:rtl"><a title="עריכת איש קשר" href="javascript:app_accounts_public.customers_contactEdit(' + value + ',' + accid + ')" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;"></i></a><span style="padding-left:5px"></span><a href="#" title="מחיקת איש קשר" onclick="app_accounts_public.customers_contactDelete(' + value + ');"><i class="fa fa-remove" style="font-size:14px;color:red;"></i></a></div>';
+
+                              //return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="app_accounts_public.customers_contactEdit(' + value + ',' + accid + ');" >הצג</a> | <a href="#" onclick="app_accounts_public.customers_contactDelete(' + value + ');">הסר</a></div>'
                           }
                       },
                       { text: 'שם איש קשר', datafield: 'ContactName', cellsalign: 'right', align: 'center' },
@@ -180,7 +176,7 @@
                           text: '*', dataField: 'NewsId', width: 110, cellsalign: 'right', align: 'center',
                           cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
                               var accid = id;//  $('#jqxgrid').jqxGrid('getrowdata', row).AccountId;
-                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="customers_newsDelete(' + value + ',' + accid + ');" >הסר</a></div>'
+                              return '<div style="text-align:center;direction:rtl;margin:5px;"><a href="#" onclick="app_accounts_public.customers_newsDelete(' + value + ',' + accid + ');" >הסר</a></div>'
                           }
                       },
                       { text: 'שם דיוור', datafield: 'NewsName', cellsalign: 'right', align: 'center' },
@@ -188,7 +184,7 @@
                 });
                 var additem = $('<a title="הוספת דיוור" href="#" style="padding-left:10px;padding-right:10px;float:right;">הוסף דיוור</a>')
                 .click(function () {
-                    NScustomers.newsDialog=popupIframe("/Common/_AccountNews?id=" + id, "580", "400");
+                    NScustomers.newsDialog = app_dialog.dialogIframe("/Common/_AccountNews?id=" + id, "580", "400");
                 });
                 var refreshitem = $('<a title="רענון קבוצת דיוור" href="#" style="padding-left:10px;float:right;">רענון</a>')
                 .click(function () {
@@ -252,11 +248,11 @@
 
                     var linkEdit = $('<div style="margin:5px"><a href="#" >הצג לקוח</a></div>')
                     .click(function () {
-                        customers_accountEdit(accid);
+                        app_accounts_public.customers_accountEdit(accid);
                     });
                     var linkRemove = $('<div style="margin:5px"><a href="#" >הסר לקוח</a></div>')
                     .click(function () {
-                        customers_accountDelete(accid);
+                        app_accounts_public.customers_accountDelete(accid);
                     });
 
                     optionscontainer.append(linkEdit);
@@ -295,7 +291,11 @@
                 },
                 initrowdetails: initrowdetails,
                 columns: [
-                  { text: '*', dataField: 'AccountId', filterable: false, width: 80, cellsalign: 'right', align: 'center', cellsrenderer: cellsrenderer },
+                  { text: '*', dataField: 'AccountId', filterable: false, width: 30, cellsalign: 'right', align: 'center', cellsrenderer: 
+                      function (row, columnfield, value, defaulthtml, columnproperties) {
+                          return '<a href="javascript:app_accounts_public.customers_accountEdit(' + value + ')" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;margin:8px 8px"></i></a>';
+                      }
+                   },
                   { text: 'שם לקוח', dataField: 'AccountName', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
                   //{ text: 'סוג לקוח', dataField: 'AccountType', width: 100, cellsalign: 'right', align: 'center' },
                   { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', cellsalign: 'right', align: 'center' },
@@ -313,7 +313,7 @@
             });
             $('#btnCustomerDef').jqxButton();
             $('#btnCustomerDef').click(function () {
-                customers_accountEdit(0);
+                app_accounts_public.customers_accountEdit(0);
             });
             $('#btnCustomerQuery').jqxButton();
             $('#btnCustomerQuery').click(function () {
@@ -329,100 +329,6 @@
 
             //});
         });
-
-        function triggerContactComplete(accid) {
-            customers_contactRefresh();
-            app_dialog.dialogClose(NScustomers.contactDialog);
-        };
-
-        function triggerAccComplete(accType,accid) {
-            customers_accounsRefresh();
-            app_dialog.dialogClose(NScustomers.accountDialog);
-        };
-
-        function triggerNewsComplete(accid) {
-            customers_newsRefresh();
-            app_dialog.dialogClose(NScustomers.newsDialog);
-        };
-
-        function customers_contactRefresh() {
-            try {
-                var i = NScustomers.currentIndex;
-                var g = NScustomers.nastedContactGrids[i];
-                var adapter = g.jqxGrid('source');
-                adapter.dataBind();
-            }
-            catch (e) {
-                alert(e);
-            }
-        };
-
-        function customers_contactDelete(id) {
-            app_contacts.contactDelete(id, false);
-            customers_contactRefresh();
-        }
-
-        function customers_contactEdit(id,accid) {
-            app_contacts.contactEdit(id, accid, 0);
-            customers_contactRefresh();
-        }
-
-        function customers_newsRefresh() {
-            try {
-                var i = NScustomers.currentIndex;
-                var g = NScustomers.nastedNewsGrids[i];
-                var adapter = g.jqxGrid('source');
-                adapter.dataBind();
-            }
-            catch (e) {
-                alert(e);
-            }
-        };
-        function customers_newsDelete(id, accid) {
-            app_accounts.AccountNewsRemove(id, accid);
-            customers_newsRefresh();
-        }
-
-        function customers_accounsRefresh() {
-            try {
-                $("#jqxgrid").jqxGrid('source').dataBind();
-            }
-            catch (e) {
-                alert(e);
-            }
-        };
-        function customers_accountEdit(id) {
-            var accountType = 1;// 'Model.AccType';
-            NScustomers.accountDialog = app_accounts.accountEdit(id, accountType);
-
-        }
-        function customers_accountDelete(id) {
-            //alert("לא ניתן למחוק לקוח.");
-            //var accountType = 1;
-            //NScustomers.accountDialog = accountDelete(id, accountType);
-
-            if (confirm("פעולה זו תסיר את הלקוח מרשימת הלקוחות , האם להמשיך?") == false)
-                return;
-            $.ajax({
-                url: '@Url.Action("CustomerDelete", "Crm")',
-                type: 'post',
-                dataType: 'json',
-                data: { 'AccountId': id },
-                success: function (data) {
-                    if (data.Status >= 0) {
-                        alert("הלקוח הוסר מהמערכת");
-                        customers_accounsRefresh();
-                        //redirectToFinal("customer-del");
-                    }
-                    else
-                        alert(data.Message);
-                },
-                error: function (jqXHR, status, error) {
-                    alert(error);
-                }
-            });
-        }
-   
 
     </script>
 }
@@ -448,16 +354,16 @@
 <div class="clear"></div>
 
 <div class="global">
-    <div class="container">
+    <div class="container-box">
 
         <div class="grid-wrap">
             <div class="box-title">
                 <h3>רשימת לקוחות</h3>
             </div>
-  
+            <div id="wiz-parent" class="rtl">
                 <div style="display: inline; float: right">
                     <!--<a id="linkCustomerDef" href="~/Crm/CustomerDef?id=0" title="הוספת לקוח">הוספת לקוח חדש</a>
-            <a id="linkCustomerDef" href="javascript:app_accounts.accountEdit(0 ,1)" title="הוספת לקוח">הוספת לקוח חדש</a>-->
+                <a id="linkCustomerDef" href="javascript:app_accounts.accountEdit(0 ,1)" title="הוספת לקוח">הוספת לקוח חדש</a>-->
 
                     <input value="איתור לקוח" id="btnCustomerQuery" type="button" class="btn-default btn2" />
                     <input value="הוספת לקוח" id="btnCustomerDef" type="button" class="btn-default btn2" />
@@ -473,8 +379,111 @@
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 </div>
 <script type="text/javascript">
-   app_menu.activeLayoutMenu("liCustomers");
+    app_menu.activeLayoutMenu("liCustomers");
+
+    var app_accounts_public = {
+
+        customers_contactRefresh: function () {
+            try {
+                var i = NScustomers.currentIndex;
+                var g = NScustomers.nastedContactGrids[i];
+                var adapter = g.jqxGrid('source');
+                adapter.dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        },
+
+        customers_contactDelete: function (id) {
+            app_contacts.contactDelete(id, false);
+            app_accounts_public.customers_contactRefresh();
+        },
+
+        customers_contactEdit: function (id, accid) {
+            app_contacts.contactEdit(id, accid, 0);
+            app_accounts_public.customers_contactRefresh();
+        },
+
+        customers_newsRefresh: function () {
+            try {
+                var i = NScustomers.currentIndex;
+                var g = NScustomers.nastedNewsGrids[i];
+                var adapter = g.jqxGrid('source');
+                adapter.dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        },
+        customers_newsDelete: function (id, accid) {
+            app_accounts.AccountNewsRemove(id, accid);
+            app_accounts_public.customers_newsRefresh();
+        },
+
+        customers_accounsRefresh: function () {
+            try {
+                $("#jqxgrid").jqxGrid('source').dataBind();
+            }
+            catch (e) {
+                alert(e);
+            }
+        },
+        customers_accountEdit: function (id) {
+            var accountType = 1;// 'Model.AccType';
+            //NScustomers.accountDialog = app_accounts.accountEdit(id, accountType);
+            app_accounts.accountPanelSwitch(id, accountType, "wiz-parent");
+
+        },
+        customers_accountDelete: function (id) {
+
+            if (confirm("פעולה זו תסיר את הלקוח מרשימת הלקוחות , האם להמשיך?") == false)
+                return;
+            $.ajax({
+                url: '@Url.Action("CustomerDelete", "Crm")',
+                type: 'post',
+                dataType: 'json',
+                data: { 'AccountId': id },
+                success: function (data) {
+                    if (data.Status >= 0) {
+                        app_jqxnotify.notify("הלקוח הוסר מהמערכת");
+
+                        app_accounts_public.customers_accounsRefresh();
+                        //redirectToFinal("customer-del");
+                    }
+                    else
+                        alert(data.Message);
+                },
+                error: function (jqXHR, status, error) {
+                    alert(error);
+                }
+            });
+        }
+    };
+
+    app_trigger = {
+
+        triggerContactComplete: function (accid) {
+            app_accounts_public.customers_contactRefresh();
+            app_dialog.dialogClose(slf.NScustomers.contactDialog);
+        },
+         triggerNewsComplete: function (accid) {
+            app_accounts_public.customers_newsRefresh();
+            app_dialog.dialogClose(slf.NScustomers.newsDialog);
+         },
+         triggerAccComplete: function (accType, accid) {
+             app_accounts_public.customers_accounsRefresh();
+             app_iframe.panelSwitchClose("wiz-parent", true);
+             //app_dialog.dialogClose(slf.NScustomers.accountDialog);
+             return false;
+         },
+
+        triggerAccCancel: function () {
+            app_iframe.panelSwitchClose("wiz-parent", true);
+        }
+    };
 </script>

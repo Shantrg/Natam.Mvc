@@ -16,6 +16,7 @@ using System.Web.Caching;
 using System.Web.Mvc;
 using Newtonsoft.Json;
 using Pro.Data.Entities;
+using Nistec.Web.Controls;
 
 namespace Natam.Mvc.Controllers
 {
@@ -168,11 +169,55 @@ namespace Natam.Mvc.Controllers
                 list = AreaZoneView.ViewAreaZone();
                 if (list != null)
                 {
-                    CacheAdd(key, list, CacheGroup.Props);
+                    CacheAdd(key, list, CacheGroup.Props, CacheTime.Hour);
                 }
             }
             return Json(list.OrderBy(v => v.AreaName).ToList(), JsonRequestBehavior.AllowGet);
         }
+
+        [HttpPost]
+        public JsonResult GetCityListByArea(int area)
+        {
+            string key = CacheKeys.GetCityListView;
+            IEnumerable<CityView> list = (IEnumerable<CityView>)CacheGet(key, CacheGroup.Props);
+
+            if (list == null)
+            {
+                list = CityView.View();
+                if (list != null)
+                {
+                    CacheAdd(key, list, CacheGroup.Props, CacheTime.Infinity);
+                }
+            }
+            if (area > 0)
+                return Json(list.Where(c => c.AreaCode == area).OrderBy(v => v.CityName).ToList(), JsonRequestBehavior.AllowGet);
+            return Json(list.OrderBy(v => v.CityName).ToList(), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GetCityListView()
+        {
+            string key = CacheKeys.GetCityListView;
+            IEnumerable<CityView> list = (IEnumerable<CityView>)CacheGet(key, CacheGroup.Props);
+
+            if (list == null)
+            {
+                list = CityView.View();
+                if (list != null)
+                {
+                    CacheAdd(key, list, CacheGroup.Props, CacheTime.Infinity);
+                }
+            }
+            return Json(list.OrderBy(v => v.CityName).ToList(), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GetStreetsListByCity(int city)
+        {
+            var list = StreetView.Filter(city);
+            return Json(list.OrderBy(v => v.StreetName).ToList(), JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public JsonResult GetOwnerView()
         {
@@ -452,7 +497,7 @@ namespace Natam.Mvc.Controllers
         {
             if (id <= 0)
                 return null;
-            var result = BuildingContext.Get(id);
+            var result = BuildingContext.View(id);
             return Json(result, JsonRequestBehavior.AllowGet);
         }
         public ContentResult GetBuilderInfo(int id)
@@ -462,6 +507,12 @@ namespace Natam.Mvc.Controllers
             var result = BuildingContext.GetBuilderView(id);
                 var content= new ContentResult { Content = result, ContentType = "application/json" };
             return content;
+        }
+        public JsonResult GetBuildingList()
+        {
+            var list = BuildingListView.View();
+            list = list.OrderBy(v =>  v.BuildingName);
+            return Json(list, JsonRequestBehavior.AllowGet);
         }
         public JsonResult GetBuildingByNatamView()
         {
@@ -478,12 +529,12 @@ namespace Natam.Mvc.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetBuildingGrid(int pagesize, int pagenum, int QueryType, string Area, int DealType, int PurposeType, int AreaSizeMin, int AreaSizeMax, string BuildingName, string BuildingStreet, string StreetNo, string City, int OwnerId, int BuildingId)
+        public JsonResult GetBuildingGrid(int pagesize, int pagenum, int QueryType, string Area, int DealType, int PurposeType, int AreaSizeMin, int AreaSizeMax, string BuildingName, int StreetId, string StreetNo, int CityCode, int OwnerId, int BuildingId)
         {
             switch (QueryType)
             {
                 case 2://address
-                    if (string.IsNullOrEmpty(BuildingName) && string.IsNullOrEmpty(BuildingStreet) && string.IsNullOrEmpty(City))
+                    if (string.IsNullOrEmpty(BuildingName) && StreetId== 0 && CityCode==0)// && string.IsNullOrEmpty(BuildingStreet) && string.IsNullOrEmpty(City))
                         return QueryPager<BuildingQueryView>(null,pagesize, pagenum);
                     break;
             }
@@ -491,7 +542,7 @@ namespace Natam.Mvc.Controllers
                 Area = "all";
 
             CommonQuery query = new CommonQuery(Request);
-            var list = BuildingContext.View(QueryType, query.PageSize, query.PageNum, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName, BuildingStreet, StreetNo, City, OwnerId, BuildingId, query.Sort, query.Filter);
+            var list = BuildingContext.View(QueryType, query.PageSize, query.PageNum, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName, StreetId, StreetNo, CityCode, OwnerId, BuildingId, query.Sort, query.Filter);
             var row = list.FirstOrDefault<BuildingQueryView>();
             int totalRows = row == null ? 0 : row.TotalRows;
             return QueryPagerServer<BuildingQueryView>(list, totalRows, query.PageSize, query.PageNum);
@@ -521,16 +572,21 @@ namespace Natam.Mvc.Controllers
         public ActionResult BuildingUnitGrid()
         {
             BuildingQuery query = new BuildingQuery(Request);
+
+            //var json= Json(query, JsonRequestBehavior.AllowGet);
+
+           // var js = Nistec.Serialization.JsonSerializer.Serialize(query);
+
             return View(query);
         }
 
         [HttpPost]
-        public JsonResult GetBuildingUnitGrid(int pagesize, int pagenum, int QueryType, string Area, int DealType, int PurposeType, int AreaSizeMin, int AreaSizeMax, string BuildingName, string BuildingStreet, string StreetNo, string City, int OwnerId, int BuildingId)
+        public JsonResult GetBuildingUnitGrid(int pagesize, int pagenum, int QueryType, string Area, int DealType, int PurposeType, int AreaSizeMin, int AreaSizeMax, string BuildingName, int StreetId, string StreetNo, int CityCode, int OwnerId, int BuildingId, int AgentId)
         {
             switch (QueryType)
             {
                 case 2://address
-                    if (string.IsNullOrEmpty(BuildingName) && string.IsNullOrEmpty(BuildingStreet) && string.IsNullOrEmpty(City))
+                    if (string.IsNullOrEmpty(BuildingName) && StreetId==0 && CityCode==0 )//string.IsNullOrEmpty(BuildingStreet) && string.IsNullOrEmpty(City))
                         return QueryPager<UnitGridView>(null, pagesize, pagenum);
                     break;
             }
@@ -538,7 +594,7 @@ namespace Natam.Mvc.Controllers
                 Area = "all";
 
             CommonQuery query = new CommonQuery(Request);
-            var list = UnitContext.QueryView(QueryType, query.PageSize,query.PageNum, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName, BuildingStreet, StreetNo, City, OwnerId, BuildingId,query.Sort,query.Filter);
+            var list = UnitContext.QueryView(QueryType, query.PageSize,query.PageNum, Area, DealType, PurposeType, AreaSizeMin, AreaSizeMax, BuildingName, StreetId, StreetNo, CityCode, OwnerId, BuildingId, AgentId,query.Sort,query.Filter);
             var row = list.FirstOrDefault<UnitGridView>();
             int totalRows = row == null ? 0 : row.TotalRows;
             return QueryPagerServer<UnitGridView>(list, totalRows, query.PageSize, query.PageNum);
@@ -614,7 +670,7 @@ namespace Natam.Mvc.Controllers
 
                 res = BuildingContext.DoSave(v);
 
-                return Json(GetFormResult(res, action, null, v.BuildingId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, v.BuildingId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -652,7 +708,7 @@ namespace Natam.Mvc.Controllers
 
                 res = BuildingContext.DoInsert(v);
 
-                return Json(GetFormResult(res, action, null, v.BuildingId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, v.BuildingId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -846,7 +902,7 @@ namespace Natam.Mvc.Controllers
 
                 //return result;
 
-                return Json(GetFormResult(res, action, null, v.UnitId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, v.UnitId), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -981,7 +1037,7 @@ namespace Natam.Mvc.Controllers
                 string key = CacheKeys.GetPlotsGrid;
                 CacheRemove(key, CacheGroup.Plots);
 
-                return Json(GetFormResult(res, action, null, v.PlotsId), JsonRequestBehavior.AllowGet);
+                return Json(FormResult.GetFormResult(res, action, v.PlotsId), JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
@@ -1159,7 +1215,7 @@ namespace Natam.Mvc.Controllers
                  CacheRemove(key, CacheGroup.Building);
 
                  res = InvestmentContext.DoSave(v);
-                 return Json(GetFormResult(res, action, null, v.InvestId), JsonRequestBehavior.AllowGet);
+                 return Json(FormResult.GetFormResult(res, action, v.InvestId), JsonRequestBehavior.AllowGet);
              }
              catch (Exception ex)
              {
@@ -1266,7 +1322,7 @@ namespace Natam.Mvc.Controllers
                  string key = CacheKeys.GetFloorGrid(v.BuildingId);
                  CacheRemove(key, CacheGroup.Building);
                  res = FloorContext.DoSave(v);
-                 return Json(GetFormResult(res, action, null, v.FloorId), JsonRequestBehavior.AllowGet);
+                 return Json(FormResult.GetFormResult(res, action, v.FloorId), JsonRequestBehavior.AllowGet);
              }
              catch (Exception ex)
              {
@@ -1291,7 +1347,7 @@ namespace Natam.Mvc.Controllers
                  int userId = GetUser();
                  res = FloorContext.DoDelete(FloorId, userId);
 
-                 return Json(GetFormResult(res, action, null, FloorId), JsonRequestBehavior.AllowGet);
+                 return Json(FormResult.GetFormResult(res, action, FloorId), JsonRequestBehavior.AllowGet);
              }
              catch (Exception ex)
              {
@@ -1451,7 +1507,7 @@ namespace Natam.Mvc.Controllers
                      return Json(GetFormResult(-1, action, validator.Result, v.FloorNum), JsonRequestBehavior.AllowGet);
                  }
                  res = WizardContext.DoSave(v);
-                 return Json(GetFormResult(res, action, null, v.FloorNum), JsonRequestBehavior.AllowGet);
+                 return Json(FormResult.GetFormResult(res, action, v.FloorNum), JsonRequestBehavior.AllowGet);
              }
              catch (Exception ex)
              {
@@ -1648,7 +1704,32 @@ namespace Natam.Mvc.Controllers
                return GoFinal("לא נמצאו נתונים");
             return CsvActionResult.ExportToCsv(list, query.ReportName);
         }
+        public ActionResult ReportGrid()
+        {
+            ReportQuery query = new ReportQuery(Request);
+            //var list = query.ExportByQuery();
+            //if (list == null)
+            //    return GoFinal("לא נמצאו נתונים");
+            //return CsvActionResult.ExportToCsv(list, query.ReportName);
 
+            return View(query);
+        }
+
+        public JsonResult GetReportGrid()
+        {
+            ReportQuery query = new ReportQuery(Request);
+            var table = query.ReportByQuery();
+            //if (list == null)
+            //    return GoFinal("לא נמצאו נתונים");
+
+            //return CsvActionResult.ExportToCsv(list, query.ReportName);
+
+            //return QueryPager<UnitInfoView>(list, pagesize, pagenum);
+
+            //string json = table == null ? null : JsonConvert.SerializeObject(table);//, Formatting.Indented);
+
+            return Json(table, JsonRequestBehavior.AllowGet);
+        }
         #endregion
 
         #region Owners

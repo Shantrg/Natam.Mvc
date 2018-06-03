@@ -66,7 +66,7 @@ namespace Pro.Data.Entities
             };
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Plots_Save", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Plots_Save", parameters, System.Data.CommandType.StoredProcedure);
             pv.PlotsId = Types.ToInt(parameters[0].Value);
             return res;
         }
@@ -75,7 +75,7 @@ namespace Pro.Data.Entities
         {
             var parameters = DataParameter.GetSqlWithDirection("PlotsId", PlotsId, 0, "AgentId", AgentId, 0, "Status", 0, 2);
             //DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Plots_Delete", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Plots_Delete", parameters, System.Data.CommandType.StoredProcedure);
             return parameters.GetParameterValue<int>("Status");// Types.ToInt(parameters[2].Value);
 
         }
@@ -107,6 +107,8 @@ namespace Pro.Data.Entities
         public string OwnerTypeName { get; set; }
         public string OwnerName { get; set; }
         public string AgentName { get; set; }
+        public string CityName { get; set; }
+        public string StreetName { get; set; }
 
         //public string DesignationName { get; set; }
     }
@@ -119,8 +121,10 @@ namespace Pro.Data.Entities
         public int PlotsId { get; set; }
         public int AreaId { get; set; }
         public string Street { get; set; }
+        public int StreetId { get; set; }
         public string StreetNo { get; set; }
         public string City { get; set; }
+        public int CityCode { get; set; }
         public string Bloc { get; set; }
         public string Lot { get; set; }
         public float Size { get; set; }

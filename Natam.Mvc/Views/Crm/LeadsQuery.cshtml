@@ -1,7 +1,6 @@
 ﻿@{
     Layout = "~/Views/Shared/_View.cshtml";
     Page.Title = "Building";
-    
    
 }
 
@@ -10,6 +9,8 @@
 
     @Scripts.Render("~/bundles/jqx")
     @Scripts.Render("~/bundles/jqxgrid")
+<script src="~/Scripts/plagins/tabs/jcxtabs.min.js"></script>
+<link href="~/Scripts/plagins/tabs/jcxtabs-light.css" rel="stylesheet" />
 
     <style type="text/css">
         table {
@@ -30,12 +31,15 @@
             font-size: 16px;
         }
     </style>
-    <script>
+ <script>
         $(function () {
-            $('#tab-query li:eq(0) a').tab('show');
+            $("#accordion").jcxTabs({
+                rotate: false,
+                startCollapsed: 'accordion',
+                collapsible: 'accordion',
+             });
         });
-    </script>
-
+</script>
     <script type="text/javascript">
     $(document).ready(function () {
         var me = this;
@@ -91,22 +95,23 @@
 
 <div class="global-view">
 
-    <div class="container">
+    <div class="container-box">
         <div class="box-title">
             <h3>איתור לקוחות</h3>
         </div>
 
-        <ul id="tab-query" class="nav nav-tabs">
-            <li class="active">
-                <a href="#tab-general" data-toggle="tab">חיפוש כללי
-                </a>
-            </li>
-            <li><a href="#tab-news" data-toggle="tab">חיפוש לפי מאפיינים</a></li>
-        </ul>
-        <div id="tab-content" class="tab-content" dir="rtl">
-             <div class="tab-pane fade in active" id="tab-general">
-                <div>
-                    <p>חיפוש כללי</p>
+        <div id="accordion" class="jcx-tabs rtl">
+            <ul id="tab-query" class="jcx-tabs-nav">
+                <li class="active">
+                    <a href="#tab-general" data-toggle="tab">
+                        חיפוש כללי
+                    </a>
+                </li>
+                <li><a href="#tab-news" data-toggle="tab">חיפוש לפי מאפיינים</a></li>
+            </ul>
+            <div class="jcxtab-panel active" id="tab-general">
+                <div class="panel-area">
+                    <p class="panel-area-title">חיפוש כללי</p>
                     <form id="formGeneral" action="LeadsGrid" method="post">
                         <div class="rtl">
                             <div class="form-group">
@@ -123,7 +128,7 @@
                                     <input type="text" name="ContactName" />
                                 </div>
                             </div>
-                         </div>
+                        </div>
                         <br />
                         <div>
                             <input type="hidden" name="AccType" value="1" />
@@ -136,9 +141,9 @@
                     </form>
                 </div>
             </div>
-            <div class="tab-pane fade in" id="tab-news">
-                <div>
-                    <p>חיפוש לפי מאפיינים</p>
+            <div class="jcxtab-panel" id="tab-news">
+                <div class="panel-area">
+                    <p class="panel-area-title">חיפוש לפי מאפיינים</p>
                     <form id="formNews" action="LeadsGrid" method="post">
                         <div class="rtl">
                             <div class="form-group">
@@ -182,7 +187,7 @@
                     </form>
                 </div>
             </div>
-         </div>
+        </div>
     </div>
 </div>
 <script type="text/javascript">

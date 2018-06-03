@@ -63,5 +63,7 @@ namespace Natam.Mvc.Controllers
         internal const string GetRequestSize = "GetRequestSize";
         internal const string GetAgentList = "GetAgentList";
         //internal const string GetLeadsView = "GetLeadsView";
+        internal const string GetCityListView = "GetCityListView";
+        internal const string GetStreetsListView = "GetStreetsListView";
     }
 }

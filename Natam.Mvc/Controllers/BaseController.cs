@@ -13,6 +13,7 @@ using System.Web;
 using System.Web.Caching;
 using System.Web.Mvc;
 using Pro.Lib;
+using System.Threading.Tasks;
 
 namespace Natam.Mvc.Controllers
 {
@@ -97,6 +98,54 @@ namespace Natam.Mvc.Controllers
             ViewBag.UserName = signedUser.UserName;
             return signedUser.UserId;
         }
+        protected int GetUserRole()
+        {
+            var signedUser = GetSignedUser(false);
+            if (signedUser != null)
+            {
+                return signedUser.UserRole;
+            }
+            return -1;
+        }
+        protected int GetAccountId()
+        {
+            //var signedUser = GetSignedUser(false);
+            //if (signedUser != null)
+            //{
+            //    //ViewBag.IsVirtual = signedUser.IsVirtual;
+            //    //ViewBag.ParentId = signedUser.ParentId;
+            //    return signedUser.AccountId;
+            //}
+            //return -1;
+
+            return 1;
+        }
+
+        protected SignedUser GetSignedUser(bool enableException)
+        {
+            var signedUser = SignedUser.Get(Request.RequestContext.HttpContext);
+            if (signedUser != null && signedUser.IsAuthenticated && signedUser.IsBlocked == false)
+            {
+                return signedUser;
+            }
+            if (enableException)
+                throw new SecurityException(AuthState.UnAuthorized);
+            return null;
+        }
+        protected SignedUser GetAdminSignedUser()
+        {
+            var signedUser = SignedUser.GetAdmin(Request.RequestContext.HttpContext);
+            if (signedUser == null)
+            {
+                return null;
+            }
+            if (signedUser.IsBlocked || signedUser.IsAuthenticated == false)
+            {
+                return null;
+            }
+            return signedUser;
+        }
+
 
         protected ActionResult Authenticate(object value)
         {
@@ -126,6 +175,92 @@ namespace Natam.Mvc.Controllers
             return View();
         }
 
+        /*
+        RoleId	RoleName
+        0	User
+        1	Super
+        5	Manager
+        7	Master
+        9	Admin
+        */
+
+        protected bool ValidateDelete(SignedUser su, string method, bool throwException = true)
+        {
+            //int userRole = su.UserRole;// GetUserRole();
+
+            if (su.UserRole < 5)
+            {
+                LogAsync("App", method, string.Format("You have no permission for this action (delete), UserId={0}, UserRole={1}", su.UserId, su.UserRole), Request);
+                if (throwException)
+                    throw new Exception("You have no permission for this action");
+                return false;
+            }
+            return true;
+        }
+        protected bool ValidateUpdate(SignedUser su, string method, bool throwException = true)
+        {
+            //int userRole = su.UserRole;// GetUserRole();
+            if (su.UserRole < 5)
+            {
+                LogAsync("App", method, string.Format("You have no permission for this action (update), UserId={0}, UserRole={1}", su.UserId, su.UserRole), Request);
+                if (throwException)
+                    throw new Exception("You have no permission for this action");
+                return false;
+            }
+            return true;
+        }
+
+        protected bool ValidateDelete(int userId, string method, bool throwException = true)
+        {
+            int userRole = GetUserRole();
+
+            if (userRole < 5)
+            {
+                LogAsync("App", method, string.Format("You have no permission for this action (delete), UserId={0}, UserRole={1}", userId, userRole), Request);
+                if (throwException)
+                    throw new Exception("You have no permission for this action");
+                return false;
+            }
+            return true;
+        }
+        protected bool ValidateUpdate(int userId, string method, bool throwException = true)
+        {
+            int userRole = GetUserRole();
+            if (userRole < 5)
+            {
+                LogAsync("App", method, string.Format("You have no permission for this action (update), UserId={0}, UserRole={1}", userId, userRole), Request);
+                if (throwException)
+                    throw new Exception("You have no permission for this action");
+                return false;
+            }
+            return true;
+        }
+
+        #region Async
+
+        [NonAction]
+        public void LogAsync(string folder, string Action, string LogText, HttpRequestBase request, int LogType = 0)
+        {
+            TraceHelper.LogAsync(folder, Action, LogText, request, LogType);
+            //await Task.Run(() => TraceHelper.Log(folder, Action, LogText, request, LogType));
+        }
+
+        [NonAction]
+        public void LogAsync(string folder, string Action, string LogText, string clientIp, string referrer, int LogType = 0)
+        {
+            TraceHelper.LogAsync(folder, Action, LogText, clientIp, referrer, LogType);
+            //await Task.Run(() => TraceHelper.Log(folder, Action, LogText, clientIp, referrer, LogType));
+        }
+
+        //[NonAction]
+        //public async Task<int> LogAsync(string folder, string Action, string LogText, HttpRequestBase request, int LogType = 0)
+        //{
+        //    await Task.Run(()=> TraceHelper.Log(folder, Action,  LogText, request, LogType));
+
+        //    return 0;
+        //}
+
+        #endregion
         protected virtual ActionResult RedirectToIndex(string message)
         {
 
@@ -365,9 +500,10 @@ namespace Natam.Mvc.Controllers
         }
 
         #region errors
+        [AllowAnonymous]
         public ViewResult ErrorNotFound()
         {
-            ViewBag.Message = string.Format("{0} : {1}", "שגיאה אירעה ב", Request["aspxerrorpath"]);
+            ViewBag.Message = string.Format("{0} : {1}", " אירעה שגיאה : ", Request["message"]);
             Response.StatusCode = 200;// 404;  //you may want to set this to 200
             return View();
         }
@@ -380,37 +516,40 @@ namespace Natam.Mvc.Controllers
                                               .Select(x => x.ErrorMessage));
             return messages;
         }
+        [AllowAnonymous]
         public ViewResult Error()
         {
-            ViewBag.Message = string.Format("{0} : {1}", "שגיאה אירעה ב", Request["aspxerrorpath"]);
+            //ViewBag.Message = string.Format("{0} : {1}", "שגיאה אירעה ב", Request["aspxerrorpath"]);
+
+            ViewBag.Message = string.Format("{0} : {1}", " אירעה שגיאה : ", Request["message"]);
             Response.StatusCode = 200;// 500;  //you may want to set this to 200
             return View();
         }
-        protected override void OnException(ExceptionContext filterContext)
-        {
-            // Bail if we can't do anything; app will crash.
-            if (filterContext == null)
-                return;
-            // since we're handling this, log to elmah
+        //protected override void OnException(ExceptionContext filterContext)
+        //{
+        //    // Bail if we can't do anything; app will crash.
+        //    if (filterContext == null)
+        //        return;
+        //    // since we're handling this, log to elmah
 
-            var ex = filterContext.Exception ?? new Exception("No further information exists.");
-            TraceHelper.Log("Application", "OnException", ex.Message, Request, 500);
+        //    var ex = filterContext.Exception ?? new Exception("No further information exists.");
+        //    TraceHelper.Log("Application", "OnException", ex.Message, Request, 500);
 
-            filterContext.ExceptionHandled = true;
-            //filterContext.Result = new ViewResult()
-            //{
-            //    ViewName = "Error"
-            //};
+        //    filterContext.ExceptionHandled = true;
+        //    //filterContext.Result = new ViewResult()
+        //    //{
+        //    //    ViewName = "Error"
+        //    //};
 
-            //var data = new ErrorPresentation
-            //{
-            //    ErrorMessage = HttpUtility.HtmlEncode(ex.Message),
-            //    TheException = ex,
-            //    ShowMessage = !(filterContext.Exception == null),
-            //    ShowLink = false
-            //};
-            //filterContext.Result = View("ErrorPage", data);
-        }
+        //    //var data = new ErrorPresentation
+        //    //{
+        //    //    ErrorMessage = HttpUtility.HtmlEncode(ex.Message),
+        //    //    TheException = ex,
+        //    //    ShowMessage = !(filterContext.Exception == null),
+        //    //    ShowLink = false
+        //    //};
+        //    //filterContext.Result = View("ErrorPage", data);
+        //}
         //protected override void OnException(ExceptionContext filterContext)
         //{
         //    base.OnException(filterContext);
@@ -428,6 +567,58 @@ namespace Natam.Mvc.Controllers
         //    //    ViewName = "Error"
         //    //};
         //}
+
+        protected override void OnException(ExceptionContext filterContext)
+        {
+            //Exception ex = filterContext.Exception;
+
+            //Save error log in file
+            //if (ConfigurationManager.AppSettings["SaveErrorLog"].ToString().Trim().ToUpper() == "TRUE")
+            //{
+            //    SaveErrorLog(ex, filterContext);
+            //}
+
+            var ex = filterContext.Exception ?? new Exception("No further information exists.");
+
+            //TraceHelper.Log("Application", "OnException", ex.Message, Request, 500);
+
+
+            // if the request is AJAX return JSON else view.
+            if (IsAjax(filterContext))
+            {
+                //Because its a exception raised after ajax invocation
+                //Lets return Json
+                filterContext.Result = new JsonResult()
+                {
+                    Data = Convert.ToString(filterContext.Exception),
+                    JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                };
+            }
+            else
+            {
+                filterContext.ExceptionHandled = true;
+                filterContext.HttpContext.Response.Clear();
+
+                filterContext.Result = new ViewResult()
+                {
+                    //Error page to load
+                    ViewName = "Error",
+                    ViewData = new ViewDataDictionary()
+                };
+
+                base.OnException(filterContext);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified filter context is ajax.
+        /// </summary>
+        /// <param name="filterContext">The filter context.</param>
+        private bool IsAjax(ExceptionContext filterContext)
+        {
+            return filterContext.HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
         #endregion
 
         #region Cache
@@ -455,7 +646,14 @@ namespace Natam.Mvc.Controllers
             All
             //LeadProperties
         }
-
+        public enum CacheTime
+        {
+            Short=3,
+            medium=10,
+            Long=30,
+            Hour=60,
+            Infinity=600
+        }
         protected void CacheRemove(string key,CacheGroup group)
         {
             if (key != null)
@@ -472,7 +670,14 @@ namespace Natam.Mvc.Controllers
                 CacheAdd(group);
             }
         }
-
+        protected void CacheAdd(string key, object o, CacheGroup group, CacheTime minutes)
+        {
+            if (o != null)
+            {
+                HttpContext.Cache.Add(key, o, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes((int)minutes), CacheItemPriority.Normal, null);
+                CacheAdd(group);
+            }
+        }
         protected bool CacheExists(CacheGroup group)
         {
             return HttpContext.Cache[group.ToString()] != null;

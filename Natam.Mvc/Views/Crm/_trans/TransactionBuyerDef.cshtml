@@ -10,7 +10,6 @@
 @section head {
     @Scripts.Render("~/bundles/jqx")
    <script type="text/javascript" src="~/Scripts/app/dateFormat.js"></script>
-   <script type="text/javascript" src="~/Scripts/plagins/blockUI.js"></script>
    <link rel="stylesheet" href="~/Scripts/app/app-form.css" type="text/css" />
 
      <style type="text/css" > 
@@ -57,7 +56,7 @@
 
         var purposeAdapter = app_jqxcombos.createComboAdapter("PurposeId", "PurposeName", "Property_Type", '@Url.Action("GetPurposeView", "Building")', 155);
 
-        var srcAdapter = app_jqx.createtDataAdapter("UserId", "DisplayName", '@Url.Action("GetAgentList", "Common")');
+        var srcAdapter = app_jqx.createDataAdapter("UserId", "DisplayName", '@Url.Action("GetAgentList", "Common")');
 
         app_jqxcombos.setComboSourceAdapter("UserId", "DisplayName", "AgentId", srcAdapter, 155, 200);
         app_jqxcombos.setComboSourceAdapter("UserId", "DisplayName", "Payment_In_Item_1", srcAdapter, 155, 200);
@@ -197,7 +196,7 @@
                         url: actionurl,
                         type: 'post',
                         dataType: 'json',
-                        data: $('#form').serialize(),
+                        data: app.serialize('#form'),
                         success: function (data) {
                             alert(data.Message);
                             if (data.Status >= 0) {

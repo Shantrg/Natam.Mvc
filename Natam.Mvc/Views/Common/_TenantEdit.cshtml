@@ -105,6 +105,11 @@
                 ]
             });
 
+            $('#accCancel').on('click', function (e) {
+
+                window.parent.app_trigger.triggerAccCancel("4");
+            });
+
             $('#accSubmit').on('click', function (e) {
 
                 e.preventDefault();
@@ -112,24 +117,21 @@
                 var actionurl = $('#accForm').attr('action');
                 var validationResult = function (isValid) {
                     if (isValid) {
-                        //ajaxForm("/Common/UpdateAccount", "accForm", onSuccess);
-
                         $.ajax({
                             url: actionurl,
                             type: 'post',
                             dataType: 'json',
-                            data: $('#accForm').serialize(),
+                            data: app.serialize('#accForm'),
                             success: function (data) {
-                                alert(data.Message);
-                                if (data.Status >= 0) {
+                                app_messenger.Post(data);
 
-                                    //$('#accWindow').jqxWindow('close');
+                                if (data.Status >= 0) {
                                     var accType = $('#AccountType').val();
-                                    window.parent.triggerAccComplete(accType, data.OutputId);
+                                    window.parent.app_trigger.triggerAccComplete(accType, data.OutputId);
                                 }
                             },
                             error: function (jqXHR, status, error) {
-                                alert(error);
+                                app_dialog.alert(error);
                             }
                         });
                     }

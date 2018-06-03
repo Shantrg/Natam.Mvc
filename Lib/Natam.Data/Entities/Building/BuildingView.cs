@@ -49,30 +49,6 @@ namespace Pro.Data.Entities
 
         #region update
 
-        //public EntityValidator Validate(UpdateCommandType commandType = UpdateCommandType.Update)
-        //{
-        //    EntityValidator validator = new EntityValidator("עדכון בניין", "he");
-        //    var entity = Entity;
-        //    validator.Required(entity.BuildingName, "שם בניין");
-        //    validator.Required(entity.Street, "רחוב");
-        //    validator.Required(entity.City, "עיר");
-        //    validator.Required(entity.StreetNum, "מס בניין");
-        //    return validator;
-        //}
-
-        //public static int DoUpdate(int id,BuildingView bv,string title ,string lang)
-        //{
-        //    using (BuildingContext context = new BuildingContext(id))
-        //    {
-        //        var result = context.Validate(title, lang);
-        //        if(!result.IsValid)
-        //        {
-        //            throw new EntityException(result.Result);
-        //        }
-        //        return context.SaveChanges(UpdateCommandType.Update);//.Update<BuildingView>(bv, context.Validate);
-        //    }
-        //}
-
 
         public static int DoActiveState(int BuildingId,int ActiveState)
         {
@@ -98,9 +74,9 @@ namespace Pro.Data.Entities
 "BuildingId",bv.BuildingId 
 ,"BuildingName",bv.BuildingName 
 ,"AreaId",bv.AreaId
-,"Street",bv.Street
+,"StreetId",bv.StreetId
 ,"StreetNo",bv.StreetNo
-,"City",bv.City
+,"CityCode",bv.CityCode
 ,"ZipCode",bv.ZipCode
 ,"PurposeType",bv.PurposeType
 ,"ElevatorNo",bv.ElevatorNo
@@ -126,28 +102,9 @@ namespace Pro.Data.Entities
 ,"MailOnChanges",bv.MailOnChanges};
             var parameters=DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res= DbNatam.Instance.ExecuteNonQuery("sp_Building_Save", parameters, System.Data.CommandType.StoredProcedure );
+            int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Building_Save_v1", parameters, System.Data.CommandType.StoredProcedure );
             bv.BuildingId = Types.ToInt( parameters[0].Value);
             return res;
-            //using (BuildingContext context = new BuildingContext())
-            //{
-            //    UpdateCommandType cmdtype = UpdateCommandType.Insert;
-            //    if (bv.BuildingId > 0)
-            //    {
-            //        context.SetEntity(bv.BuildingId);
-            //        cmdtype = UpdateCommandType.Update;
-            //    }
-            //    context.Set(bv);
-                
-            //    //EntityValidator.Validate<BuildingView>(bv, "", "");
-
-            //    //var result = context.Validate("הגדרת בניין", "he");
-            //    //if (!result.IsValid)
-            //    //{
-            //    //    throw new EntityException(result.Result);
-            //    //}
-            //    return context.SaveChanges(cmdtype);
-            //}
         }
 
 
@@ -159,9 +116,9 @@ namespace Pro.Data.Entities
 "BuildingId",bv.BuildingId 
 ,"BuildingName",bv.BuildingName 
 ,"AreaId",bv.AreaId
-,"Street",bv.Street
+,"StreetId",bv.StreetId
 ,"StreetNo",bv.StreetNo
-,"City",bv.City
+,"CityCode",bv.CityCode
 ,"ZipCode",bv.ZipCode
 ,"PurposeType",bv.PurposeType
 ,"ElevatorNo",bv.ElevatorNo
@@ -206,7 +163,7 @@ namespace Pro.Data.Entities
             };
             var parameters=DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Building_New", parameters, System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Building_New_v1", parameters, System.Data.CommandType.StoredProcedure);
             bv.BuildingId = Types.ToInt( parameters[0].Value);
             return res;
         }
@@ -221,6 +178,11 @@ namespace Pro.Data.Entities
             {
                 return context.Entity;
             }
+        }
+
+        public static BuildingView View(int id)
+        {
+            return DbNatam.Instance.EntityGet<BuildingView>("BuildingId", id);
         }
 
         public static IList<BuildingView> GetItems()
@@ -257,92 +219,27 @@ namespace Pro.Data.Entities
         }
         #endregion
 
-        #region query
-        /*
-        public static IEnumerable<BuildingQueryView> ViewByBuilding(int BuildingId)
-        {
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Query_Unit_Building", "QueryType", 4, "IdArg", BuildingId);
-        }
-
-        public static IEnumerable<BuildingQueryView> ViewByOwner(int OwnerId)
-        {
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Query_Unit_Building", "QueryType", 3, "IdArg", OwnerId);
-        }
-
-        public static IEnumerable<BuildingQueryView> ViewByAddress(
-            string BuildingName,
-            string BuildingStreet,
-            string StreetNo,
-            string City)
-        {
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Query_Unit_Building", "QueryType", 2, "IdArg", 0, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", BuildingName, "BuildingStreet", BuildingStreet, "StreetNo", StreetNo, "City", City);
-        }
-
-        public static IEnumerable<BuildingQueryView> ViewByArgs(int QueryType,
-           string AreaId,
-           int DealType,
-           int PurposeType,
-           int SizeMin,
-           int SizeMax
-           )
-        {
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Query_Unit_Building", "QueryType", QueryType, "IdArg", 0, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax);
-        }
-
-        public static IEnumerable<BuildingQueryView> View(
-           int QueryType,
-           string AreaId,
-           int DealType,
-           int PurposeType,
-           int SizeMin,
-           int SizeMax,
-           string BuildingName,
-           string BuildingStreet,
-           string StreetNo,
-           string City,
-           int OwnerId,
-           int BuildingId
-           )
-        {
-            switch (QueryType)
-            {
-                case 1:
-                case 10:
-                    return ViewByArgs(QueryType, AreaId, DealType, PurposeType, SizeMin, SizeMax);
-                case 2:
-                    return ViewByAddress(BuildingName, BuildingStreet, StreetNo, City);
-                case 3:
-                    return ViewByOwner(OwnerId);
-                case 4:
-                    return ViewByBuilding(BuildingId);
-                default:
-                    return null;
-            }
-        }
-         */ 
-        #endregion
-
         #region query server
         public static IEnumerable<BuildingQueryView> ViewByBuilding(int BuildingId, int PageSize, int PageNum, string Sort, string Filter)
         {
-            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v1", "QueryType", 4, "PageSize", PageSize, "PageNum", PageNum, "IdArg", BuildingId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "BuildingStreet", null, "StreetNo", null, "City", null, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v2", "QueryType", 4, "PageSize", PageSize, "PageNum", PageNum, "IdArg", BuildingId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<BuildingQueryView> ViewByOwner(int OwnerId, int PageSize, int PageNum, string Sort, string Filter)
         {
-            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v1", "QueryType", 3, "PageSize", PageSize, "PageNum", PageNum, "IdArg", OwnerId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "BuildingStreet", null, "StreetNo", null, "City", null, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v2", "QueryType", 3, "PageSize", PageSize, "PageNum", PageNum, "IdArg", OwnerId, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<BuildingQueryView> ViewByAddress(int PageSize, int PageNum,
             string BuildingName,
-            string BuildingStreet,
+            int StreetId,
             string StreetNo,
-            string City,
+            int CityCode,
             string Sort,
            string Filter
             )
         {
-            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v1", "QueryType", 2, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", BuildingName, "BuildingStreet", BuildingStreet, "StreetNo", StreetNo, "City", City, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v2", "QueryType", 2, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", null, "DealType", 0, "PurposeType", 0, "SizeMin", 0, "SizeMax", 0, "BuildingName", BuildingName, "StreetId", StreetId, "StreetNo", StreetNo, "CityCode", CityCode, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<BuildingQueryView> ViewByArgs(int QueryType, int PageSize, int PageNum,
@@ -355,7 +252,7 @@ namespace Pro.Data.Entities
            string Filter
            )
         {
-            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v1", "QueryType", QueryType, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "BuildingName", null, "BuildingStreet", null, "StreetNo", null, "City", null, "Sort", Sort, "Filter", Filter);
+            return DbNatam.Instance.ExecuteList<BuildingQueryView>("sp_Query_Unit_Building_v2", "QueryType", QueryType, "PageSize", PageSize, "PageNum", PageNum, "IdArg", 0, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "BuildingName", null, "StreetId", 0, "StreetNo", null, "CityCode", 0, "Sort", Sort, "Filter", Filter);
         }
 
         public static IEnumerable<BuildingQueryView> View(
@@ -367,9 +264,9 @@ namespace Pro.Data.Entities
            int SizeMin,
            int SizeMax,
            string BuildingName,
-           string BuildingStreet,
+           int StreetId,
            string StreetNo,
-           string City,
+           int CityCode,
            int OwnerId,
            int BuildingId,
             string Sort,
@@ -382,7 +279,7 @@ namespace Pro.Data.Entities
                 case 10:
                     return ViewByArgs(QueryType, PageSize, PageNum,AreaId, DealType, PurposeType, SizeMin, SizeMax,Sort,Filter);
                 case 2:
-                    return ViewByAddress(PageSize, PageNum, BuildingName, BuildingStreet, StreetNo, City,Sort,Filter);
+                    return ViewByAddress(PageSize, PageNum, BuildingName, StreetId, StreetNo, CityCode,Sort,Filter);
                 case 3:
                     return ViewByOwner(OwnerId,PageSize, PageNum,Sort,Filter);
                 case 4:
@@ -473,51 +370,11 @@ namespace Pro.Data.Entities
         public int AreaId { get; set; }
     }
 
+    [EntityMapping( ViewName = "dv_Building")]
     public class BuildingView : IEntityItem//EntityItem<DbNatam>, IEntityItem
     {
-        #region override
-
-        //public override string GetMappingName()
-        //{
-        //     return "Crm_Building";
-        //}
-
-        //public override EntityValidator Validate(UpdateCommandType commandType = UpdateCommandType.Update)
-        //{
-        //    EntityValidator validator = new EntityValidator("עדכון בניין", "he");
-
-        //    validator.Required(BuildingName, "שם בניין");
-        //    validator.Required(Street, "רחוב");
-        //    validator.Required(City, "עיר");
-        //    validator.Required(StreetNum, "מס בניין");
-        //    return validator;
-        //}
-        #endregion
-
-        //public static IEnumerable<BuildingView> View()
-        //{
-        //    return DbNatam.Instance.EntityItemList<BuildingView>(TableName, null);
-        //}
-
-        //public static BuildingView View(int BuildingId)
-        //{
-        //    return DbNatam.Instance.EntityGet<BuildingView>(TableName, BuildingId);
-        //}
-        //public static BuildingView Current(int BuildingId)
-        //{
-        //    if (BuildingId > 0)
-        //        return View(BuildingId);
-        //    return new BuildingView();
-        //}
-
-       
-
-        //public int Update(BuildingView b)
-        //{
-        //    return DbNatam.Instance.UpdateEntity<BuildingView>(MappingName,this,b,b.BuildingId>0? UpdateCommandType.Update: UpdateCommandType.Insert);
-        //}
-        
-        public const string TableName = "Crm_Building";
+                 
+        public const string TableName = "dv_Building";
 
 
         [EntityProperty(EntityPropertyType.Identity)]
@@ -526,21 +383,17 @@ namespace Pro.Data.Entities
         public string BuildingName { get; set; }
         [Validator("אזור", true)]
         public int AreaId { get; set; }
+       
         [Validator("רחוב", true)]
-        public string Street { get; set; }
+        public int StreetId { get; set; }
         [Validator("מספר בית", true)]
         public string StreetNo { get; set; }
         [Validator("עיר", true)]
-        public string City { get; set; }
+        public int CityCode { get; set; }
         public int ZipCode { get; set; }
         public string PurposeType { get; set; }
         public string BuildingClass { get; set; }
         
-
-        //public float BuildingSizeTrade { get; set; }
-        //public float BuildingSizeOffice { get; set; }
-        //public float BuildingSizeTotal { get; set; }
-        //public float BuildingSizeNoParks { get; set; }
         public int ElevatorNo { get; set; }
         public DateTime? BuildingPopulateTime { get; set; }
         public int ManagementCompany { get; set; }
@@ -552,17 +405,10 @@ namespace Pro.Data.Entities
         public int ParkingNo { get; set; }
         public int AirConditionType { get; set; }
         public bool Investment { get; set; }
-        //public string BuildingAdmin { get; set; }
-        //public string BuildingAdminPhone { get; set; }
-        //public string BuildingAdminMail { get; set; }
-        //public string BuildingAdmin2 { get; set; }
-        //public string BuildingAdmin2Phone { get; set; }
-        //public string BuildingAdmin2Mail { get; set; }
         public string BuildingGrossNet { get; set; }
         public float OverloadGround { get; set; }
         public float OverloadUp { get; set; }
         public float ManagementFees { get; set; }
-        //public float BuildingBasementSize { get; set; }
         public int AgentId { get; set; }
         public string PicPath { get; set; }
         public string Memo { get; set; }
@@ -571,12 +417,15 @@ namespace Pro.Data.Entities
         public int FloorDefined { get; set; }
         public int ActiveState { get; set; }
         public float ParkingPrice { get; set; }
-        
+
 
         //view only
         [EntityProperty(EntityPropertyType.View)]
+        public string CityName { get; set; }
+        [EntityProperty(EntityPropertyType.View)]
+        public string StreetName { get; set; }
+        [EntityProperty(EntityPropertyType.View)]
         public DateTime LastUpdate { get; set; }
-
         [EntityProperty( EntityPropertyType.View)]
         public string SizeTrade { get; set; }
         [EntityProperty( EntityPropertyType.View)]
@@ -616,40 +465,7 @@ namespace Pro.Data.Entities
 
     public class BuildingQueryView : BuildingView, IEntityItem
     {
-        /*
-        public static IEnumerable<BuildingQueryView> ViewPropertyBuilding(
-         int QueryType,
-         int IArg,
-         string AreaId,
-         int DealType,
-         int PurposeType,
-         int SizeMin,
-         int SizeMax,
-         string BuildingName,
-         string BuildingStreet,
-         int BuildingNo
-         )
-        {
-            var parameters = new object[] { "QueryType", QueryType, "IArg", IArg, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "BuildingName", BuildingName, "BuildingStreet", BuildingStreet, "BuildingNo", BuildingNo };
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Property_Building_Query", parameters);
-        }
-
-        public static IEnumerable<BuildingQueryView> View(
-           int QueryType,
-           string AreaId,
-           int DealType,
-           int PurposeType,
-           int SizeMin,
-           int SizeMax,
-           string BuildingName,
-           string BuildingStreet,
-           int BuildingNo
-           )
-        {
-            var parameters = new object[] { "QueryType", QueryType, "AreaId", AreaId, "DealType", DealType, "PurposeType", PurposeType, "SizeMin", SizeMin, "SizeMax", SizeMax, "BuildingName", BuildingName, "BuildingStreet", BuildingStreet, "BuildingNo", BuildingNo };
-            return DbNatam.Instance.ExecuteQuery<BuildingQueryView>("sp_Building_Query", parameters);//, System.Data.CommandType.StoredProcedure);
-        }
-        */
+    
         public int TotalRows { get; set; }
         public string OwnerName { get; set; }
        
@@ -661,49 +477,10 @@ namespace Pro.Data.Entities
     {
         const string TableName = "vw_BuildingInfo";
 
-        //public static BuildingInfoView View(int BuildingId)
-        //{
-        //    var parameters = new object[] { "BuildingId", BuildingId};
-        //    var model = DbNatam.Instance.QuerySingle<BuildingInfoView>("select * from " + TableName + " where BuildingId=@BuildingId", parameters);
-        //    if (model != null)
-        //    {
-        //        model.FloorNum = 0;
-        //        model.PropertyType = 1;
-        //    }
-        //    return model;
-        //}
-
-        //public static BuildingInfoView View(int BuildingId, int FloorNum)
-        //{
-        //    var parameters = new object[] { "BuildingId", BuildingId };
-        //    var model = DbNatam.Instance.QuerySingle<BuildingInfoView>("select * from " + TableName + " where BuildingId=@BuildingId", parameters);
-        //    if (model != null)
-        //    {
-        //        model.FloorNum = FloorNum;
-        //        model.PropertyType = 0;
-        //    }
-        //    return model;
-        //}
-
-
         public static BuildingInfoView View(int BuildingId, int FloorNum, int PropertyType)
         {
             BuildingInfoView model = DbNatam.Instance.ExecuteSingle<BuildingInfoView>("sp_BuildingFloorInfo", "BuildingId", BuildingId, "FloorNum", FloorNum, "PropertyType", PropertyType);
 
-            //if (PropertyType == 0)
-            //{
-            //    model = DbNatam.Instance.ExecuteSingle<BuildingInfoView>("sp_BuildingFloorInfo", "BuildingId", BuildingId, "FloorNum", FloorNum, "PropertyType", PropertyType);
-            //}
-            //else
-            //{
-            //    model = new BuildingInfoView()
-            //    {
-            //        BuildingId = BuildingId,
-            //        BuildingName = BuildingContext.LookupBuildingName(BuildingId),
-            //        FloorNum = FloorNum,
-            //        PropertyType = PropertyType
-            //    };
-            //}
             return model;
         }
 

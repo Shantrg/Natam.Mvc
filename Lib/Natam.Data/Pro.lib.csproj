@@ -43,6 +43,8 @@
     <Reference Include="WebMatrix.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Admin\AdContext.cs" />
+    <Compile Include="Entities\Building\CityView.cs" />
     <Compile Include="Entities\Building\EntityProp.cs" />
     <Compile Include="Entities\Building\PlotsView.cs" />
     <Compile Include="Entities\Building\PropertyView.cs">
@@ -55,7 +57,9 @@
     <Compile Include="Entities\Crm\TransactionView.cs" />
     <Compile Include="Entities\Crm\LeadUnitsView.cs" />
     <Compile Include="Entities\Enums.cs" />
+    <Compile Include="Entities\IEntityProp.cs" />
     <Compile Include="Entities\Lists.cs" />
+    <Compile Include="Entities\EntityProCache.cs" />
     <Compile Include="Lib\TraceHelper.cs" />
     <Compile Include="Models\AccountQuery.cs" />
     <Compile Include="Models\CommonQuery.cs" />
@@ -104,6 +108,10 @@
     <Folder Include="Entities\_Exclude\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Channels\Nistec.Channels\Nistec.Channels.csproj">
+      <Project>{0839a364-a34d-4143-ad4c-aef4c7b232ac}</Project>
+      <Name>Nistec.Channels</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\Nistec\Git_4.0.2.0\Nistec.Data\Nistec.Data\Nistec.Data.csproj">
       <Project>{d5fd6c68-86ea-48bf-8f6d-29ce57419500}</Project>
       <Name>Nistec.Data</Name>

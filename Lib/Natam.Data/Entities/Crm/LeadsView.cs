@@ -61,7 +61,7 @@ namespace Pro.Data.Entities
             };
             var parameters=DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res= DbNatam.Instance.ExecuteNonQuery("sp_Leads_Update", parameters, System.Data.CommandType.StoredProcedure );
+            int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Update", parameters, System.Data.CommandType.StoredProcedure );
             v.LeadId = Types.ToInt( parameters[0].Value);
             return res;
         }
@@ -71,7 +71,7 @@ namespace Pro.Data.Entities
  
             var parameters = DataParameter.GetSqlList("LeadId",LeadId,"UserId",UserId);
             DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Leads_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Delete", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             var status = Types.ToInt(parameters[2].Value);
             return status;
         }
@@ -80,7 +80,7 @@ namespace Pro.Data.Entities
         {
             var parameters = DataParameter.GetSqlList("LeadId", LeadId, "UnitId", UnitId,"Action",action);
             //DataParameter.AddOutputParameter(parameters, "Status", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Leads_Property_Action", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Property_Action", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             //var status = Types.ToInt(parameters[2].Value);
             return res;
         }
@@ -102,7 +102,7 @@ namespace Pro.Data.Entities
             var parameters = DataParameter.GetSqlList("ValidateType", 1, "CustomerName", customerName, "AgentId", userId);
             DataParameter.AddOutputParameter(parameters, "Result", System.Data.SqlDbType.NVarChar, 4000);
             //parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Leads_Validity", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Validity", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             result = Types.NZ(parameters[3].Value, "");
             if (result == "ok" || result == "none" || result == "")
                 return "ok";
@@ -122,7 +122,7 @@ namespace Pro.Data.Entities
         {
             var parameters = DataParameter.GetSqlList("LeadId", LeadId, "AgentId", AgentId);
             DataParameter.AddOutputParameter(parameters, "NewId", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteNonQuery("sp_Leads_Transfer", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Transfer", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
             int newid = Types.ToInt(parameters[2].Value, 0);
 
             return newid;
@@ -169,27 +169,26 @@ namespace Pro.Data.Entities
              return DbNatam.Instance.ExecuteNonQuery("sp_Leads_List_Update", "LeadId", LeadId, "UnitId", UnitId,"Comment",Comment);
          }
 
-        
+
 
         #endregion
+
+        #region Agent Broadcast
+
+        public static AgentBroadcast AgentBroacastGet(int AgentId)
+        {
+            var ab = DbNatam.Instance.ExecuteSingle<AgentBroadcast>("sp_Crm_Mail_Message_Agent", "Mode", 0, "AgentId", AgentId);
+            return ab;
+        }
+        public static int AgentBroacastUpdate(int AgentId, int Area, int Purpose, int DealType,int Size)
+        {
+            var res = DbNatam.Instance.ExecuteNonQuery("sp_Crm_Mail_Message_Agent", "Mode", 1, "AgentId", AgentId, "Area", Area, "Purpose", Purpose, "DealType", DealType, "Size", Size);
+            return res;
+        }
+        #endregion
+
+
     }
-
-    //public class LeadsListView : LeadsView
-    //{
-
-    //    public static IEnumerable<LeadsListView> ViewByAgent(int AgentId)
-    //    {
-    //        return DbNatam.Instance.EntityItemList<LeadsListView>("vw_Leads", "AgentId", AgentId);
-    //    }
-
-        
-    //    public string PurposeName { get; set; }
-        
-    //    public string DealName { get; set; }
-        
-    //    public string AreaName { get; set; }
-    //}
-
     public class LeadsView : IEntityItem//EntityItem<DbNatam>, IEntityItem
     {
         #region override
@@ -206,22 +205,6 @@ namespace Pro.Data.Entities
         //    return validator;
         //}
         #endregion
-
-
-        //public static IEnumerable<LeadsView> View()
-        //{
-        //    return DbNatam.Instance.EntityItemList<LeadsView>(TableName, null);
-        //}
-        //public static LeadsView View(int LeadId)
-        //{
-        //    return DbNatam.Instance.EntityItemGet<LeadsView>(TableName,"LeadId", LeadId);
-        //}
-
-        
-        
-
-        //public const string TableName = "Crm_Leads";
-
 
         #region properties
 
@@ -298,4 +281,21 @@ namespace Pro.Data.Entities
         //}
     }
 
+    public class AgentBroadcast : IEntityItem
+    {
+        [EntityProperty(EntityPropertyType.Key)]
+        public int AgentId { get; set; }
+
+        public int Area { get; set; }
+        public int Purpose { get; set; }
+        public int DealType { get; set; }
+        public int Size { get; set; }
+
+        [EntityProperty(EntityPropertyType.View)]
+        public string AgentName { get; set; }
+
+
+        
+
+    }
 }

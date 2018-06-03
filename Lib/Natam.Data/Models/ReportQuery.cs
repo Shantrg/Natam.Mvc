@@ -17,8 +17,22 @@ namespace Pro.Models
         {
             try
             {
-                var parameters = DataParameter.GetSql("ReportType", ReportType, "Area", Area, "Arg1", Arg1, "Arg2", Arg2, "Arg3", Arg3);
-                var dt = DbNatam.Instance.ExecuteCommand<DataTable>("sp_Report", parameters, CommandType.StoredProcedure);
+                var parameters = DataParameter.GetSql("ReportType", ReportType, "IsExport", true, "Area", Area, "Arg1", Arg1, "Arg2", Arg2, "Arg3", Arg3);
+                var dt = DbNatam.Instance.ExecuteCommand<DataTable>("sp_Report_v1", parameters, CommandType.StoredProcedure);
+                return dt;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public IList<Dictionary<string,object>> ReportByQuery()//int ReportType, string Area, string Arg1, string Arg2, string Arg3)
+        {
+            try
+            {
+                //var parameters = DataParameter.GetSql("ReportType", ReportType, "Area", Area, "Arg1", Arg1, "Arg2", Arg2, "Arg3", Arg3);
+                var dt = DbNatam.Instance.ExecuteDictionary("sp_Report_v1", "ReportType", ReportType, "IsExport", false, "Area", Area, "Arg1", Arg1, "Arg2", Arg2, "Arg3", Arg3);
                 return dt;
             }
             catch (Exception)
@@ -41,8 +55,8 @@ namespace Pro.Models
                     break;
                   case 2:
                     ReportName = "properties_by_address";
-                    Arg1 = Request.Form["building_city"];
-                    Arg2 = Request.Form["building_street"];
+                    Arg1 = Request.Form["CityCode"];
+                    Arg2 = Request.Form["StreetId"];
                     break;
                   case 3:
                     ReportName = "owners_by_area";

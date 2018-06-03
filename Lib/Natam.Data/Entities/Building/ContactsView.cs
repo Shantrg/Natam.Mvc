@@ -189,8 +189,11 @@ namespace Pro.Data.Entities
         public string Details { get; set; }
         public bool EnableNewsletter { get; set; }
         public bool IsNA { get; set; }
-       // public int UserId { get; set; }
+        public bool IsPrimary { get; set; }
         
+
+        // public int UserId { get; set; }
+
         //0=no role,1=BuildingContact
         public int Role { get; set; }
 

@@ -58,8 +58,12 @@
         margin-right: 10px;
         width: 115px;
     }
-    #contacts {
+    /*#contacts {
         border: none;
+    }*/
+     #jqxTabs{ float:right}
+    .panel-window {
+        max-width: 900px !important;
     }
 </style>
 
@@ -182,7 +186,7 @@
             $("#jqxgrid").jqxGrid(
             {
                 width: '98%',
-                height:'300px',
+                height:300,
                 //selectionmode: 'checkbox',
                 autoheight: false,
                 rtl: true,
@@ -237,7 +241,8 @@
                 alert("לא סומן לקוח!");
                 return;
             }
-            window.parent.triggerPopertyTransComplete(unitId,clientId, contactId);
+            if (window.parent.app_trigger && window.parent.app_trigger.triggerPropertyTransComplete)
+            window.parent.app_trigger.triggerPropertyTransComplete(unitId,clientId, contactId);
 
         });
 
@@ -280,7 +285,7 @@
             //Listbox's source
             //Initializing the wizzard - creating all elements, adding event handlers and starting the validation
             init: function () {
-                $('#jqxTabs').jqxTabs({ height: 490, width: 980, keyboardNavigation: false, rtl:true });
+                $('#jqxTabs').jqxTabs({ width: '100%', keyboardNavigation: false, rtl: true });
                 $('#nextButton1').jqxButton({ width: 50 });
                 $('#nextButton2').jqxButton({ width: 50 });
                 $('#backButton2').jqxButton({ width: 50 });
