@@ -80,7 +80,7 @@ namespace Natam.Mvc.Controllers
 
         protected bool IsAdmin()
         {
-            var signedUser = SignedUser.GetAdmin(Request.RequestContext.HttpContext);
+            var signedUser = SignedUser.Get(Request.RequestContext.HttpContext, UserRole.Admin);
             if (signedUser == null)
             {
                 return false;
@@ -134,7 +134,7 @@ namespace Natam.Mvc.Controllers
         }
         protected SignedUser GetAdminSignedUser()
         {
-            var signedUser = SignedUser.GetAdmin(Request.RequestContext.HttpContext);
+            var signedUser = SignedUser.Get(Request.RequestContext.HttpContext, UserRole.Admin);
             if (signedUser == null)
             {
                 return null;
@@ -164,7 +164,7 @@ namespace Natam.Mvc.Controllers
 
         protected ActionResult AuthenticateAdmin(object value)
         {
-            var signedUser = SignedUser.GetAdmin(Request.RequestContext.HttpContext);
+            var signedUser = SignedUser.Get(Request.RequestContext.HttpContext, UserRole.Admin);
             if (signedUser == null || !signedUser.IsAdmin)
             {
                 return RedirectToAction("Manager", "Admin");
