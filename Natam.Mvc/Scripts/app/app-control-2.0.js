@@ -395,19 +395,19 @@ var app_select = {
     BroadcastDealType: function (tag, value) {
         if (tag === undefined)
             tag = "#DealType";
-        var selectValues = { "0": "הכל","2": "מכירה", "3": "שכירות"};
+        var selectValues = { "0": "הכל","1": "מכירה", "2": "שכירות"};
         app_select.loadSelect(tag, selectValues, 0, value);
     },
     BroadcastPurposeType: function (tag, value) {
         if (tag === undefined)
             tag = "#PurposeType";
-        var selectValues = {  "0": "הכל", "2": "משרדים", "3": "תעשיה", "4": "מסחר", "5": "מחסנים", "6": "מגורים", "7": "חניה"};
+        var selectValues = {  "0": "הכל", "1": "משרדים", "2": "תעשיה", "4": "מסחר", "8": "מחסנים", "16": "מגורים", "32": "חניה"};
         app_select.loadSelect(tag, selectValues, 0, value);
     },
     BroadcastAreaType: function (tag, value) {
         if (tag === undefined)
             tag = "#AreaType";
-        var selectValues = {  "0": "הכל","1": "מרכז", "2": "צפון", "3": "דרום", "4": "ירושלים", "5": "שפלה", "6": "שרון"};//, "7": "תל אביב"};
+        var selectValues = {  "0": "הכל","1": "מרכז", "2": "צפון", "4": "דרום", "8": "ירושלים", "16": "שפלה", "32": "שרון"};//, "7": "תל אביב"};
         app_select.loadSelect(tag, selectValues, 0, value);
     },
     BroadcastSize: function (tag, value) {

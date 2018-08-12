@@ -130,12 +130,12 @@ app_accounts_grid = {
                 { name: 'Address', type: 'string' },
                 { name: 'City', type: 'string' },
                 { name: 'ZipCode', type: 'number' },
-                //{ name: 'ContactName', type: 'string' },
+                { name: 'ContactName', type: 'string' },
                 { name: 'Phone1', type: 'string' },
                 { name: 'Phone2', type: 'string' },
                 { name: 'Phone3', type: 'string' },
                 { name: 'Creation', type: 'date' },
-                //{ name: 'Email', type: 'string' },
+                { name: 'Email', type: 'string' },
                 { name: 'Fax', type: 'string' },
                 { name: 'WebSite', type: 'string' },
                 { name: 'Details', type: 'string' }
@@ -344,16 +344,17 @@ app_accounts_grid = {
                       return '<a href="javascript:app_accounts_public.customers_accountEdit(' + value + ')" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;margin:8px 8px"></i></a>';
                   }
               },
-              { text: 'שם ' + app_accounts.displayAccountType(slf.AccType), dataField: 'AccountName', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
+              { text: 'שם ' + app_accounts.displayAccountType(slf.AccType), dataField: 'AccountName', filtercondition: 'CONTAINS', width: 150, cellsalign: 'right', align: 'center' },
               //{ text: 'סוג לקוח', dataField: 'AccountType', width: 100, cellsalign: 'right', align: 'center' },
-              { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: slf.isMobile },
-              { text: 'כתובת', dataField: 'Address', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: slf.isMobile },
-              //{ text: 'איש קשר', dataField: 'ContactName', filtercondition: 'starts_with', width: 120, cellsalign: 'right', align: 'center' },
+              { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center', hidden: slf.isMobile },
+              { text: 'כתובת', dataField: 'Address', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center', hidden: slf.isMobile },
+              { text: 'איש קשר', dataField: 'ContactName', filtercondition: 'starts_with', width: 120, cellsalign: 'right', align: 'center' },
               {
                   text: 'טלפון', dataField: 'Phone1', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center', cellsrenderer: function (row, datafield, value) {
                       return isMobile ? '<a style="float:right;"  href="tel:' + value + '">' + value + '</a>' : '<span style="float:right">' + value + '</span>';
                   }
               },
+              { text: 'דואל', dataField: 'Email', filtercondition: 'starts_with', cellsalign: 'right', align: 'center' },
               { text: 'מועד עדכון', type: 'date', dataField: 'Creation', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center', hidden: slf.isMobile }
             ]
         });

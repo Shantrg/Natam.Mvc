@@ -206,14 +206,14 @@ app_units_grid = {
                     //return '<div style="text-align:center"><a href="UnitDef?id=' + value + '&bid=' + 0 + '&floor=0&op=0" >הצג</a></div>';
                 }
               }, 
-              { text: 'שם בניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center' },
-              { text: 'כתובת', dataField: 'Address',  cellsalign: 'right', align: 'center' },
-              { text: 'עיר', dataField: 'CityName', cellsalign: 'right', align: 'center' },
-              { text: 'שטח', dataField: 'UnitSize', cellsalign: 'right', align: 'center' },
-              { text: 'קומה', dataField: 'FloorNum', cellsalign: 'right', align: 'center' },
-              { text: 'סוג', dataField: 'PropertyTypeName', cellsalign: 'right', align: 'center' },
+              { text: 'שם בניין', dataField: 'BuildingName', width: 150, cellsalign: 'right', align: 'center' },
+              { text: 'כתובת', dataField: 'Address', width: 150, cellsalign: 'right', align: 'center' },
+              { text: 'עיר', dataField: 'CityName', width: 150, cellsalign: 'right', align: 'center' },
+              { text: 'שטח', dataField: 'UnitSize', width: 60, cellsalign: 'right', align: 'center' },
+              { text: 'קומה', dataField: 'FloorNum', width: 60, cellsalign: 'right', align: 'center' },
+              { text: 'סוג', dataField: 'PropertyTypeName', width: 70, cellsalign: 'right', align: 'center' },
               
-              { text: 'מחיר', dataField: 'Price', cellsalign: 'right', align: 'center' },
+              { text: 'מחיר', dataField: 'Price', width: 60, cellsalign: 'right', align: 'center' },
               { text: 'מאוכלס', datafield: 'Populate', threestatecheckbox: true, columntype: 'checkbox', width: 70, cellsalign: 'right', align: 'center', hidden: slf.isMobile },
               { text: 'בעלים', dataField: 'OwnerName', cellsalign: 'right', align: 'center', hidden: slf.isMobile },
               { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center', hidden: slf.isMobile }

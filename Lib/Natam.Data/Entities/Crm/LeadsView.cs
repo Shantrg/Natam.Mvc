@@ -61,7 +61,7 @@ namespace Pro.Data.Entities
             };
             var parameters=DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Update", parameters, System.Data.CommandType.StoredProcedure );
+            int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Update_v1", parameters, System.Data.CommandType.StoredProcedure );
             v.LeadId = Types.ToInt( parameters[0].Value);
             return res;
         }
@@ -118,25 +118,31 @@ namespace Pro.Data.Entities
             return message;
         }
 
-        public static int Leads_Transfer(int LeadId, int AgentId)
+        public static int Leads_Transfer(int LeadId, string TransFerTo, bool EnableEmail)
         {
-            var parameters = DataParameter.GetSqlList("LeadId", LeadId, "AgentId", AgentId);
-            DataParameter.AddOutputParameter(parameters, "NewId", System.Data.SqlDbType.Int, 4);
-            int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Transfer", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
-            int newid = Types.ToInt(parameters[2].Value, 0);
-
-            return newid;
-
-            //if (newid > 0)
-            //    return "הלקוח כולל כל הפרטים הנלווים הועברו";
-            //if (newid == -1)
-            //    return "נתונים שגויים, פרטי הסוכן המיועד אינם תקינים";
-            //if (newid == -2)
-            //    return "נתונים שגויים, הלקוח או הסוכן המיועד אינם תקינים";
-            //else
-            //    return "אירעה שגיאה, הנתונים לא הועברו";
-
+            int returnValue = DbNatam.Instance.ExecuteReturnValue("sp_Leads_Transfer_v1",0, "LeadId", LeadId, "TransFerTo", TransFerTo, "EnableEmail", EnableEmail);
+            return returnValue;
         }
+
+        //public static int Leads_Transfer(int LeadId, int AgentId)
+        //{
+        //    var parameters = DataParameter.GetSqlList("LeadId", LeadId, "AgentId", AgentId);
+        //    DataParameter.AddOutputParameter(parameters, "NewId", System.Data.SqlDbType.Int, 4);
+        //    int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Leads_Transfer", parameters.ToArray(), System.Data.CommandType.StoredProcedure);
+        //    int newid = Types.ToInt(parameters[2].Value, 0);
+
+        //    return newid;
+
+        //    //if (newid > 0)
+        //    //    return "הלקוח כולל כל הפרטים הנלווים הועברו";
+        //    //if (newid == -1)
+        //    //    return "נתונים שגויים, פרטי הסוכן המיועד אינם תקינים";
+        //    //if (newid == -2)
+        //    //    return "נתונים שגויים, הלקוח או הסוכן המיועד אינם תקינים";
+        //    //else
+        //    //    return "אירעה שגיאה, הנתונים לא הועברו";
+
+        //}
 
 
         public static IEnumerable<LeadsView> ViewByQuery(int QueryType, int AgentId, string CustomerName, string ContactName, string DealType, string PurposeType, string AreaType, int RequestSize)
@@ -175,9 +181,9 @@ namespace Pro.Data.Entities
 
         #region Agent Broadcast
 
-        public static AgentBroadcast AgentBroacastGet(int AgentId)
+        public static AgentBroadcastArgs AgentBroacastGet(int AgentId)
         {
-            var ab = DbNatam.Instance.ExecuteSingle<AgentBroadcast>("sp_Crm_Mail_Message_Agent", "Mode", 0, "AgentId", AgentId);
+            var ab = DbNatam.Instance.ExecuteSingle<AgentBroadcastArgs>("sp_Crm_Mail_Message_Agent", "Mode", 0, "AgentId", AgentId);
             return ab;
         }
         public static int AgentBroacastUpdate(int AgentId, int Area, int Purpose, int DealType,int Size)
@@ -294,8 +300,20 @@ namespace Pro.Data.Entities
         [EntityProperty(EntityPropertyType.View)]
         public string AgentName { get; set; }
 
+    }
 
-        
+    public class AgentBroadcastArgs : IEntityItem
+    {
+        [EntityProperty(EntityPropertyType.Key)]
+        public int AgentId { get; set; }
+
+        public string Area { get; set; }
+        public string Purpose { get; set; }
+        public string DealType { get; set; }
+        public string Size { get; set; }
+
+        [EntityProperty(EntityPropertyType.View)]
+        public string AgentName { get; set; }
 
     }
 }

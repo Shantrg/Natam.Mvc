@@ -136,12 +136,13 @@
                         var pid = $('#ParentId').val();
                         //$('#contactForm')[0].reset();
                         $('#ParentId').val(pid);
-                        //$('#ContactId').val(data.OutputId);
+                        if (data.OutputId > 0)
+                            $('#ContactId').val(data.OutputId);
                         if (parent.app_trigger && parent.app_trigger.triggerContactComplete)
                             parent.app_trigger.triggerContactComplete(data.OutputId, '@op');
                     }
                     else {
-                        alert(data.Message);
+                        app_dialog.alert(data.Message);
                     }
                 });
 

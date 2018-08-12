@@ -49,7 +49,7 @@
     $(document).ready(function () {
         JSON.useDateParser();
         var theme = 'Arctic';
-       
+        
          def = new app_leads_def(parseInt('@id'), parseInt('@ViewBag.UserId'), parseInt('@ViewBag.UserRole'));
 
          //prepare the data
@@ -95,71 +95,80 @@
                         <input id="LeadId" type="hidden" name="LeadId" />
                         <input id="UploadKey" type="hidden" name="UploadKey" />
                         <input id="ValidateResult" type="hidden" />
-
                         <div id="accordion" class="jcx-tabs rtl">
                             <ul class="jcx-tabs-nav" id="tab-form">
                                 <li class="active"><a id="linkA" data-toggle="tab" href="#tab1">פרטי לקוח</a></li>
-                                <li><a id="linkB" data-toggle="tab" href="#tab2">נתונים כללים</a></li>
-                                <li><a id="linkC" data-toggle="tab" href="#tab3">רשימת נכסים</a></li>
-                                <li><a id="linkD" data-toggle="tab" href="#tab4">מעקב שיחות</a></li>
+                                <li><a id="linkB" data-toggle="tab" href="#tab2">אנשי קשר לקוח</a></li>
+                                <li><a id="linkC" data-toggle="tab" href="#tab3">נתונים כללים</a></li>
+                                <li><a id="linkD" data-toggle="tab" href="#tab4">רשימת נכסים</a></li>
+                                <li><a id="linkE" data-toggle="tab" href="#tab5">מעקב שיחות</a></li>
+                                <li><a id="linkF" data-toggle="tab" href="#tab6">העברה לסוכן</a></li>
                             </ul>
                             <div id="tab1" class="jcxtab-panel active">
                                 <div class="panel-area">
                                     <div class="panel-area-title">פרטי לקוח</div>
-                                    <a id="checkAccountValidity" href="#">בדיקה</a>
+ 
+                                            <a id="checkAccountValidity" href="#">בדיקה</a>
 
-                                    <div class="form-group">
-                                        <label class="column">
-                                            שם חברה:<span class="mandatory">(*)</span>
-                                        </label>
-                                        <input id="CustomerName" type="text" name="CustomerName" class="text" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            כתובת:
-                                        </label>
-                                        <input id="Address" name="Address" type="text" class="text-mid" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            עיר:
-                                        </label>
-                                        <input id="City" name="City" type="text" class="text-mid" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            טלפון-1 :
-                                        </label>
-                                        <input id="Phone" type="text" name="Phone" class="text" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            טלפון-2 :
-                                        </label>
-                                        <input id="Phone2" type="text" name="Phone2" class="text" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            מספר פקס :
-                                        </label>
-                                        <input id="Fax" name="Fax" type="text" class="text-mid" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            תאריך רישום מקורי:
-                                        </label>
-                                        <input id="Creation" readonly="readonly" type="text" class="text" />
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="column">
-                                            מועד עדכון:
-                                        </label>
-                                        <input id="LastUpdate" readonly="true" type="text" class="text" />
-                                    </div>
-                                    <div id="contactsGrid"></div>
-                                </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    שם חברה:<span class="mandatory">(*)</span>
+                                                </label>
+                                                <input id="CustomerName" type="text" name="CustomerName" class="text" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    כתובת:
+                                                </label>
+                                                <input id="Address" name="Address" type="text" class="text-mid" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    עיר:
+                                                </label>
+                                                <input id="City" name="City" type="text" class="text-mid" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    טלפון-1 :
+                                                </label>
+                                                <input id="Phone" type="text" name="Phone" class="text" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    טלפון-2 :
+                                                </label>
+                                                <input id="Phone2" type="text" name="Phone2" class="text" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    מספר פקס :
+                                                </label>
+                                                <input id="Fax" name="Fax" type="text" class="text-mid" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    תאריך רישום מקורי:
+                                                </label>
+                                                <input id="Creation" readonly="readonly" type="text" class="text" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="column">
+                                                    מועד עדכון:
+                                                </label>
+                                                <input id="LastUpdate" readonly="true" type="text" class="text" />
+                                            </div>
+                                        </div>
                             </div>
                             <div id="tab2" class="jcxtab-panel">
+                                <div class="panel-area" id="tab3-entry">
+                                    <div class="panel-area-title">אנשי קשר</div>
+                                    <div style="direction: rtl; text-align: right">
+                                        <div id="contactsGrid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tab3" class="jcxtab-panel">
                                 <div class="panel-area">
                                     <div class="panel-area-title">נתונים כללים</div>
                                     <div class="form-group">
@@ -222,15 +231,8 @@
                                     </div>
                                     <div id="partial-tab2"></div>
                                 </div>
-                                <div class="panel-area">
-                                    <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
-                                    <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
-                                    <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
-                                    <input id="linkTransAdvice" type="button" value="דוח עסקת ייעוץ" class="btn-default btn2" />
-                                    <input id="linkTransfer" type="button" value="העברה לסוכן" class="btn-default btn2" />
-                                </div>
                             </div>
-                            <div id="tab3" class="jcxtab-panel">
+                            <div id="tab4" class="jcxtab-panel">
                                 <div class="panel-area" id="tab3-entry">
                                     <div class="panel-area-title">רשימת נכסים</div>
                                     <div>
@@ -239,15 +241,13 @@
                                     <div id="partial-tab3"></div>
                                     <div>
                                         <h3><span>רשימת נכסים</span>-<a href="#" id="btnPropertyRefresh">רענון</a></h3>
-
                                         <div>
-                                            <iframe id="property-iframe" style="width: 900px; height: 480px; text-align: right" frameborder="0"></iframe>
-                                            @*@Html.Action("_LeadPropertyGrid", "Common", new { id = @id })*@
+                                            <iframe id="property-iframe" style="width: 900px; height: 480px; text-align: right;" frameborder="0" scrolling="no"></iframe>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="tab4" class="jcxtab-panel">
+                            <div id="tab5" class="jcxtab-panel">
                                 <div class="panel-area">
                                     <div class="panel-area-title">מעקב שיחות</div>
                                     <div>
@@ -256,16 +256,50 @@
                                 </div>
                                 <div id="partial-tab4"></div>
                             </div>
+                            <div id="tab6" class="jcxtab-panel">
+                                <div class="panel-area" id="tab3-entry">
+                                    <div class="panel-area-title">העברה לסוכן</div>
+                                    <div style="direction: rtl; text-align: right">
+                                        <div id="divCategory" class="form-group">
+                                            <label class="column">
+                                                בחירת סוכן :
+                                            </label>
+                                            <div id="listTransferAgents"></div>
+                                            <input type="checkbox" id="allTransferAgents" /><span>שליחה לכולם</span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="column">
+                                                קוד סוכן :
+                                            </label>
+                                            <input id="TransferToAgent" name="TransferToAgent" type="text" readonly />
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" id="EnableTransferEmail" name="EnableTransferEmail" /><span>האם לשלוח בדואל</span>
+                                        </div>
+                                        @*<div class="form-group">
+                                            <label class="column">
+                                                קוד לקוח:
+                                            </label>
+                                            <input id="LeadId" name="LeadId" type="text" readonly />
+                                        </div>*@
+                                        <div style="height: 5px"></div>
+                                        <div id="transfer-command">
+                                            <input id="accTransferSubmit" class="btn-default btn7" type="button" value="העברה לסוכן" />
+                                            @*<input id="accTransferCancel" class="btn-default btn7" type="button" value="ביטול" />*@
+                                        </div>
+                                        <span dir="rtl" class="mandatory">שדות חובה(*)</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
+                        <div class="panel-area">
+                            <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                            <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
+                            <input id="linkTransaction" type="button" value="דוח סיכום עסקה" class="btn-default btn2" />
+                            <input id="linkTransAdvice" type="button" value="דוח עסקת ייעוץ" class="btn-default btn2" />
+                            @*<input id="linkTransfer" type="button" value="העברה לסוכן" class="btn-default btn2" />*@
+                        </div>
                     </form>
-
-                    @*<div style="text-align: center">
-                            <iframe id="form-iframe" name="form-iframe" style="width: 400px; height: 160px; text-align: right" frameborder="0"></iframe>
-                            <div id="form-next" style="font-size:18px"></div>
-                        </div>*@
-
-
                 </div>
             </div>
 </div>

@@ -100,6 +100,11 @@ namespace Pro.Data.Entities
 ,"BuildingSteward",bv.BuildingSteward
 ,"ActiveState",bv.ActiveState
 ,"MailOnChanges",bv.MailOnChanges};
+
+            if(bv.BuildingId==0)
+            {
+                throw new Exception("Invalid building id ");
+            }
             var parameters=DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
             int res= DbNatam.Instance.ExecuteCommandNonQuery("sp_Building_Save_v1", parameters, System.Data.CommandType.StoredProcedure );

@@ -122,7 +122,7 @@
 
 <div style="margin: 5px;">
 
-    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl">
+    <div id="jqxWidget" style="margin: 0 auto; display: block; direction: rtl;">
         <div id="accWindow">
             <div id="accHeader">
             </div>
@@ -171,7 +171,9 @@
             try {
                 var adapter = $("#jqxgrid").jqxGrid('source');
                 adapter.dataBind();
-                app_iframe.panelSwitchClose("contacts-box");
+                //app_iframe.panelSwitchClose("contacts-box");
+                app_iframe.panelSwitchClose("jqxgrid");
+                app_messenger.Post("עודכן בהצלחה");
                 //app_dialog.dialogClose(NSaccountcontacts.contactdialog);
             }
             catch (e) {
@@ -179,8 +181,8 @@
             }
         },
         triggerContactClose: function () {
-            app_iframe.panelSwitchClose("contacts-box", false);
-            //app_iframe.panelSwitchClose("jqxgrid", false);
+            //app_iframe.panelSwitchClose("contacts-box", false);
+            app_iframe.panelSwitchClose("jqxgrid", false);
         }
 
 

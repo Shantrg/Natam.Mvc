@@ -19,11 +19,26 @@
         var id = '@id';
         $('#LeadId').val(id);
 
-        var agentAdapter = app_jqxcombos.createListAdapter("UserId", "DisplayName", "listAgents", '@Url.Action("GetAgentTransferList", "Common")', 200, 120);
-        $('#listAgents').on('change', function (event) {
-            app_jqxcombos.listBoxToInput("listAgents", "AgentId");
-        });
+        var agentAdapter = app_jqxcombos.createCheckListAdapter("UserId", "DisplayName", "listAgents", '@Url.Action("GetAgentTransferList", "Common")', 200, 120);
+        $('#listAgents').on('checkChange', function (event) {
 
+            if (!$('#allAgents').is(':checked'))
+            app_jqxcombos.listCheckBoxToInput("listAgents", "AgentId");
+
+        });
+        $("#allAgents").change(function () {
+            if (this.checked) {
+                $('#listAgents').jqxListBox('uncheckAll'); 
+                $("#AgentId").val("-all-");
+                $('#listAgents').jqxListBox({ disabled: true });
+                //Do stuff
+            }
+            else {
+                $("#AgentId").val("");
+                $('#listAgents').jqxListBox({ disabled: false });
+            }
+        });
+        
   
 
 
@@ -86,6 +101,7 @@
                                 בחירת סוכן :
                             </label>
                             <div id="listAgents" name="listAgents"></div>
+                            <input type="checkbox" id="allAgents" /><span>שליחה לכולם</span>
                         </div>
                         <div class="form-group">
                             <label class="column">

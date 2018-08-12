@@ -105,21 +105,27 @@ namespace Natam.Mvc.Controllers
             int res = 0;
             int aid = 0;
             string action = "הגדרת לקוח";
-            AccountView a = null;
+            //AccountView a = null;
+            AccountContactView a = null;
             try
             {
                 aid = Request.Form.Get<int>("AccountId");
-                a = EntityContext.Create<AccountView>(Request.Form);
+
+               
+                a = EntityContext.Create<AccountContactView>(Request.Form);
+                //a = EntityContext.Create<AccountView>(Request.Form);
                 string uploadKey = null;
                 string key = null;
 
-                if (a.AccountType == 2){
+                if (a.AccountType == 2)
+                {
                     key = CacheKeys.GetOwnerView;
-                    action="הגדרת בעלים";
+                    action = "הגדרת בעלים";
                 }
-                else if (a.AccountType == 6){
+                else if (a.AccountType == 6)
+                {
                     key = CacheKeys.GetManagementView;
-                       action="הגדרת חברת ניהול";
+                    action = "הגדרת חברת ניהול";
                 }
                 else if (a.AccountType == 4)
                 {
@@ -144,7 +150,10 @@ namespace Natam.Mvc.Controllers
 
                 }
 
-                res = AccountContext.DoSave(aid, uploadKey, a);
+                if (aid == 0)
+                    res = AccountContext.DoSaveNew(a);
+                else
+                    res = AccountContext.DoSave(aid, uploadKey, a);
 
                 return Json(FormResult.GetFormResult(res, action, a.AccountId), JsonRequestBehavior.AllowGet);
 
@@ -537,36 +546,47 @@ namespace Natam.Mvc.Controllers
         public JsonResult TransferLead()
         {
 
-            int newid = 0;
-            int leadid = 0;
-            int agentid = 0;
+            //int newid = 0;
             string action = "העברת לקוח";
             string message = "";
             try
             {
-                leadid = Request.Form.Get<int>("LeadId");
-                agentid = Request.Form.Get<int>("AgentId");
-               
-                string key = CacheKeys.GetLeadsView(agentid);
-                CacheRemove(key, CacheGroup.Accounts);
 
-                newid = LeadsContext.Leads_Transfer(leadid, agentid);
+                int leadid = Request.Form.Get<int>("LeadId");
+                string TransferTo = Request.Form.Get("TransferTo");
+                bool EnableEmail = Request.Form.Get<bool>("EnableEmail");
+                
+                var returnValue=LeadsContext.Leads_Transfer(leadid, TransferTo, EnableEmail);
 
-                if (newid > 0)
-                    message= "הלקוח כולל כל הפרטים הנלווים הועברו";
-                if (newid == -1)
-                    message= "נתונים שגויים, פרטי הסוכן המיועד אינם תקינים";
-                if (newid == -2)
-                    message= "נתונים שגויים, הלקוח או הסוכן המיועד אינם תקינים";
+                CacheRemove(CacheGroup.Leads, CacheGroup.Accounts);
+
+                if(returnValue>0)
+                    message = "הלקוח כולל כל הפרטים הנלווים הועברו";
+                else if (returnValue == -1)
+                     message= "נתונים שגויים, פרטי הסוכן המיועד אינם תקינים";
                 else
-                    message= "אירעה שגיאה, הנתונים לא הועברו";
+                     message= "אירעה שגיאה, הנתונים לא הועברו";
 
-                return Json(GetFormResult(newid, action, message, agentid), JsonRequestBehavior.AllowGet);
+                    //string key = CacheKeys.GetLeadsView(agentid);
+                    //CacheRemove(key, CacheGroup.Accounts);
+
+                    ////newid = LeadsContext.Leads_Transfer(leadid, TransferTo, EnableEmail);
+
+                    //if (newid > 0)
+                    //    message= "הלקוח כולל כל הפרטים הנלווים הועברו";
+                    //if (newid == -1)
+                    //    message= "נתונים שגויים, פרטי הסוכן המיועד אינם תקינים";
+                    //if (newid == -2)
+                    //    message= "נתונים שגויים, הלקוח או הסוכן המיועד אינם תקינים";
+                    //else
+                    //    message= "אירעה שגיאה, הנתונים לא הועברו";
+
+                    return Json(GetFormResult(returnValue, action, message, 0), JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 message = ex.Message;
-                return Json(GetFormResult(-1, action, message, agentid), JsonRequestBehavior.AllowGet);
+                return Json(GetFormResult(-1, action, message, 0), JsonRequestBehavior.AllowGet);
             }
         }
 

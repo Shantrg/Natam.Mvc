@@ -146,6 +146,8 @@ namespace Pro.Data.Entities
                 ,"Details",v.Details,0
                 ,"PropertyType",v.PropertyType,0
                 ,"PurposeId",v.PurposeId,0
+                ,"AdsStreet",v.AdsStreet,0
+                ,"AdsQuarter",v.AdsQuarter,0
             };
             var parameters = DataParameter.GetSqlWithDirection(args);
             int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Ads_Add", parameters, System.Data.CommandType.StoredProcedure);

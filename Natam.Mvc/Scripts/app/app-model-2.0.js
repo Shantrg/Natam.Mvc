@@ -209,12 +209,34 @@ app = {
         return indexed_array;
     },
     parseJsonDate: function (value) {
-
+        var reg = /^\/Date\((d|-|.*)\)[\/|\\]$/;
         if (typeof value === 'string') {
-            var strd = /\/Date\((\d*)\)\//.exec(value);
+            //var strd = /\/Date\((\d*)\)\//.exec(value);
+            var strd = reg.exec(value);
             return (strd) ? new Date(+strd[1]) : value;
         }
         return value;
+        /*
+        if (window.JSON && !window.JSON.dateParser) {
+            var reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+            var reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
+
+            JSON.dateParser = function (key, value) {
+                if (typeof value === 'string') {
+                    var a = reISO.exec(value);
+                    if (a)
+                        return new Date(value);
+                    a = reMsAjax.exec(value);
+                    if (a) {
+                        var b = a[1].split(/[-+,.]/);
+                        return new Date(b[0] ? +b[0] : 0 - +b[1]);
+                    }
+                }
+                return value;
+            };
+
+        }
+        */
         //value = new Date(parseInt(value.replace("/Date(", "").replace(")/", ""), 10));
         //return new Date(value);
     },
@@ -253,6 +275,16 @@ app = {
         if (format === undefined || format == null)
             format = 'dd/mm/yyyy';
         return app.formatDateTimeString(date, format);
+    },
+    calcBitCode : function (str) {
+
+        var array = str.toString().split(',');
+        var value = 0;
+
+        for(var i=0;i< array.length;i++)
+            value += parseInt(array[i]);
+
+        return value;
     }
 };
 
@@ -1220,6 +1252,7 @@ var app_menu = {
                 var tag = input.attr('name');
                 var datatype = $(this).attr("data-type");
                 var datafield = $(this).attr("data-field");
+                var datatrigger = $(this).attr("data-trigger");
                 var currentId = $(this).attr('id');
                 //var type = input.prop('tagName');
 
@@ -1255,7 +1288,7 @@ var app_menu = {
                                     //ignore
                                     break;
                                 case "select-input":
-                                    $('form#' + form + '#' + tag ).val(value);
+                                    $('#' + tag ).val(value);
                                     $('form#' + form + ' [name=' + tag + ']').val(value);
                                     break;
                                 case "jqx-widget":
@@ -1281,6 +1314,8 @@ var app_menu = {
                                         app_form.setInputValue(input, form, currentId, tag, value);
                                     break;
                             }
+                            if (datatrigger)
+                                input.trigger(datatrigger);
                         }
                         else {
                             app_form.setInputValue(input, form, currentId, tag, null); //$('#' + tag).val(null);

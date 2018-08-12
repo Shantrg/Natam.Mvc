@@ -65,7 +65,7 @@
         $(document).ready(function () {
             JSON.useDateParser();
             var theme = 'Arctic';
-
+            
             var def = new app_leads_def(0, parseInt('@ViewBag.UserId'), parseInt('@ViewBag.UserRole'));
 
             // prepare the data
@@ -273,10 +273,10 @@
                                 <textarea id="Memo" name="Memo" class="textarea-mid"></textarea>
                             </div>
                         </div>
-                        <div>
-                            <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
-                            <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
-                        </div>
+                    </div>
+                    <div>
+                        <input id="submit" type="submit" value="עדכון" class="btn-default btn2" />
+                        <input id="reset" type="reset" value="רענון" class="btn-default btn2" />
                     </div>
                 </div>
             </form>

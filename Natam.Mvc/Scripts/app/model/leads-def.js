@@ -11,7 +11,7 @@ function app_leads_def(leadId, userId, userRule) {
     this.srcUploadKey;
     this.srcTransId;
     this.propertyDialog;
-
+    this.isTransferAgenttList = false;
     var slf = this;
 
     this.loadLeadPropertyList = function () {
@@ -26,11 +26,13 @@ function app_leads_def(leadId, userId, userRule) {
     };
 
     if (leadId <= 0) {
-        $("#linkC").hide();
+        $("#linkB").hide();
         $("#linkD").hide();
+        $("#linkE").hide();
         $("#linkTransaction").hide();
         $("#linkTransAdvice").hide();
         $("#linkTransfer").hide();
+        $("#transfer-command").hide();
 
         $("#ParkingNum").val("");
         $("#ContractDuration").val("");
@@ -45,6 +47,39 @@ function app_leads_def(leadId, userId, userRule) {
         location.reload();
     });
 
+    //transfer agents
+    $('#listTransferAgents').on('checkChange', function (event) {
+        if (!$('#allTransferAgents').is(':checked'))
+            app_jqxcombos.listCheckBoxToInput("listTransferAgents", "TransferToAgent");
+
+    });
+
+    $("#allTransferAgents").change(function () {
+        if (this.checked) {
+            $('#listTransferAgents').jqxListBox('uncheckAll');
+            $("#TransferToAgent").val("-all-");
+            $('#listTransferAgents').jqxListBox({ disabled: true });
+            //Do stuff
+        }
+        else {
+            $("#TransferToAgent").val("");
+            $('#listTransferAgents').jqxListBox({ disabled: false });
+        }
+    });
+
+    $('#accTransferSubmit').on('click', function () {
+        
+        var transferTo = $("#TransferToAgent").val();
+        var enableEmail = $('#EnableTransferEmail').is(':checked');
+        app_query.doPost("/Common/TransferLead", { 'LeadId': slf.LeadId, 'TransferTo': transferTo, 'EnableEmail': enableEmail }, function (data) {
+        
+            app_dialog.alert(data.Message);
+
+        });
+    });
+
+
+
     $("#accordion").jcxTabs({
         rotate: false,
         startCollapsed: 'accordion',
@@ -57,7 +92,7 @@ function app_leads_def(leadId, userId, userRule) {
         activate: function (e, tab) {
             //$('.info').html('Tab <strong>' + tab.id + '</strong> activated!');
             switch (tab.id) {
-                case 2:
+                case 3:
                     if (slf.LeadId > 0) {
                         if ($("#property-iframe").length == 0 || $("#property-iframe")[0].src == "") {
                             slf.loadLeadPropertyList();
@@ -66,12 +101,19 @@ function app_leads_def(leadId, userId, userRule) {
                         }
                     }
                     break;
-                case 3:
+                case 4:
                     if (slf.LeadId > 0) {
                         if ($("#trace-iframe").length == 0 || $("#trace-iframe")[0].src == "") {
                             //slf.loadLeadPropertyList();
                             slf.loadLeadTracking();
                         }
+                    }
+                    break;
+                case 5:
+
+                    if (!slf.isTransferAgenttList) {
+                        var agentAdapter = app_jqxcombos.createCheckListAdapter("UserId", "DisplayName", "listTransferAgents", '/Common/GetAgentTransferList', 200, 120);
+                        slf.isTransferAgenttList = true;
                     }
                     break;
             }

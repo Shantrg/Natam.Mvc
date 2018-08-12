@@ -200,20 +200,20 @@
                 initrowdetails: initrowdetails,
                 columns: [
                   {
-                      text: 'הוספת עדכון', dataField: 'BuildingId', width: '7%', cellsalign: 'right', align: 'center', hidden: isMobile,
+                      text: 'הוספת עדכון', dataField: 'BuildingId', width: 100, cellsalign: 'right', align: 'center', hidden: isMobile,
                       cellsrenderer: function (row, columnfield, value, defaulthtml, columnproperties) {
                           return '<div style="text-align:center"><a href="UnitDef?id=0&bid=' + value + '&floor=0&op=1" >הוספת עדכון</a></div>';
 
                        //return '<div style="text-align:center"><a href="BuildingDef?id=' + value + '" >הצג</a></div>';
                       }
                    },
-                  { text: 'שם הבניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center', width: '25%' },
-                  { text: 'עיר', dataField: 'CityName', cellsalign: 'right', align: 'center', width: '15%' },
-                  { text: 'רחוב', dataField: 'StreetName', cellsalign: 'right', align: 'center', width: '15%' },
-                  { text: 'מס', dataField: 'StreetNo', cellsalign: 'right', align: 'center', width: '3%' },
-                  { text: 'שטח', dataField: 'SizeTotal', width: '10%', cellsalign: 'right', align: 'center', hidden: isMobile },
-                  { text: 'בעלים עיקריים', dataField: 'OwnerName', width: '12%', cellsalign: 'right', align: 'center', hidden: isMobile },
-                  { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: '11%', cellsformat: 'd', cellsalign: 'right', align: 'center', hidden: isMobile }
+                  { text: 'שם הבניין', dataField: 'BuildingName', cellsalign: 'right', align: 'center', width: 180 },
+                  { text: 'עיר', dataField: 'CityName', cellsalign: 'right', align: 'center', width: 150 },
+                  { text: 'רחוב', dataField: 'StreetName', cellsalign: 'right', align: 'center', width: 150 },
+                  { text: 'מס', dataField: 'StreetNo', cellsalign: 'right', align: 'center', width: 60 },
+                  { text: 'שטח', dataField: 'SizeTotal', cellsalign: 'right', align: 'center', width: 60 },
+                  { text: 'בעלים עיקריים', dataField: 'OwnerName', cellsalign: 'right', align: 'center' },
+                  { text: 'מועד עדכון', dataField: 'LastUpdate', type: 'date', width: 120, cellsformat: 'd', cellsalign: 'right', align: 'center' }
                 ]
             });
             $('#jqxgrid').on('rowdoubleclick', function (event) {

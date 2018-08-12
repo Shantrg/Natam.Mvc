@@ -62,7 +62,9 @@ namespace Pro.Data.Entities
              "OwnerId", pv.OwnerId ,
             "Price", pv.Price ,
             "Memo", pv.Memo ,
-            "AgentId", pv.AgentId 
+            "AgentId", pv.AgentId,
+            "StreetId", pv.StreetId,
+            "CityCode", pv.CityCode
             };
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;

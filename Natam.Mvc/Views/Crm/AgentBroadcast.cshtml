@@ -24,6 +24,87 @@
         var sizesAdapter = app_jqxcombos.createComboAdapter("SizeId", "SizeTitle", "RequestSize", '@Url.Action("GetRequestSize", "Common")', 0, 200, false);*@
 
 
+            var dealValues = { "1": "מכירה", "2": "שכירות"};
+            var purposeValues = {   "1": "משרדים", "2": "תעשיה", "4": "מסחר", "8": "מחסנים", "16": "מגורים", "32": "חניה"};
+            var areaValues = { "1": "מרכז", "2": "צפון", "4": "דרום", "8": "ירושלים", "16": "שפלה", "32": "שרון"};//, "7": "תל אביב"};
+
+            app_jqxcombos.createCheckListFromArray(dealValues, "listDealType", 200, 80,"DealType");
+            app_jqxcombos.createCheckListFromArray(purposeValues, "listPurposeType", 200, 120, "PurposeType");
+            app_jqxcombos.createCheckListFromArray(areaValues, "listAreaType", 200, 120, "AreaType");
+    
+        
+            //$('#listDealType').on('checkChange', function (event) {
+            //    if (!$('#allDealType').is(':checked'))
+            //        app_jqxcombos.listCheckBoxToInput("listTransferAgents", "TransferToAgent");
+
+            //});
+
+            $("#allDealType").change(function () {
+                if (this.checked) {
+                    $('#listDealType').jqxListBox('uncheckAll');
+                    $("#DealType").val("0");
+                    $('#listDealType').jqxListBox({ disabled: true });
+                    //Do stuff
+                }
+                else {
+                    $("#DealType").val("0");
+                    $('#listDealType').jqxListBox({ disabled: false });
+                }
+            });
+
+            $("#allPurposeType").change(function () {
+                if (this.checked) {
+                    $('#listPurposeType').jqxListBox('uncheckAll');
+                    $("#PurposeType").val("0");
+                    $('#listPurposeType').jqxListBox({ disabled: true });
+                    //Do stuff
+                }
+                else {
+                    $("#PurposeType").val("0");
+                    $('#listPurposeType').jqxListBox({ disabled: false });
+                }
+            });
+
+
+            $("#allAreaType").change(function () {
+                if (this.checked) {
+                    $('#listAreaType').jqxListBox('uncheckAll');
+                    $("#AreaType").val("0");
+                    $('#listAreaType').jqxListBox({ disabled: true });
+                    //Do stuff
+                }
+                else {
+                    $("#AreaType").val("0");
+                    $('#listAreaType').jqxListBox({ disabled: false });
+                }
+            });
+          
+            var getDealType = function () {
+
+                var val = $("#DealType").val();
+                if (val == "0")
+                    return 0;
+                return app.calcBitCode(val);
+
+            }
+            var getPurposeType = function () {
+
+                var val = $("#PurposeType").val();
+                if (val == "0")
+                    return 0;
+                return app.calcBitCode(val);
+
+
+            }
+            var getAreaType = function () {
+
+                var val = $("#AreaType").val();
+                if (val == "0")
+                    return 0;
+                return app.calcBitCode(val);
+
+            }
+
         var source =
         {
             datatype: "json",
@@ -38,10 +119,26 @@
                 //app_form.loadDataForm("form", record);
 
                 $("#AgentName").val(record.AgentName);
+                               
+                if (record.DealType == 0)
+                    $("#DealType").val("0");
+                else
+                    app_jqxcombos.selectCheckList("listDealType", record.DealType, "DealType");
 
-                app_select.BroadcastDealType("#DealType", record.Deal);
-                app_select.BroadcastPurposeType("#PurposeType", record.Purpose);
-                app_select.BroadcastAreaType("#AreaType", record.Area);
+                if (record.Purpose == 0)
+                    $("#PurposeType").val("0");
+                else
+                    app_jqxcombos.selectCheckList("listPurposeType", record.Purpose, "PurposeType");
+
+                if (record.Area == 0)
+                    $("#AreaType").val("0");
+                else
+                    app_jqxcombos.selectCheckList("listAreaType", record.Area, "AreaType");
+
+
+                //app_select.BroadcastDealType("#DealType", record.Deal);
+                //app_select.BroadcastPurposeType("#PurposeType", record.Purpose);
+                //app_select.BroadcastAreaType("#AreaType", record.Area);
                 app_select.BroadcastSize("#Size", record.Size);
 
             },
@@ -59,13 +156,20 @@
             //e.preventDefault();
 
             var actionurl = $('#form').attr('action');
-            var postData=[];
-            postData.push("Area=" + $("#AreaType").val() );
-            postData.push("Purpose=" + $("#PurposeType").val() );
-            postData.push("DealType=" + $("#DealType").val() );
+            var postData = [];
+
+            var dealType=getDealType();
+            var purposeType=getPurposeType();
+            var areaType=getAreaType();
+
+            postData.push("Area=" + areaType);
+            postData.push("Purpose=" + purposeType);
+            postData.push("DealType=" + dealType);
             postData.push("Size=" + $("#Size").val() );
 
+            //alert(postData);
 
+            
             var validationResult = function (isValid) {
                 if (isValid) {
                      $.ajax({
@@ -88,6 +192,7 @@
             }
             // Validate the Form.
             $('#form').jqxValidator('validate', validationResult);
+            
         });
 
         $('#form').jqxValidator({
@@ -95,22 +200,9 @@
             hintType: 'label',
             animationDuration: 0,
             rules: [
-                    {
-                        input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'select', rule: function (input) {
-                            return $("#DealType").val() >= 0;
-                            //var index = $("#MediaType").jqxDropDownList('getSelectedIndex');
-                            //if (index >= 0) { return true; } return false;
-                        }
-                    },
-                    {input: '#PurposeType', message: 'חובה לציין סוג הנכס!', action: 'select', rule: function (input) {
-                        return $("#PurposeType").val() >= 0;
-                    }
-                    },
-                    {
-                        input: '#AreaType', message: 'חובה לציין אזור!', action: 'select', rule: function (input) {
-                            return $("#AreaType").val() >= 0;
-                    }
-                },
+                    {input: '#DealType', message: 'חובה לציין סוג עסקה!', action: 'keyup, blur', rule: 'required'},
+                    {input: '#PurposeType', message: 'חובה לציין סוג הנכס!', action: 'keyup, blur', rule: 'required'},
+                    {input: '#AreaType', message: 'חובה לציין אזור!', action: 'keyup, blur', rule: 'required'},
                     {
                         input: '#Size', message: 'חובה לציין שטח!', action: 'select', rule: function (input) {
                             return $("#Size").val() >= 0;
@@ -147,19 +239,25 @@
                         <label class="column">
                             סוג עסקה:
                         </label>
-                        <select id="DealType" name="DealType"></select>
+                        <div id="listDealType"></div>
+                        <input type="checkbox" id="allDealType" /><span>הכל</span>
+                        <input type="text" id="DealType" readonly />
                     </div>
                     <div class="form-group">
                         <label class="column">
                             סוג הנכס/שימוש:
                         </label>
-                        <select id="PurposeType" name="PurposeType"></select>
+                        <div id="listPurposeType"></div>
+                        <input type="checkbox" id="allDealType" /><span>הכל</span>
+                        <input type="text" id="PurposeType" readonly />
                     </div>
                     <div class="form-group">
                         <label class="column">
                             אזור מבוקש:
                         </label>
-                        <select id="AreaType" name="AreaType"></select>
+                        <div id="listAreaType"></div>
+                        <input type="checkbox" id="allDealType" /><span>הכל</span>
+                        <input type="text" id="AreaType" readonly />
                     </div>
                     <div class="form-group">
                         <label class="column">
@@ -184,7 +282,7 @@
     </div>
 </div>
 <script type="text/javascript">
-   app_menu.activeLayoutMenu("liLeads");
+    app_menu.activeLayoutMenu("liBuilding");
 </script>
 
 

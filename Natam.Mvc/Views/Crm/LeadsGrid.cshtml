@@ -298,20 +298,20 @@
                             return '<a href="javascript:leads_Edit(' + value + ')" ><i class="fa fa-plus-square-o" style="font-size:14px;color:#000;margin:8px 8px"></i></a>';
                         }
                   },
-                  { text: 'שם לקוח', dataField: 'CustomerName', filtercondition: 'CONTAINS', cellsalign: 'right', align: 'center' },
+                  { text: 'שם לקוח', dataField: 'CustomerName', filtercondition: 'CONTAINS', width: 150, cellsalign: 'right', align: 'center' },
                   {
-                      text: 'טלפון', dataField: 'Phone', filtercondition: 'starts_with',  cellsalign: 'right', align: 'center',cellsrenderer : function (row, datafield, value) {
+                      text: 'טלפון', dataField: 'Phone', filtercondition: 'starts_with', width: 100, cellsalign: 'right', align: 'center', cellsrenderer: function (row, datafield, value) {
                           return isMobile ?  '<a style="float:right;"  href="tel:' + value + '">' + value + '</a>': '<span style="float:right">'+ value+ '</span>';
                       }
                   },
+                  { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center' },
+                  { text: 'כתובת', dataField: 'Address', filtercondition: 'starts_with', width: 150, cellsalign: 'right', align: 'center' },
                    {
-                       text: 'דואר אלקטרוני', dataField: 'Email', filtercondition: 'starts_with',  cellsalign: 'right', align: 'center' ,hidden: true, cellsrenderer: function (row, datafield, value) {
+                       text: 'דואר אלקטרוני', dataField: 'Email', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', cellsrenderer: function (row, datafield, value) {
                            return '<a href="mailto:' + value + '">' + value + '</a>';
                        }
                    },
-                  { text: 'עיר', dataField: 'City', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: isMobile },
-                  { text: 'כתובת', dataField: 'Address', filtercondition: 'starts_with', cellsalign: 'right', align: 'center', hidden: isMobile },
-                  { text: 'מועד עדכון', type: 'date', dataField: 'LastUpdate', cellsformat: 'd', cellsalign: 'right', align: 'center', hidden: isMobile }
+                   { text: 'מועד עדכון', type: 'date', dataField: 'LastUpdate', cellsformat: 'd', width: 120, cellsalign: 'right', align: 'center' }
                 ]
             });
             $('#jqxgrid').on('rowdoubleclick', function (event) {
@@ -348,6 +348,17 @@
             //});
             
         });
+
+        var app_trigger = {
+            triggerContactClose:function(){
+            
+                app_dialog.dialogClose(NScustomers.contactDialog);
+            },
+            triggerContactComplete: function (accid) {
+                leads_contactRefresh();
+                app_dialog.dialogClose(NScustomers.contactDialog);
+            }
+        }
 
         function triggerContactComplete(accid) {
             leads_contactRefresh();

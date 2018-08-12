@@ -345,9 +345,10 @@ app_building_def.prototype.loadControls = function (record) {
                   { input: '#StreetNo', message: 'חובה לציין מספר בית!', action: 'keyup, blur', rule: 'required' }
             ]
         });
+        
     }
     else {
-
+        
         $('#form').jqxValidator({
             rtl: true,
             hintType: 'label',
@@ -405,8 +406,9 @@ app_building_def.prototype.loadControls = function (record) {
                   { input: '#StreetNo', message: 'חובה לציין מספר בית!', action: 'keyup, blur', rule: 'required' }
 
             ]
-        });
+        }); 
     }
+   
 };
 
 app_building_def.prototype.loadEvents = function () {

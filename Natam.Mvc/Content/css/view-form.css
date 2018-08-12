@@ -236,6 +236,11 @@ ul.toolbar {
 
 /*grid extension====================================================*/
 
+.jqx-grid-cell {
+      border-top: none!important;
+      border-left: none!important;
+      border-right: none!important;
+ }
 .grid-toolbar {
     background-color: #E8E8E8;
     border: solid 1px #C7C7C7;

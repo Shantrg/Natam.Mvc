@@ -421,8 +421,29 @@ var app_jqxcombos = {
         return srcAdapter;
     },
 
+    createCheckListFromArray: function (array, tagList, width, height, output) {
+        tagList = "#" + tagList.replace("#", "");
+        $(tagList).jqxListBox(
+        {
+            rtl: true,
+            source: array,
+            width: width,
+            checkboxes: true,
+            height: height
+            //displayMember: displayMember,
+            //valueMember: valueMember
+        });
+        if (output) {
+            $(tagList).on('checkChange', function (event) {
+                app_jqxcombos.listCheckBoxToInput(tagList, output);
+            });
+        }
+        
+    },
+
     listBoxToInput: function (list, input, checkbox) {
         //$('#' + list).on('change', function (event) {
+        list = list.replace("#", "");
         var items = $("#" + list).jqxListBox('getSelectedItems');
         var checked = true;
         var values = "";
@@ -440,6 +461,7 @@ var app_jqxcombos = {
 
     listCheckBoxToInput: function (list, input, checkbox) {
         //$('#' + list).on('checkChange', function (event) {
+        list = list.replace("#", "");
         var items = $("#" + list).jqxListBox('getCheckedItems');
         var checked = true;
         var values = "";

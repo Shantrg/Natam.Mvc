@@ -29,7 +29,7 @@ namespace Pro.Data.Entities
         #endregion
 
         #region update
-
+        /*
         public static int DoSave(int id, string UploadKey, AccountView entity)
         {
             return DoSave(id, UploadKey,entity, id > 0 ? UpdateCommandType.Update : UpdateCommandType.Insert);
@@ -64,12 +64,31 @@ namespace Pro.Data.Entities
                 //}
             }
             if (commandType == UpdateCommandType.Update)
-                using (AccountContext context = new AccountContext(id))
+                if (id == 0)
+                {
+                    throw new Exception("Invalid id");
+                }
+            using (AccountContext context = new AccountContext(id))
                 {
                     context.Set(entity);
                     return context.SaveChanges(commandType);
                 }
             return 0;
+        }
+        */
+        public static int DoSave(int id, string UploadKey, AccountView entity)
+        {
+            if (id < 10 || entity.AccountId != id)
+            {
+                throw new Exception("לא ניתן להגדרה או עדכון");
+            }
+            EntityValidator.Validate(entity, "לקוח", "he");
+
+            using (AccountContext context = new AccountContext(id))
+            {
+                context.Set(entity);
+                return context.SaveChanges(UpdateCommandType.Update);
+            }
         }
 
         public static int DoDelete(int id)
@@ -80,6 +99,7 @@ namespace Pro.Data.Entities
             }
         }
 
+        /*
         public static int DoSaveNew(AccountView v)
         {
 
@@ -102,9 +122,9 @@ namespace Pro.Data.Entities
                 ,"ContactName", v.ContactName
                 ,"Mobile", v.Mobile
                 ,"Email", v.Email
-                ,"ContactTitle", ""//v.ContactTitle
-                ,"ContactDetails", ""// v.ContactDetails
-                ,"ContactRole", "0"//v.ContactRole
+                ,"ContactTitle", v.ContactTitle
+                ,"ContactDetails", v.ContactDetails
+                ,"ContactRole", v.ContactRole
 
             };
             var parameters = DataParameter.GetSql(args);
@@ -113,7 +133,7 @@ namespace Pro.Data.Entities
             v.AccountId = Types.ToInt(parameters[0].Value);
             return v.AccountId > 0 ? 1 : 0;
         }
-
+        */
         public static int DoSaveNew(AccountContactView v)
         {
 
@@ -143,11 +163,8 @@ namespace Pro.Data.Entities
             };
             var parameters = DataParameter.GetSql(args);
             parameters[0].Direction = System.Data.ParameterDirection.InputOutput;
-            //parameters[1].Direction = System.Data.ParameterDirection.InputOutput;
-            //int res = DbNatam.Instance.ExecuteNonQuery("sp_Unit_Save", parameters, System.Data.CommandType.StoredProcedure);
             int res = DbNatam.Instance.ExecuteCommandNonQuery("sp_Accounts_AddNew_v1", parameters, System.Data.CommandType.StoredProcedure);
             v.AccountId = Types.ToInt(parameters[0].Value);
-            //var status = Types.ToInt(parameters[1].Value);
             return v.AccountId > 0 ? 1 : 0;
         }
 
@@ -238,11 +255,11 @@ namespace Pro.Data.Entities
 
         public static IEnumerable<AccountView> View()
         {
-            return DbNatam.Instance.EntityItemList<AccountView>(MappingName, null);
+            return DbNatam.Instance.EntityItemList<AccountView>(ViewName, null);
         }
         public static IEnumerable<AccountView> ViewByType(int AccountType)
         {
-            return DbNatam.Instance.EntityItemList<AccountView>(MappingName, "AccountType", AccountType);
+            return DbNatam.Instance.EntityItemList<AccountView>(ViewName, "AccountType", AccountType);
         }
         public static IEnumerable<AccountView> ViewByQuery(int QueryType, string AccountName, string ContactName, int AccType)
         {
@@ -273,7 +290,7 @@ namespace Pro.Data.Entities
         //    return DbNatam.Instance.EntityItemGet<AccountView>(MappingName, "AccountId", AccountId);
         //}
         public const string MappingName = "Crm_Accounts";
-
+        public const string ViewName = "vw_Accounts";
         #endregion
     }
 
@@ -337,7 +354,7 @@ namespace Pro.Data.Entities
     public class AccountContactView : AccountView
     {
         //public string ContactName { get; set; }
-        public string ContactTitle { get; set; }
+        //public string ContactTitle { get; set; }
 
         //[EntityProperty(Caption = "טלפון נייד")]
         //public string ContactMobile { get; set; }
