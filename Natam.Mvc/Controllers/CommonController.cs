@@ -105,55 +105,93 @@ namespace Natam.Mvc.Controllers
             int res = 0;
             int aid = 0;
             string action = "הגדרת לקוח";
-            //AccountView a = null;
-            AccountContactView a = null;
+            AccountView a = null;
+            AccountContactView ac = null;
             try
             {
                 aid = Request.Form.Get<int>("AccountId");
 
-               
-                a = EntityContext.Create<AccountContactView>(Request.Form);
-                //a = EntityContext.Create<AccountView>(Request.Form);
                 string uploadKey = null;
                 string key = null;
 
-                if (a.AccountType == 2)
-                {
-                    key = CacheKeys.GetOwnerView;
-                    action = "הגדרת בעלים";
-                }
-                else if (a.AccountType == 6)
-                {
-                    key = CacheKeys.GetManagementView;
-                    action = "הגדרת חברת ניהול";
-                }
-                else if (a.AccountType == 4)
-                {
-                    action = "הגדרת דייר";
-                    key = CacheKeys.GetTenantView;
-                }
-                else if (a.AccountType == 1)
-                {
-                    key = CacheKeys.GetCustomerView;
-                    action = "הגדרת לקוח";
-                }
-                if (key == null)
-                    CacheRemove(CacheGroup.Accounts);
-                else
-                    CacheRemove(key, CacheGroup.Accounts);
-
-                EntityValidator validator = EntityValidator.ValidateEntity(a, action, "he");
-                if (!validator.IsValid)
-                {
-                    //return GoPrompt(-1, "account", validator.Result);
-                    return Json(GetFormResult(-1, action, validator.Result, a.AccountId), JsonRequestBehavior.AllowGet);
-
-                }
-
                 if (aid == 0)
-                    res = AccountContext.DoSaveNew(a);
+                {
+                    ac = EntityContext.Create<AccountContactView>(Request.Form);
+                  
+
+                    if (ac.AccountType == 2)
+                    {
+                        key = CacheKeys.GetOwnerView;
+                        action = "הגדרת בעלים";
+                    }
+                    else if (ac.AccountType == 6)
+                    {
+                        key = CacheKeys.GetManagementView;
+                        action = "הגדרת חברת ניהול";
+                    }
+                    else if (ac.AccountType == 4)
+                    {
+                        action = "הגדרת דייר";
+                        key = CacheKeys.GetTenantView;
+                    }
+                    else if (ac.AccountType == 1)
+                    {
+                        key = CacheKeys.GetCustomerView;
+                        action = "הגדרת לקוח";
+                    }
+                    if (key == null)
+                        CacheRemove(CacheGroup.Accounts);
+                    else
+                        CacheRemove(key, CacheGroup.Accounts);
+
+                    EntityValidator validator = EntityValidator.ValidateEntity(ac, action, "he");
+                    if (!validator.IsValid)
+                    {
+                        //return GoPrompt(-1, "account", validator.Result);
+                        return Json(GetFormResult(-1, action, validator.Result, ac.AccountId), JsonRequestBehavior.AllowGet);
+
+                    }
+                    res = AccountContext.DoSaveNew(ac);
+                }
                 else
+                {
+                    a = EntityContext.Create<AccountView>(Request.Form);
+                   
+
+                    if (a.AccountType == 2)
+                    {
+                        key = CacheKeys.GetOwnerView;
+                        action = "הגדרת בעלים";
+                    }
+                    else if (a.AccountType == 6)
+                    {
+                        key = CacheKeys.GetManagementView;
+                        action = "הגדרת חברת ניהול";
+                    }
+                    else if (a.AccountType == 4)
+                    {
+                        action = "הגדרת דייר";
+                        key = CacheKeys.GetTenantView;
+                    }
+                    else if (a.AccountType == 1)
+                    {
+                        key = CacheKeys.GetCustomerView;
+                        action = "הגדרת לקוח";
+                    }
+                    if (key == null)
+                        CacheRemove(CacheGroup.Accounts);
+                    else
+                        CacheRemove(key, CacheGroup.Accounts);
+
+                    EntityValidator validator = EntityValidator.ValidateEntity(a, action, "he");
+                    if (!validator.IsValid)
+                    {
+                        //return GoPrompt(-1, "account", validator.Result);
+                        return Json(GetFormResult(-1, action, validator.Result, a.AccountId), JsonRequestBehavior.AllowGet);
+
+                    }
                     res = AccountContext.DoSave(aid, uploadKey, a);
+                }
 
                 return Json(FormResult.GetFormResult(res, action, a.AccountId), JsonRequestBehavior.AllowGet);
 

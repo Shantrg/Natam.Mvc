@@ -159,7 +159,7 @@
             var id = $('#jqxgrid').jqxGrid('getrowid', row);
             var rcd = $('#jqxgrid').jqxGrid('getrowdata', row);
             var value = true;
-            
+            alert('triggerPrimaryContact');
             if (window.parent) {
                 if (window.parent.app_trigger && window.parent.app_trigger.triggerPrimaryContactCompleted)
                     window.parent.app_trigger.triggerPrimaryContactCompleted(id, value, rcd);

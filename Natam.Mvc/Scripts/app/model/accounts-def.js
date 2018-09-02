@@ -14,6 +14,7 @@ function triggerPrimaryContactCompleted(id, isPrimary, rcd) {
         $("#ContactName").val(rcd.ContactName);
         $("#Mobile").val(rcd.Mobile);
         $("#Email").val(rcd.Email);
+        $("#ContactTitle").val(rcd.Title);
     }
     $("#ContactName").focus();
     //return false;
@@ -1060,6 +1061,7 @@ app_trigger = {
             $("#ContactName").val(rcd.ContactName);
             $("#Mobile").val(rcd.Mobile);
             $("#Email").val(rcd.Email);
+            $("#ContactTitle").val(rcd.Title);
         }
         //$("#ContactName").focus();
         return false;
