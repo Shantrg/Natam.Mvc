@@ -14,7 +14,8 @@ function app_plots_def(plotsId, userInfo) {
     this.srcCityCode;
     this.allowEdit = (this.UserRole == 9) ? 1 : 0;
     this.isMobile = app.IsMobile();
-    this.mediaUploader = new media_model('#media-files', { 'buildingId': this.PlotsId, 'propertyId': this.PlotsId, 'propertyType': "p" }, this.allowEdit == 0).mediaFiles();
+    this.mediaUploader = null;
+    //this.mediaUploader = new media_model('#media-files', { 'buildingId': this.PlotsId, 'propertyId': this.PlotsId, 'propertyType': "p" }, this.allowEdit == 0).mediaFiles();
     var slf = this;
 
     
@@ -184,12 +185,15 @@ app_plots_def.prototype.syncData = function (record) {
         this.srcAreaId = record.AreaId;
         this.srcStreetId = record.StreetId;
         this.srcCityCode = record.CityCode;
+
         //srcPlotsId = record.PlotsId;
 
         //app_accounts.getAgentName(record.AgentId, 'AgentName');
 
         app_jqxcombos.selectCheckList("DesignationList", record.Designation);
 
+        this.allowEdit = (this.UserId == record.AgentId || this.UserRole == 9) ? 1 : 0;
+        this.mediaUploader = new media_model('#media-files', { 'buildingId': this.PlotsId, 'propertyId': this.PlotsId, 'propertyType': "p" }, this.allowEdit == 0).mediaFiles();
         //if (record.ActiveState == 1) {
         //    this.allowEdit = (this.UserRole == 9) ? 1 : 0;
         //}
